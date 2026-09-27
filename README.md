@@ -1,4 +1,3 @@
-`frontend/README.md`
 ```markdown
 # Flex — Mobile Frontend Application (Mobile-First)
 
