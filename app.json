@@ -6,14 +6,12 @@
     "orientation": "portrait",
     "scheme": "flex",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "by.flex.mobile"
     },
     "android": {
-      "package": "by.flex.mobile",
-      "edgeToEdgeEnabled": true
+      "package": "by.flex.mobile"
     },
     "web": {
       "bundler": "metro",
