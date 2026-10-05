@@ -6,7 +6,7 @@ export type FlexLogoProps = {
   size?: number;
 };
 
-/** Two-leaf brand mark used in headers, the promo banner and card plastic. */
+/** фирменный знак из двух листьев: шапки, промо-баннер и пластик карты */
 export function FlexLogo({ size = 28 }: FlexLogoProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 32 32" accessibilityElementsHidden>

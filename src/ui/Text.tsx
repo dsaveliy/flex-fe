@@ -4,9 +4,9 @@ import { useTheme } from '@/theme';
 import type { ThemeColors, TypographyToken } from '@/theme';
 
 export type TextProps = RNTextProps & {
-  /** Typography token from the theme. */
+  /** типографический токен из темы */
   variant?: TypographyToken;
-  /** Semantic color key; avoids hardcoded colors in screens. */
+  /** семантический ключ цвета; исключает жёстко заданные цвета на экранах */
   color?: keyof ThemeColors;
   align?: 'auto' | 'left' | 'right' | 'center';
   uppercase?: boolean;

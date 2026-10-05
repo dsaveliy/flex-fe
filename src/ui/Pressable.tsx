@@ -15,15 +15,15 @@ import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 const AnimatedPressable = Animated.createAnimatedComponent(RNPressable);
 
 export type TouchableProps = PressableProps & {
-  /** Light haptic on press. Default: true. */
+  /** лёгкая вибрация при нажатии. по умолчанию: true */
   haptic?: boolean;
-  /** Scale applied while pressed; set to 1 to disable. */
+  /** масштаб при нажатии; значение 1 отключает эффект */
   pressedScale?: number;
 };
 
 /**
- * Standard touchable of the design system: UI-thread scale animation,
- * light haptics, 44pt minimum touch target and Reduce Motion support.
+ * стандартный нажимаемый элемент дизайн-системы: анимация масштаба в UI-потоке,
+ * лёгкая вибрация, минимальная зона касания 44pt и поддержка Reduce Motion.
  */
 export function Touchable({
   haptic = true,

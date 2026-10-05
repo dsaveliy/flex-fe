@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { GlassTabBar } from '@/ui';
 
 /**
- * Thin route file: layout/labels only. All visual work lives in
- * `src/ui/GlassTabBar.tsx` so it can be reused/tested independently.
+ * тонкий файл маршрута: только раскладка и подписи. вся визуальная часть
+ * живёт в `src/ui/GlassTabBar.tsx`, чтобы её можно было переиспользовать
+ * и тестировать независимо.
  */
 export default function TabsLayout() {
   const { t } = useTranslation();

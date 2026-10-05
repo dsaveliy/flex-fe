@@ -1,6 +1,6 @@
 import { getIntlLocale } from '@/i18n';
 
-/** `2.4` -> `+2.4%`, `-0.87` -> `-0.87%`. */
+/** `2.4` -> `+2.4%`, `-0.87` -> `-0.87%` */
 export function formatPercent(
   value: number,
   options: { locale?: string; withSign?: boolean; digits?: number } = {},
@@ -14,7 +14,7 @@ export function formatPercent(
   }).format(value).concat('%');
 }
 
-/** Absolute percent value for badges that render their own arrow glyph. */
+/** абсолютное значение процента для бейджей, которые сами рисуют стрелку */
 export function formatPercentAbs(value: number, digits = 2): string {
   return formatPercent(Math.abs(value), { withSign: false, digits });
 }
@@ -27,7 +27,7 @@ export function trendOf(value: number): TrendDirection {
   return 'flat';
 }
 
-/** ISO date string -> localized short date, e.g. `12 Feb`. */
+/** строка даты ISO -> локализованная короткая дата, например `12 Feb` */
 export function formatShortDate(iso: string, locale = getIntlLocale()): string {
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(iso));
 }
@@ -48,7 +48,7 @@ export function greetingSlotFor(date = new Date()): GreetingSlot {
   return 'night';
 }
 
-/** `4821` -> `•••• 4821`. */
+/** `4821` -> `•••• 4821` */
 export function maskCardNumber(last4: string): string {
   return `•••• ${last4}`;
 }

@@ -12,7 +12,7 @@ import { Icon, type IconName } from './icons/Icon';
 import { Touchable } from './Pressable';
 import { Text } from './Text';
 
-/** Route name -> icon mapping; keep in sync with `app/(tabs)`. */
+/** соответствие имени маршрута и иконки; держать в синхронизации с `app/(tabs)` */
 const TAB_ICONS: Record<string, IconName> = {
   index: 'home',
   crypto: 'crypto',
@@ -21,8 +21,9 @@ const TAB_ICONS: Record<string, IconName> = {
 };
 
 /**
- * Floating glass capsule tab bar with an animated mint pill behind the
- * active tab. Content scrolls underneath so the glass refracts it.
+ * плавающий стеклянный таб-бар в форме капсулы с анимированной мятной
+ * «таблеткой» за активной вкладкой. контент прокручивается под ним, поэтому
+ * стекло преломляет его.
  */
 export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const theme = useTheme();

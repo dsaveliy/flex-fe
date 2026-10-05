@@ -1,6 +1,6 @@
 /**
- * Deterministic pseudo-random sparkline generator, so mock charts do not
- * flicker between renders.
+ * детерминированный генератор псевдослучайных sparkline, чтобы mock-графики
+ * не мерцали между рендерами.
  */
 function seededRandom(seed: number): () => number {
   let state = seed % 2147483647;

@@ -24,9 +24,9 @@ import {
 import { mockMarkets } from './markets.fixtures';
 
 /**
- * Mock implementation of the future FastAPI endpoints.
- * Signatures mirror the planned REST routes so `services.ts` can swap the
- * implementation without touching feature code.
+ * mock-реализация будущих эндпоинтов FastAPI.
+ * сигнатуры повторяют планируемые REST-маршруты, поэтому `services.ts` может
+ * подменить реализацию, не затрагивая код фич.
  */
 export const mockApi = {
   getUser: (): Promise<User> => respond(mockUser),

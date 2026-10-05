@@ -12,11 +12,11 @@ export type GlassButtonProps = {
   icon?: IconName;
   onPress?: () => void;
   /**
-   * `pill`  — horizontal capsule with icon + label (Cards actions);
-   * `circle` — round action button (Home quick actions, header buttons).
+   * `pill`  — горизонтальная капсула с иконкой и подписью (действия на экране Cards);
+   * `circle` — круглая кнопка действия (быстрые действия Home, кнопки в шапке).
    */
   shape?: 'pill' | 'circle';
-  /** Solid accent fill instead of glass (green "+" button). */
+  /** сплошная акцентная заливка вместо стекла (зелёная кнопка "+") */
   accent?: boolean;
   size?: number;
   accessibilityLabel?: string;
@@ -24,7 +24,7 @@ export type GlassButtonProps = {
   testID?: string;
 };
 
-/** Interactive glass button; uses native Liquid Glass touch reaction on iOS 26+. */
+/** интерактивная стеклянная кнопка; на iOS 26+ использует нативную реакцию Liquid Glass на касание */
 export function GlassButton({
   label,
   icon,

@@ -1,12 +1,12 @@
-// Flex UI Generator v13 — Figma Plugin
-// Crypto — без изменений (зафиксировано).
-// Home: круглые кнопки действий увеличены и лучше сбалансированы с виджетом баланса.
-// Cards: все карты (главная + мини) теперь строго держат реальное соотношение сторон банковской карты
+// плагин Figma: Flex UI Generator v13
+// экран Crypto — без изменений (зафиксировано).
+// экран Home: круглые кнопки действий увеличены и лучше сбалансированы с виджетом баланса.
+// экран Cards: все карты (главная + мини) теперь строго держат реальное соотношение сторон банковской карты
 // 1.586:1 (85.6×53.98мм, ISO/IEC 7810) на всех трёх breakpoint'ах — это и убирает "непропорциональность".
-// Запуск: Figma Desktop → значок Figma → Plugins → Development → New Plugin → без Custom UI →
+// запуск: Figma Desktop → значок Figma → Plugins → Development → New Plugin → без Custom UI →
 // заменить manifest.json и code.js → запустить.
 
-const CARD_RATIO = 1.586; // ISO/IEC 7810 ID-1 — реальное соотношение сторон банковской карты
+const CARD_RATIO = 1.586; // по ISO/IEC 7810 ID-1 — реальное соотношение сторон банковской карты
 
 const COLORS = {
   bgTop: { r: 0.95, g: 0.98, b: 0.97 },
@@ -214,7 +214,7 @@ function createRoundAvatar(parent, x, y, size = 40) {
   return avatar;
 }
 
-// Круглые стеклянные кнопки — размер иконки/подписи авто-масштабируется от диаметра круга
+// круглые стеклянные кнопки — размер иконки/подписи авто-масштабируется от диаметра круга
 function createQuickActions(parent, containerX, containerW, y, items, circleD = 76) {
   const gap = Math.max(16, circleD * 0.24);
   const totalW = circleD * items.length + gap * (items.length - 1);
@@ -243,7 +243,7 @@ function createQuickActions(parent, containerX, containerW, y, items, circleD = 
   });
 }
 
-// ============ ВИДЖЕТЫ ============
+// ============ виджеты ============
 
 function drawBalanceWidget(frame, x, y, w, h, withHalo = true, circleD = 76) {
   const card = createGlassCard(frame, x, y, w, h, { radius: 24, fillOpacity: 0.4 });
@@ -282,7 +282,7 @@ function drawBanner(frame, x, y, w, h = 88) {
   return banner;
 }
 
-// Главная карта — держит реальную пропорцию 1.586:1, все внутренние элементы масштабируются от ширины
+// главная карта — держит реальную пропорцию 1.586:1, все внутренние элементы масштабируются от ширины
 function drawMainCard(frame, x, y, w) {
   const h = w / CARD_RATIO;
   const s = w / 335; // масштаб относительно базовой мобильной ширины
@@ -326,7 +326,7 @@ const MINI_CARDS_DATA = [
   { fills: () => diagonalGradient(COLORS.cardPurpleA, COLORS.cardPurpleB), balance: "850.0", currency: "", scheme: "", active: false, textColor: COLORS.white },
 ];
 
-// Мини-карты — та же реальная пропорция 1.586:1, в ряд (горизонтальный скролл на мобильном/планшете)
+// мини-карты — та же реальная пропорция 1.586:1, в ряд (горизонтальный скролл на мобильном/планшете)
 function drawMiniCardsRow(frame, x, y, miniW, gap) {
   const miniH = miniW / CARD_RATIO;
   MINI_CARDS_DATA.forEach((c, i) => {
@@ -336,7 +336,7 @@ function drawMiniCardsRow(frame, x, y, miniW, gap) {
   return miniH;
 }
 
-// Мини-карты — колонкой (для планшета/десктопа, где больше вертикального пространства)
+// мини-карты — колонкой (для планшета/десктопа, где больше вертикального пространства)
 function drawMiniCardsColumn(frame, x, y, miniW, gap) {
   const miniH = miniW / CARD_RATIO;
   MINI_CARDS_DATA.forEach((c, i) => {
@@ -548,7 +548,7 @@ function baseScreen(name, w, h, offsetX) {
   return frame;
 }
 
-// ============ MOBILE (375×812) ============
+// ============ mobile (375×812) ============
 
 async function buildHomeMobile(offsetX) {
   const W = 375, H = 812;
@@ -607,7 +607,7 @@ async function buildCryptoMobile(offsetX) {
   return frame;
 }
 
-// ============ TABLET (834×1194) ============
+// ============ tablet (834×1194) ============
 
 async function buildHomeTablet(offsetX) {
   const W = 834, H = 1194, CW = 700;
@@ -634,7 +634,7 @@ async function buildCardsTablet(offsetX) {
 
   const search = createSearchBar(frame, cx, 108, CW, "Search or pay", 54);
 
-  // Главная карта — фиксированная реалистичная ширина (не растянута на всю колонку), рядом колонка остальных карт
+  // главная карта — фиксированная реалистичная ширина (не растянута на всю колонку), рядом колонка остальных карт
   const mainCardW = 420;
   const mainCard = drawMainCard(frame, cx, search.y + search.height + 30, mainCardW);
   const colX = cx + mainCardW + 32;
@@ -669,7 +669,7 @@ async function buildCryptoTablet(offsetX) {
   return frame;
 }
 
-// ============ DESKTOP (1440×900+, macOS-стиль) ============
+// ============ desktop (1440×900+, macOS-стиль) ============
 
 function drawMacChrome(frame, w) {
   const chrome = createGlassCard(frame, 0, 0, w, 44, { radius: 0, fillOpacity: 0.55, blur: 20, strokeOpacity: 0.3 });
@@ -747,7 +747,7 @@ async function buildCardsDesktop(offsetX) {
   createRoundIconButton(frame, contentX + contentW - 44 - 12 - 44, 77, "+", 44, true);
   createRoundAvatar(frame, contentX + contentW - 44, 77, 44);
 
-  // Главная карта — фиксированная реалистичная ширина, колонка остальных карт справа фиксированной узкой ширины
+  // главная карта — фиксированная реалистичная ширина, колонка остальных карт справа фиксированной узкой ширины
   const mainCardW = 480;
   const mainCard = drawMainCard(frame, contentX, search.y + search.height + 24, mainCardW);
   const colX = contentX + mainCardW + 40;

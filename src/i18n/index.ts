@@ -35,7 +35,7 @@ if (!i18n.isInitialized) {
   });
 }
 
-/** Language currently active in i18next, normalized to a supported code. */
+/** язык, активный в i18next, приведённый к поддерживаемому коду */
 export function getCurrentLanguage(): AppLanguage {
   const code = i18n.resolvedLanguage ?? i18n.language ?? FALLBACK_LANGUAGE;
   const short = code.split('-')[0];
@@ -48,7 +48,7 @@ export async function changeLanguage(language: AppLanguage): Promise<void> {
   await i18n.changeLanguage(language);
 }
 
-/** BCP-47 locale used by `Intl` formatters. */
+/** локаль BCP-47, используемая форматтерами `Intl` */
 export function getIntlLocale(): string {
   return getCurrentLanguage() === 'ru' ? 'ru-RU' : 'en-US';
 }

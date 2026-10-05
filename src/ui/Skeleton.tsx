@@ -18,7 +18,7 @@ export type SkeletonProps = {
   style?: ViewStyle;
 };
 
-/** Glass-friendly shimmer placeholder used while queries are loading. */
+/** мерцающая заглушка, подходящая для стекла, пока запросы загружаются */
 export function Skeleton({ width = '100%', height = 16, radius, style }: SkeletonProps) {
   const theme = useTheme();
   const { reduceMotion } = useAccessibilityFlags();

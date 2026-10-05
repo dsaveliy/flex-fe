@@ -7,15 +7,15 @@ import { Text } from './Text';
 import type { TypographyToken } from '@/theme';
 
 export type DeltaBadgeProps = {
-  /** Percent change, e.g. `-0.87`. */
+  /** изменение в процентах, например `-0.87` */
   value: number;
-  /** Optional suffix like "vs last month" / "today". */
+  /** необязательный суффикс вроде "vs last month" / "today" */
   caption?: string;
   variant?: TypographyToken;
   style?: ViewStyle;
 };
 
-/** `▲ +2.4% vs last month` — consistent trend indicator. */
+/** `▲ +2.4% vs last month` — единообразный индикатор тренда */
 export function DeltaBadge({ value, caption, variant = 'bodyStrong', style }: DeltaBadgeProps) {
   const theme = useTheme();
   const trend = trendOf(value);

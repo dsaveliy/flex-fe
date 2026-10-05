@@ -12,7 +12,7 @@ export type ChipProps = {
   style?: ViewStyle;
 };
 
-/** Category chip: mint fill + green text when selected (Markets card). */
+/** чип категории: мятная заливка и зелёный текст, когда выбран (карточка Markets) */
 export function Chip({ label, selected = false, onPress, style }: ChipProps) {
   const theme = useTheme();
 

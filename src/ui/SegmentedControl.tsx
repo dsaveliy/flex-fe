@@ -22,7 +22,7 @@ export type SegmentedControlProps<T extends string> = {
 };
 
 /**
- * Glass segmented control with an animated raised pill
+ * стеклянный сегментированный контрол с анимированной приподнятой таблеткой
  * (Top gainers / Top losers).
  */
 export function SegmentedControl<T extends string>({

@@ -23,9 +23,9 @@ import { formatPercentAbs } from '@/utils/format';
 import { formatMoney, formatPrice } from '@/utils/money';
 
 /**
- * Crypto screen — placeholder layout exercising the full data layer
- * (markets, movers, portfolio) with the design-system components. Pixel
- * layout will follow the Figma mockup once supplied.
+ * экран крипто — временная раскладка, использующая весь слой данных
+ * (markets, movers, portfolio) с компонентами дизайн-системы. точная
+ * вёрстка появится после получения макета из Figma.
  */
 export default function CryptoScreen() {
   const { t } = useTranslation();

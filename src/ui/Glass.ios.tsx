@@ -7,19 +7,19 @@ import type { GlassGroupProps, GlassProps } from './Glass.types';
 import { GlassFallback } from './GlassFallback';
 import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 
-/** iOS 26+ check, evaluated once per process. */
+/** проверка iOS 26+, вычисляется один раз на процесс */
 export const isNativeGlassAvailable = isLiquidGlassAvailable();
 
 /**
- * The single glass primitive of the design system.
+ * единственный стеклянный примитив дизайн-системы.
  *
- * On iOS 26+ it renders the native `UIVisualEffectView`-backed Liquid Glass.
- * Everywhere else (and when Reduce Transparency is on) it falls back to the
- * blur-based imitation so the layout stays identical.
+ * на iOS 26+ рендерит нативный Liquid Glass на основе `UIVisualEffectView`.
+ * в остальных случаях (и когда включено Reduce Transparency) он
+ * откатывается к имитации на основе размытия, чтобы раскладка не менялась.
  *
- * Rules enforced by usage, not by code:
- * - never nest glass more than one level deep;
- * - always place glass above rich content so refraction is visible.
+ * правила, которые соблюдаются использованием, а не кодом:
+ * - никогда не вкладывать стекло глубже чем на один уровень;
+ * - всегда размещать стекло над насыщенным контентом, чтобы было видно преломление.
  */
 export function Glass({
   variant = 'regular',
@@ -75,8 +75,9 @@ export function Glass({
 }
 
 /**
- * Groups neighbouring glass surfaces so iOS blends/morphs them together
- * (tab bar items, action button rows, segmented controls).
+ * группирует соседние стеклянные поверхности, чтобы iOS смешивала и
+ * преобразовывала их вместе (элементы таб-бара, ряды кнопок действий,
+ * сегментированные контролы).
  */
 export function GlassGroup({ spacing, style, children, testID }: GlassGroupProps) {
   const { reduceTransparency } = useAccessibilityFlags();

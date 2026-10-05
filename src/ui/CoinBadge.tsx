@@ -11,7 +11,7 @@ export type CoinBadgeProps = {
   style?: ViewStyle;
 };
 
-/** Colored circle with the asset's first letter — used across crypto screens. */
+/** цветной круг с первой буквой актива — используется на экранах крипто */
 export function CoinBadge({ symbol, color, size, style }: CoinBadgeProps) {
   const theme = useTheme();
   const diameter = size ?? theme.sizes.coinBadge;

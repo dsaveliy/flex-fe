@@ -13,7 +13,7 @@ export type SearchFieldProps = {
   style?: ViewStyle;
 };
 
-/** Glass pill search input used on the Crypto and Cards screens. */
+/** стеклянное поле поиска в форме таблетки, используется на экранах Crypto и Cards */
 export function SearchField({
   placeholder,
   value,

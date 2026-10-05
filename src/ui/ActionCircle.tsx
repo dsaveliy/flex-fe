@@ -14,7 +14,7 @@ export type ActionCircleProps = {
   style?: ViewStyle;
 };
 
-/** Round glass action with a caption underneath (Home: Transfer / Top up / Buy crypto). */
+/** круглое стеклянное действие с подписью снизу (Home: Transfer / Top up / Buy crypto) */
 export function ActionCircle({ icon, label, onPress, accent = false, style }: ActionCircleProps) {
   const theme = useTheme();
 

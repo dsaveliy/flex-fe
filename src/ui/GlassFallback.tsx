@@ -10,19 +10,18 @@ import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 const CLEAR = 'rgba(255, 255, 255, 0)';
 
 /**
- * Cross-platform imitation of Liquid Glass used when the native effect is not
- * available (iOS < 26, Android, web, Reduce Transparency).
+ * кроссплатформенная имитация Liquid Glass, используемая, когда нативный
+ * эффект недоступен (iOS < 26, Android, web, Reduce Transparency).
  *
- * Layers, bottom → top:
- *   1. low-alpha fill            — lets the saturated page colors show through
- *   2. backdrop blur (+saturate) — frosted look
- *   3. diagonal specular sheen   — light catching the top-left of the pane
- *   4. bottom depth shade        — gives the pane thickness
- *   5. lit/shaded rim (border)   — bright top/left edge, faint bottom/right
+ * слои снизу вверх:
+ *   1. заливка с низкой прозрачностью — пропускает насыщенные цвета страницы
+ *   2. размытие фона (+насыщенность) — матовый вид
+ *   3. диагональный зеркальный блик — свет, падающий на верхний левый угол панели
+ *   4. тень глубины снизу — придаёт панели толщину
+ *   5. освещённая и затенённая кромка (border) — яркая сверху и слева, слабая снизу и справа
  *
- * The outer view carries the shadow and is NOT clipped (on iOS `overflow:
- * hidden` would cut the shadow); the decorative layers live in an inner
- * clipped view.
+ * внешний view несёт тень и НЕ обрезается (на iOS `overflow: hidden`
+ * обрезал бы тень); декоративные слои находятся во внутреннем обрезанном view.
  */
 export function GlassFallback({
   variant = 'regular',
@@ -70,8 +69,8 @@ export function GlassFallback({
     );
   }
 
-  // expo-blur's web 'light' tint paints a near-white plate that hides the
-  // backdrop; its neutral 'default' tint keeps the colors visible.
+  // у тона 'light' в expo-blur на web рисуется почти белая плита, скрывающая
+  // фон; нейтральный тон 'default' оставляет цвета видимыми.
   const blurTint = theme.isDark ? 'dark' : Platform.OS === 'web' ? 'default' : 'light';
 
   return (

@@ -1,17 +1,17 @@
 import type { Money } from '@/utils/money';
 
 /**
- * Domain types for the mobile client.
+ * доменные типы мобильного клиента.
  *
- * They are intentionally flat and close to what the FastAPI backend is
- * expected to expose, so they can later be replaced by types generated from
- * the OpenAPI schema with minimal changes (keep names and field shapes).
+ * они намеренно плоские и близки к тому, что должен отдавать бэкенд на
+ * FastAPI, чтобы позже их можно было заменить типами, сгенерированными из
+ * схемы OpenAPI, с минимальными изменениями (имена и форма полей сохраняются).
  */
 
 export type Trend = {
-  /** Percent change, e.g. -0.87 means -0.87%. */
+  /** изменение в процентах, например -0.87 означает -0.87% */
   changePercent: number;
-  /** Optional sparkline series (~24 points). */
+  /** необязательный ряд для sparkline (~24 точки) */
   series?: number[];
 };
 
@@ -24,7 +24,7 @@ export type User = {
 
 export type BalanceSummary = {
   total: Money;
-  /** Change vs previous month in percent. */
+  /** изменение по сравнению с предыдущим месяцем в процентах */
   monthChangePercent: number;
 };
 
@@ -36,10 +36,10 @@ export type CardStatus = 'active' | 'frozen';
 
 export type BankCard = {
   id: string;
-  /** Product label shown on the plastic, e.g. "Flex". */
+  /** название продукта на пластике, например "Flex" */
   productName: string;
   brand: CardBrand;
-  /** "Debit" / "Credit" — translated on the client via i18n keys. */
+  /** "Debit" / "Credit" — переводится на клиенте через ключи i18n */
   kind: 'debit' | 'credit';
   last4: string;
   balance: Money;
@@ -66,7 +66,7 @@ export type Transaction = {
   category: TransactionCategory;
   direction: TransactionDirection;
   amount: Money;
-  /** ISO 8601 timestamp. */
+  /** временная метка в формате ISO 8601 */
   occurredAt: string;
 };
 
@@ -77,11 +77,11 @@ export type MarketAsset = {
   symbol: string;
   name: string;
   kind: AssetKind;
-  /** Price in `quoteCurrency`. */
+  /** цена в `quoteCurrency` */
   price: number;
   quoteCurrency: string;
   trend: Trend;
-  /** Hex color used by the coin badge. */
+  /** hex-цвет, используемый значком монеты */
   badgeColor: string;
 };
 
@@ -98,7 +98,7 @@ export type PortfolioHolding = {
   assetId: string;
   symbol: string;
   badgeColor: string;
-  /** Share of the portfolio, 0..1. */
+  /** доля в портфеле, от 0 до 1 */
   weight: number;
 };
 
@@ -113,11 +113,11 @@ export type PromoOffer = {
   id: string;
   titleKey: string;
   subtitleKey: string;
-  /** Deep link handled by Expo Router, e.g. `/savings`. */
+  /** deep link, обрабатываемый Expo Router, например `/savings` */
   href?: string;
 };
 
-/** Normalized API error used by the query layer. */
+/** нормализованная ошибка API, используемая слоем запросов */
 export type ApiErrorShape = {
   status: number;
   code: string;

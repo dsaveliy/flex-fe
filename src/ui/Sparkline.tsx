@@ -7,7 +7,7 @@ export type SparklineProps = {
   data: number[];
   width?: number;
   height?: number;
-  /** Trend color; `auto` derives it from the first/last values. */
+  /** цвет тренда; `auto` определяет его по первому и последнему значениям */
   tone?: 'positive' | 'negative' | 'auto';
   strokeWidth?: number;
 };
@@ -29,7 +29,7 @@ function buildPath(data: number[], width: number, height: number, padding: numbe
     .join(' ');
 }
 
-/** Lightweight SVG sparkline for price tiles and the portfolio card. */
+/** лёгкий SVG-sparkline для плиток цен и карточки портфеля */
 export function Sparkline({
   data,
   width = 72,

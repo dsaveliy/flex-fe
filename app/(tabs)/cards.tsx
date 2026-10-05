@@ -17,9 +17,10 @@ import { formatShortDate } from '@/utils/format';
 import { formatMoney } from '@/utils/money';
 
 /**
- * Cards screen — placeholder layout. The real `CardCarousel` /
- * `CardThumbStrip` (paged, swipe-synced) will be built once the mockup is
- * available; for now cards render as a simple list to validate data flow.
+ * экран карт — временная раскладка. настоящие `CardCarousel` /
+ * `CardThumbStrip` (постраничные, синхронизированные со свайпом) будут
+ * сделаны, когда появится макет; пока карты выводятся простым списком,
+ * чтобы проверить поток данных.
  */
 export default function CardsScreen() {
   const { t } = useTranslation();

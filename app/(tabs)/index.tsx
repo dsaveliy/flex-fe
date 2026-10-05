@@ -17,9 +17,10 @@ import { greetingSlotFor } from '@/utils/format';
 import { splitMoneyParts } from '@/utils/money';
 
 /**
- * Home screen — placeholder layout wired to the real design system and mock
- * API. Final pixel-accurate layout will be implemented once mockups land;
- * this proves the Glass primitive, Screen backdrop and data layer end to end.
+ * главный экран — временная раскладка, подключённая к настоящей
+ * дизайн-системе и mock API. итоговая попиксельная вёрстка будет сделана
+ * после появления макетов; сейчас она сквозным образом проверяет
+ * примитив Glass, фон Screen и слой данных.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();

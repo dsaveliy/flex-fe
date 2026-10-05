@@ -1,15 +1,15 @@
 /**
- * Raw palette extracted from the Figma generator (`design/code (11).js`).
- * Figma stores colors as 0..1 rgb — here they are converted to hex once,
- * so no screen ever hardcodes a color literal.
+ * исходная палитра, извлечённая из генератора Figma (`design/code (11).js`).
+ * в Figma цвета хранятся как rgb в диапазоне 0..1 — здесь они один раз
+ * преобразованы в hex, поэтому ни один экран не использует цвет-литерал.
  */
 export const palette = {
   white: '#FFFFFF',
   black: '#000000',
 
-  // Rich mint → aqua → sky page gradient. It must be saturated enough that
-  // translucent glass surfaces visibly refract/tint it (a near-white page
-  // makes glass indistinguishable from a plain white card).
+  // насыщенный градиент страницы мята → аква → небо. он должен быть достаточно
+  // насыщенным, чтобы полупрозрачные стеклянные поверхности заметно преломляли
+  // и тонировали его (почти белая страница делает стекло неотличимым от обычной белой карточки).
   bgTop: '#9FE0C4',
   bgMid: '#C4ECE3',
   bgBottom: '#CFE6F6',

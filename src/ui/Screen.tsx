@@ -16,21 +16,21 @@ import { ScreenBackdrop } from './ScreenBackdrop';
 
 export type ScreenProps = {
   children: ReactNode;
-  /** Wraps content in a ScrollView. Disable for custom scroll containers. */
+  /** оборачивает контент в ScrollView. отключите для собственных контейнеров прокрутки */
   scrollable?: boolean;
-  /** Pull-to-refresh handler; shows a native RefreshControl. */
+  /** обработчик pull-to-refresh; показывает нативный RefreshControl */
   onRefresh?: () => void;
   refreshing?: boolean;
-  /** Extra bottom padding so content clears the floating tab bar. */
+  /** дополнительный нижний отступ, чтобы контент не заходил под плавающий таб-бар */
   contentBottomInset?: number;
   contentContainerStyle?: ViewStyle;
   style?: ViewStyle;
 } & Pick<ScrollViewProps, 'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle'>;
 
 /**
- * Page shell: mint→aqua→sky gradient plus soft colored blobs.
- * Content always scrolls OVER this backdrop so glass surfaces have something
- * rich to refract.
+ * оболочка страницы: градиент мята → аква → небо и мягкие цветные пятна.
+ * контент всегда прокручивается НАД этим фоном, чтобы у стеклянных
+ * поверхностей было что преломлять.
  */
 export function Screen({
   children,

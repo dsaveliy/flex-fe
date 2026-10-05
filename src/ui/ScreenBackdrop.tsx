@@ -5,7 +5,7 @@ import { useTheme } from '@/theme';
 
 type Blob = {
   id: string;
-  /** Position/size as a fraction of screen width/height (from the Figma generator). */
+  /** позиция и размер как доля ширины/высоты экрана (из генератора Figma) */
   cx: number;
   cy: number;
   r: number;
@@ -14,9 +14,9 @@ type Blob = {
 };
 
 /**
- * Blobs are spread over the whole height so that glass widgets at any scroll
- * position sit above a visibly colored area (the "glass needs rich content
- * behind it" rule). Radii are relative to screen width.
+ * пятна распределены по всей высоте, чтобы стеклянные виджеты при любой
+ * позиции прокрутки находились над заметно окрашенной областью (правило
+ * «стеклу нужен насыщенный контент за ним»). радиусы заданы относительно ширины экрана.
  */
 const BLOBS: Blob[] = [
   { id: 'mint-top', cx: 0.1, cy: 0.1, r: 0.6, color: 'mint', opacity: 0.85 },
@@ -27,9 +27,9 @@ const BLOBS: Blob[] = [
 ];
 
 /**
- * Soft blurred color blobs behind the page content.
- * Rendered with SVG radial gradients (cheap, no blur pass) so glass surfaces
- * above them show visible refraction.
+ * мягкие размытые цветные пятна за контентом страницы.
+ * рисуются SVG-радиальными градиентами (дёшево, без прохода размытия), чтобы
+ * стеклянные поверхности над ними заметно преломляли свет.
  */
 export function ScreenBackdrop() {
   const theme = useTheme();

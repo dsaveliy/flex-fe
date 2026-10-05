@@ -12,7 +12,7 @@ export function delay(ms = randomLatency()): Promise<void> {
   });
 }
 
-/** Wraps a fixture in fake latency (and optional fake failures). */
+/** оборачивает fixture в имитацию задержки (и, при необходимости, имитацию сбоев) */
 export async function respond<T>(data: T): Promise<T> {
   await delay();
 

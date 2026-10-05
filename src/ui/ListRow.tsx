@@ -9,16 +9,16 @@ import { Text } from './Text';
 export type ListRowProps = {
   title: string;
   subtitle?: string;
-  /** Leading slot: avatar, coin badge, icon. */
+  /** ведущий слот: аватар, значок монеты, иконка */
   left?: ReactNode;
-  /** Trailing slot: amount, chevron, switch. */
+  /** завершающий слот: сумма, шеврон, переключатель */
   right?: ReactNode;
   onPress?: () => void;
   showDivider?: boolean;
   style?: ViewStyle;
 };
 
-/** Generic row used by transactions, markets and account settings. */
+/** универсальная строка для транзакций, рынков и настроек аккаунта */
 export function ListRow({
   title,
   subtitle,

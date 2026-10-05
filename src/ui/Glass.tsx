@@ -4,15 +4,15 @@ import type { GlassGroupProps, GlassProps } from './Glass.types';
 import { GlassFallback } from './GlassFallback';
 
 /**
- * Default (non-iOS) implementation: always the fallback surface.
- * iOS overrides this file with `Glass.ios.tsx`, which renders the native
+ * реализация по умолчанию (не для iOS): всегда запасная поверхность.
+ * на iOS этот файл подменяется `Glass.ios.tsx`, который рендерит нативный
  * Liquid Glass `GlassView`.
  */
 export function Glass(props: GlassProps) {
   return <GlassFallback {...props} />;
 }
 
-/** No-op grouping on platforms without native glass morphing. */
+/** пустая группировка на платформах без нативного смешивания стекла */
 export function GlassGroup({ style, children, testID }: GlassGroupProps) {
   return (
     <View style={style} testID={testID}>

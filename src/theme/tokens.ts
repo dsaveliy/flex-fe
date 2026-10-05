@@ -2,7 +2,7 @@ import type { TextStyle, ViewStyle } from 'react-native';
 
 import { palette } from './palette';
 
-/** Font families registered in `app/_layout.tsx`. */
+/** семейства шрифтов, зарегистрированные в `app/_layout.tsx` */
 export const fonts = {
   regular: 'Inter_400Regular',
   medium: 'Inter_500Medium',
@@ -10,7 +10,7 @@ export const fonts = {
   bold: 'Inter_700Bold',
 } as const;
 
-/** 4pt-based spacing scale. */
+/** шкала отступов с шагом 4pt */
 export const spacing = {
   none: 0,
   xxs: 2,
@@ -24,7 +24,7 @@ export const spacing = {
   huge: 40,
 } as const;
 
-/** Corner radii — values taken from the Figma generator. */
+/** радиусы скругления — значения взяты из генератора Figma */
 export const radii = {
   xs: 4,
   sm: 8,
@@ -36,7 +36,7 @@ export const radii = {
   pill: 999,
 } as const;
 
-/** Sizes of recurring round/fixed elements. */
+/** размеры повторяющихся круглых и фиксированных элементов */
 export const sizes = {
   touchTarget: 44,
   avatar: 44,
@@ -47,7 +47,7 @@ export const sizes = {
   segmentHeight: 42,
   tabBarHeight: 64,
   tabBarInset: 16,
-  /** ISO/IEC 7810 ID-1 aspect ratio of a real bank card. */
+  /** соотношение сторон реальной банковской карты по ISO/IEC 7810 ID-1 */
   cardAspectRatio: 1.586,
 } as const;
 
@@ -93,11 +93,11 @@ export type ShadowToken = 'soft' | 'card' | 'floating' | 'raised';
 export type Shadows = Record<ShadowToken, ViewStyle>;
 
 export type ThemeColors = {
-  /** Vertical page gradient. */
+  /** вертикальный градиент страницы */
   backgroundTop: string;
   backgroundMid: string;
   backgroundBottom: string;
-  /** Blurred decorative blobs behind content. */
+  /** размытые декоративные пятна за контентом */
   blobMint: string;
   blobTeal: string;
   blobBlue: string;
@@ -115,18 +115,18 @@ export type ThemeColors = {
   positive: string;
   negative: string;
 
-  /** Glass fallback surfaces. */
+  /** поверхности запасного варианта стекла */
   glassFill: string;
   glassFillStrong: string;
-  /** Bright rim on the lit (top/left) edges. */
+  /** яркая кромка на освещённых (верхней и левой) гранях */
   glassBorder: string;
-  /** Faint rim on the shaded (bottom/right) edges. */
+  /** слабая кромка на затенённых (нижней и правой) гранях */
   glassEdgeLow: string;
-  /** Specular sheen at the top of the surface. */
+  /** зеркальный блик в верхней части поверхности */
   glassHighlight: string;
-  /** Subtle depth shade at the bottom of the surface. */
+  /** лёгкая тень глубины в нижней части поверхности */
   glassShade: string;
-  /** Opaque-ish pill for the selected segment / active control on glass. */
+  /** почти непрозрачная «таблетка» для выбранного сегмента или активного элемента на стекле */
   glassSelected: string;
   glassTint: string;
 
@@ -147,7 +147,7 @@ export type Theme = {
   shadows: Shadows;
   durations: typeof durations;
   springs: typeof springs;
-  /** Blur intensity for the non-Liquid-Glass fallback. */
+  /** интенсивность размытия для запасного варианта без Liquid Glass */
   blurIntensity: number;
 };
 
@@ -206,8 +206,8 @@ export const lightTheme: Theme = {
     positive: palette.accent,
     negative: palette.red,
 
-    // Low fill alpha on purpose: the blurred, saturated page colors must
-    // show through the glass instead of being covered by white.
+    // низкая прозрачность заливки сделана намеренно: размытые насыщенные
+    // цвета страницы должны просвечивать сквозь стекло, а не закрываться белым.
     glassFill: 'rgba(255, 255, 255, 0.18)',
     glassFillStrong: 'rgba(255, 255, 255, 0.34)',
     glassBorder: 'rgba(255, 255, 255, 0.85)',
@@ -233,8 +233,8 @@ export const lightTheme: Theme = {
 };
 
 /**
- * Dark theme placeholder — same shape as `lightTheme` so that switching
- * later requires no refactoring. Values are provisional.
+ * заглушка тёмной темы — той же формы, что и `lightTheme`, чтобы
+ * последующее переключение не требовало рефакторинга. значения временные.
  */
 export const darkTheme: Theme = {
   ...lightTheme,

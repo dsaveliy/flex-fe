@@ -18,9 +18,9 @@ export type ApiTransport = {
 };
 
 /**
- * HTTP transport for the future FastAPI backend.
- * Not used while `USE_MOCK_API` is true, but kept here so switching to the
- * real backend is a one-line change in `src/api/config.ts`.
+ * транспорт HTTP для будущего бэкенда на FastAPI.
+ * не используется, пока `USE_MOCK_API` равен true, но оставлен здесь, чтобы
+ * переход на настоящий бэкенд делался одной строкой в `src/api/config.ts`.
  */
 export function createHttpTransport(baseUrl: string): ApiTransport {
   async function request<T>(path: string, init?: RequestInit): Promise<T> {

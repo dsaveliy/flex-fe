@@ -1,8 +1,8 @@
 import { getIntlLocale } from '@/i18n';
 
 /**
- * Money is always stored as integer minor units (cents) + ISO currency code,
- * which is how the FastAPI backend is expected to return it.
+ * деньги всегда хранятся как целые минорные единицы (центы) и ISO-код валюты —
+ * именно так их должен возвращать бэкенд на FastAPI.
  */
 export type Money = {
   amountMinor: number;
@@ -18,15 +18,15 @@ export function toMajorUnits(value: Money, minorUnitDigits = 2): number {
 }
 
 type FormatMoneyOptions = {
-  /** Show the currency code/symbol. Default: true. */
+  /** показывать код или символ валюты. по умолчанию: true */
   withCurrency?: boolean;
-  /** Force sign for positive numbers (e.g. `+2,850.00`). */
+  /** принудительно показывать знак для положительных чисел (например, `+2,850.00`) */
   signDisplay?: Intl.NumberFormatOptions['signDisplay'];
   locale?: string;
   minorUnitDigits?: number;
 };
 
-/** `124900 BYN` -> `1,249.00 BYN` (locale aware). */
+/** `124900 BYN` -> `1,249.00 BYN` (с учётом локали) */
 export function formatMoney(value: Money, options: FormatMoneyOptions = {}): string {
   const {
     withCurrency = true,
@@ -45,7 +45,7 @@ export function formatMoney(value: Money, options: FormatMoneyOptions = {}): str
   return withCurrency ? `${amount} ${value.currency}` : amount;
 }
 
-/** Splits money into integer / fraction parts for the big balance typography. */
+/** делит сумму на целую и дробную части для крупной типографики баланса */
 export function splitMoneyParts(
   value: Money,
   options: { locale?: string; minorUnitDigits?: number } = {},
@@ -72,7 +72,7 @@ type FormatPriceOptions = {
   maximumFractionDigits?: number;
 };
 
-/** Market prices come from the API as decimals, not minor units. */
+/** рыночные цены приходят из API десятичными числами, а не минорными единицами */
 export function formatPrice(value: number, options: FormatPriceOptions = {}): string {
   const { locale = getIntlLocale(), currency = 'USD', maximumFractionDigits } = options;
   const digits =

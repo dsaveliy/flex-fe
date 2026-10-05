@@ -5,7 +5,7 @@ import { type Theme, type ThemeName, themes } from './tokens';
 type ThemeContextValue = {
   theme: Theme;
   themeName: ThemeName;
-  /** Dark theme exists as a placeholder; switching is intentionally disabled for now. */
+  /** тёмная тема существует как заглушка; переключение пока намеренно отключено */
   canSwitchTheme: boolean;
   setThemeName: (name: ThemeName) => void;
 };
@@ -14,7 +14,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 type ThemeProviderProps = {
   children: React.ReactNode;
-  /** Forced theme, useful for tests and the design showcase. */
+  /** принудительная тема, полезна для тестов и демонстрации дизайна */
   initialTheme?: ThemeName;
 };
 
@@ -51,7 +51,7 @@ export function useTheme(): Theme {
 }
 
 /**
- * Creates memoized, theme-aware styles.
+ * создаёт мемоизированные стили, зависящие от темы.
  *
  * const useStyles = makeStyles((t) => ({ box: { padding: t.spacing.lg } }));
  */

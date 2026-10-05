@@ -5,7 +5,7 @@ import { type AppLanguage, changeLanguage, getCurrentLanguage } from '@/i18n';
 import { useTheme } from '@/theme';
 import { Chip, GlassCard, Icon, ListRow, Screen, Text } from '@/ui';
 
-/** Simple placeholder screen; the language switch is fully functional. */
+/** простой экран-заглушка; переключатель языка полностью рабочий */
 export default function AccountScreen() {
   const { t } = useTranslation();
   const theme = useTheme();

@@ -9,9 +9,9 @@ import { Text } from './Text';
 
 export type GlassCardProps = {
   children: ReactNode;
-  /** Optional section title rendered in the card header. */
+  /** необязательный заголовок секции в шапке карточки */
   title?: string;
-  /** Right-hand header slot (e.g. a "See all ›" action). */
+  /** правый слот шапки (например, действие "See all ›") */
   headerRight?: ReactNode;
   variant?: GlassVariant;
   radius?: number;
@@ -21,7 +21,7 @@ export type GlassCardProps = {
   testID?: string;
 };
 
-/** Standard content container: glass surface + optional titled header. */
+/** стандартный контейнер контента: стеклянная поверхность и необязательная шапка с заголовком */
 export function GlassCard({
   children,
   title,

@@ -10,8 +10,9 @@ import { ThemeProvider } from '@/theme';
 import '@/i18n';
 
 /**
- * Single place where all app-wide providers are composed, so route files
- * stay thin and new providers (auth, notifications) are easy to add.
+ * единое место, где собираются все провайдеры приложения, чтобы файлы
+ * маршрутов оставались тонкими, а новые провайдеры (auth, notifications)
+ * легко добавлялись.
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   const queryClient = useRef(createQueryClient()).current;

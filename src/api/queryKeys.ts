@@ -1,6 +1,6 @@
 import type { AssetKind, MoverDirection } from './types';
 
-/** Single source of truth for TanStack Query cache keys. */
+/** единый источник ключей кэша TanStack Query */
 export const queryKeys = {
   user: ['user'] as const,
   balance: ['balance'] as const,

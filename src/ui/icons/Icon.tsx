@@ -24,9 +24,9 @@ export type IconProps = {
 };
 
 /**
- * Single line-icon set drawn with react-native-svg.
- * Keeping icons in code avoids an extra font/asset dependency and lets them
- * inherit theme colors.
+ * единый набор линейных иконок, нарисованных через react-native-svg.
+ * хранение иконок в коде избавляет от лишней зависимости на шрифт или ресурс
+ * и позволяет им наследовать цвета темы.
  */
 export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
   const theme = useTheme();

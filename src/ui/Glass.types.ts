@@ -3,17 +3,17 @@ import type { ColorValue, StyleProp, ViewStyle } from 'react-native';
 export type GlassVariant = 'regular' | 'clear';
 
 export type GlassProps = {
-  /** Native glass style. `clear` is more transparent, `regular` is frosted. */
+  /** нативный стиль стекла. `clear` более прозрачный, `regular` матовый */
   variant?: GlassVariant;
-  /** Optional tint applied on top of the glass. */
+  /** необязательный оттенок поверх стекла */
   tint?: ColorValue;
-  /** Enables the native touch reaction of Liquid Glass. */
+  /** включает нативную реакцию Liquid Glass на касание */
   interactive?: boolean;
-  /** Corner radius; falls back to the `card` token when omitted. */
+  /** радиус скругления; если не указан, используется токен `card` */
   radius?: number;
-  /** Adds a soft drop shadow under the surface. */
+  /** добавляет мягкую тень под поверхностью */
   elevated?: boolean;
-  /** Force the fallback rendering — used by the design showcase. */
+  /** принудительно использовать запасной рендеринг — нужно для демонстрации дизайна */
   forceFallback?: boolean;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
@@ -24,7 +24,7 @@ export type GlassProps = {
 >;
 
 export type GlassGroupProps = {
-  /** Distance at which neighbouring glass elements start merging. */
+  /** расстояние, на котором соседние стеклянные элементы начинают сливаться */
   spacing?: number;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;

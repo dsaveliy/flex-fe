@@ -11,7 +11,7 @@ export type ErrorStateProps = {
   style?: ViewStyle;
 };
 
-/** Shared error placeholder for failed queries. */
+/** общая заглушка ошибки для неудачных запросов */
 export function ErrorState({ onRetry, style }: ErrorStateProps) {
   const { t } = useTranslation();
   const theme = useTheme();

@@ -9,9 +9,9 @@ export type AccessibilityFlags = {
 type Subscription = { remove: () => void };
 
 /**
- * Not every platform implements every AccessibilityInfo API
- * (e.g. `isReduceTransparencyEnabled` is iOS-only and missing on web/Android).
- * Always feature-detect and never let a missing API crash the tree.
+ * не каждая платформа реализует каждый API AccessibilityInfo
+ * (например, `isReduceTransparencyEnabled` есть только на iOS и отсутствует на web/Android).
+ * всегда проверяйте наличие API и не позволяйте отсутствующему API уронить дерево.
  */
 async function safeQuery(method: 'isReduceTransparencyEnabled' | 'isReduceMotionEnabled') {
   const fn = (AccessibilityInfo as unknown as Record<string, unknown>)[method];
@@ -39,16 +39,16 @@ function safeSubscribe(
   }
 }
 
-/** Web fallback: CSS media queries expose the same OS-level preferences. */
+/** запасной вариант для web: CSS media queries отдают те же настройки уровня ОС */
 function queryMedia(query: string): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined' || !window.matchMedia) return false;
   return window.matchMedia(query).matches;
 }
 
 /**
- * Live accessibility preferences. Glass surfaces must degrade to opaque fills
- * when "Reduce Transparency" is on, and animations must be skipped when
- * "Reduce Motion" is on.
+ * актуальные настройки доступности. стеклянные поверхности должны
+ * деградировать до непрозрачной заливки при включённом "Reduce Transparency",
+ * а анимации — пропускаться при включённом "Reduce Motion".
  */
 export function useAccessibilityFlags(): AccessibilityFlags {
   const [flags, setFlags] = useState<AccessibilityFlags>({

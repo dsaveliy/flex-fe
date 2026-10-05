@@ -14,7 +14,7 @@ import type {
   User,
 } from './types';
 
-/** Contract shared by the mock and the real backend implementation. */
+/** контракт, общий для mock- и настоящей реализации бэкенда */
 export type FlexApi = {
   getUser(): Promise<User>;
   getBalance(): Promise<BalanceSummary>;
