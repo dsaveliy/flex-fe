@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Flex",
+    "slug": "flex",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "flex",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "by.flex.mobile"
+    },
+    "android": {
+      "package": "by.flex.mobile",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-status-bar",
+      "expo-localization",
+      "expo-dev-client"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

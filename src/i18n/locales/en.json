@@ -1,0 +1,82 @@
+{
+  "common": {
+    "appName": "Flex",
+    "tagline": "Better money. Brighter future.",
+    "seeAll": "See all",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorSubtitle": "Please check your connection and try again."
+  },
+  "tabs": {
+    "home": "Home",
+    "crypto": "Crypto",
+    "cards": "Cards",
+    "account": "Account"
+  },
+  "greeting": {
+    "morning": "Good morning,",
+    "afternoon": "Good afternoon,",
+    "evening": "Good evening,",
+    "night": "Good night,"
+  },
+  "home": {
+    "totalBalance": "Total balance",
+    "deltaVsLastMonth": "vs last month",
+    "actions": {
+      "transfer": "Transfer",
+      "topUp": "Top up",
+      "buyCrypto": "Buy crypto"
+    },
+    "promo": {
+      "title": "Your money works for you",
+      "subtitle": "Earn up to 4.5% APY on your balance"
+    }
+  },
+  "crypto": {
+    "title": "Crypto",
+    "searchPlaceholder": "Search crypto",
+    "topMovers": "Top movers",
+    "segments": {
+      "gainers": "Top gainers",
+      "losers": "Top losers"
+    },
+    "portfolio": "Your portfolio",
+    "today": "today",
+    "markets": "Markets",
+    "categories": {
+      "crypto": "Crypto",
+      "fiat": "Fiat",
+      "stocks": "Stocks"
+    }
+  },
+  "cards": {
+    "title": "Cards",
+    "searchPlaceholder": "Search or pay",
+    "addCard": "Add card",
+    "debit": "Debit",
+    "actions": {
+      "transfer": "Transfer",
+      "topUp": "Top up",
+      "details": "Details"
+    },
+    "recentTransactions": "Recent transactions"
+  },
+  "account": {
+    "title": "Account",
+    "rows": {
+      "profile": "Profile",
+      "security": "Security",
+      "language": "Language",
+      "theme": "Theme",
+      "logOut": "Log out"
+    },
+    "themeLight": "Light",
+    "themeComingSoon": "Dark mode coming soon"
+  },
+  "a11y": {
+    "avatarPlaceholder": "Profile picture placeholder",
+    "notifications": "Notifications",
+    "settings": "Settings"
+  }
+}

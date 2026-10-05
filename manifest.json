@@ -1,0 +1,11 @@
+{
+  "name": "Flex UI Generator",
+  "id": "flex-ui-generator",
+  "api": "1.0.0",
+  "main": "code (11).js",
+  "editorType": ["figma"],
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page"
+}
+

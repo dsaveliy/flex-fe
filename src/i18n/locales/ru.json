@@ -1,0 +1,82 @@
+{
+  "common": {
+    "appName": "Flex",
+    "tagline": "Лучше деньги. Ярче будущее.",
+    "seeAll": "Все",
+    "retry": "Повторить",
+    "loading": "Загрузка…",
+    "errorTitle": "Что-то пошло не так",
+    "errorSubtitle": "Проверьте соединение и попробуйте снова."
+  },
+  "tabs": {
+    "home": "Главная",
+    "crypto": "Крипто",
+    "cards": "Карты",
+    "account": "Профиль"
+  },
+  "greeting": {
+    "morning": "Доброе утро,",
+    "afternoon": "Добрый день,",
+    "evening": "Добрый вечер,",
+    "night": "Доброй ночи,"
+  },
+  "home": {
+    "totalBalance": "Общий баланс",
+    "deltaVsLastMonth": "за месяц",
+    "actions": {
+      "transfer": "Перевод",
+      "topUp": "Пополнить",
+      "buyCrypto": "Купить крипто"
+    },
+    "promo": {
+      "title": "Деньги работают на вас",
+      "subtitle": "До 4,5% годовых на остаток"
+    }
+  },
+  "crypto": {
+    "title": "Крипто",
+    "searchPlaceholder": "Поиск криптовалюты",
+    "topMovers": "Лидеры",
+    "segments": {
+      "gainers": "Рост",
+      "losers": "Падение"
+    },
+    "portfolio": "Ваш портфель",
+    "today": "сегодня",
+    "markets": "Рынки",
+    "categories": {
+      "crypto": "Крипто",
+      "fiat": "Фиат",
+      "stocks": "Акции"
+    }
+  },
+  "cards": {
+    "title": "Карты",
+    "searchPlaceholder": "Поиск или оплата",
+    "addCard": "Добавить карту",
+    "debit": "Дебетовая",
+    "actions": {
+      "transfer": "Перевод",
+      "topUp": "Пополнить",
+      "details": "Детали"
+    },
+    "recentTransactions": "Последние операции"
+  },
+  "account": {
+    "title": "Профиль",
+    "rows": {
+      "profile": "Профиль",
+      "security": "Безопасность",
+      "language": "Язык",
+      "theme": "Тема",
+      "logOut": "Выйти"
+    },
+    "themeLight": "Светлая",
+    "themeComingSoon": "Тёмная тема скоро"
+  },
+  "a11y": {
+    "avatarPlaceholder": "Заглушка фото профиля",
+    "notifications": "Уведомления",
+    "settings": "Настройки"
+  }
+}
