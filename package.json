@@ -44,6 +44,7 @@
     "typescript": "~6.0.3"
   },
   "devDependencies": {
-    "babel-plugin-module-resolver": "^5.0.3"
+    "babel-plugin-module-resolver": "^5.0.3",
+    "sass": "^1.105.1"
   }
 }

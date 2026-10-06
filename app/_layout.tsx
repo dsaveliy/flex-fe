@@ -12,6 +12,11 @@ import { View } from 'react-native';
 import { AppProviders } from '@/providers/AppProviders';
 import { palette } from '@/theme';
 
+// Глобальные веб-стили (SASS/SCSS). Expo Router требует импортировать
+// глобальный CSS именно в корневом layout; на native-платформах этот
+// импорт автоматически игнорируется бандлером.
+import '@/styles/global.scss';
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,

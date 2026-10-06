@@ -1,0 +1,64 @@
+// ---------------------------------------------------------------------------
+// Глобальные веб-стили приложения, написанные с использованием SASS (SCSS).
+//
+// Этот файл подключается ОДИН раз в корневом `app/_layout.tsx` и, согласно
+// документации Expo (https://docs.expo.dev/versions/latest/config/metro/#sass),
+// автоматически игнорируется на native-платформах (iOS/Android) — то есть
+// он не затрагивает основную RN-вёрстку (которая остаётся на Flexbox через
+// `StyleSheet.create`), а лишь донастраивает веб-рендер (react-native-web).
+//
+// Значения переменных продублированы из `src/theme/palette.ts` и
+// `src/theme/tokens.ts`, чтобы веб-специфичные штрихи (скроллбар, выделение
+// текста, focus-ring) оставались в одном визуальном языке с приложением.
+// ---------------------------------------------------------------------------
+
+// ----- переменные (аналог "дизайн-токенов" из src/theme) -----
+$accent: #248c66;
+$accent-soft: #99ccb8;
+$text-primary: #141f29;
+$bg-top: #9fe0c4;
+$radius-pill: 999px;
+$scrollbar-width: 8px;
+
+// ----- миксин: переиспользуемый скролл-бар в акцентных тонах -----
+@mixin styled-scrollbar($thumb: $accent, $track: transparent, $width: $scrollbar-width) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba($thumb, 0.45);
+    border-radius: $radius-pill;
+
+    &:hover {
+      background-color: rgba($thumb, 0.7);
+    }
+  }
+}
+
+// ----- вложенность (nesting) + применение миксина к корневым элементам -----
+html,
+body {
+  @include styled-scrollbar();
+  scrollbar-color: rgba($accent, 0.45) transparent;
+}
+
+#root {
+  // выделение текста — тонируем в акцентный цвет приложения вместо дефолтного синего
+  ::selection {
+    background-color: rgba($accent, 0.25);
+    color: $text-primary;
+  }
+
+  // единый фокус-ринг для доступности (клавиатурная навигация по кнопкам/ссылкам)
+  :focus-visible {
+    outline: 2px solid $accent-soft;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
