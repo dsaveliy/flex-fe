@@ -11,4 +11,5 @@ export const queryKeys = {
   markets: (kind?: AssetKind) => ['markets', kind ?? 'all'] as const,
   movers: (direction: MoverDirection) => ['movers', direction] as const,
   portfolio: ['portfolio'] as const,
+  rates: ['rates'] as const,
 };

@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 
 import { AppProviders } from '@/providers/AppProviders';
-import { palette } from '@/theme';
+import { darkTheme, palette } from '@/theme';
 
 // Глобальные веб-стили (SASS/SCSS). Expo Router требует импортировать
 // глобальный CSS именно в корневом layout; на native-платформах этот
@@ -26,14 +26,24 @@ export default function RootLayout() {
   });
 
   if (!fontsLoaded && !fontError) {
-    return <View style={{ flex: 1, backgroundColor: palette.bgTop }} />;
+    return <View style={{ flex: 1, backgroundColor: darkTheme.colors.backgroundTop }} />;
   }
 
   return (
     <AppProviders>
-      <StatusBar style="dark" />
+      {/* «auto» следует за темой, выставленной через Appearance в ThemeProvider */}
+      <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="account"
+          options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerBackButtonDisplayMode: 'minimal',
+            headerTintColor: palette.accent,
+          }}
+        />
       </Stack>
     </AppProviders>
   );

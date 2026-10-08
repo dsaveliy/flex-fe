@@ -7,6 +7,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createQueryClient } from '@/api';
 import { ThemeProvider } from '@/theme';
 
+import { BalancePrivacyProvider } from './BalancePrivacyProvider';
+import { DisplayCurrencyProvider } from './DisplayCurrencyProvider';
+
 import '@/i18n';
 
 /**
@@ -21,7 +24,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <BalancePrivacyProvider>
+              <DisplayCurrencyProvider>{children}</DisplayCurrencyProvider>
+            </BalancePrivacyProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -32,6 +32,18 @@ export function formatShortDate(iso: string, locale = getIntlLocale()): string {
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).format(new Date(iso));
 }
 
+/**
+ * короткая дата с годом: `8 мар. 2024` / `Mar 8, 2024`. хвост « г.»
+ * русской локали отбрасывается, чтобы подпись оставалась компактной.
+ * без `formatToParts`: Hermes на iOS разбивает дату на части иначе, чем
+ * браузер, и год мог не находиться — подпись становилась пустой.
+ */
+export function formatShortDateWithYear(iso: string, locale = getIntlLocale()): string {
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+    .format(new Date(iso))
+    .replace(/\s*г\.?$/, '');
+}
+
 export function formatTime(iso: string, locale = getIntlLocale()): string {
   return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
     new Date(iso),

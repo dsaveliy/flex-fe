@@ -11,8 +11,10 @@ import {
   DeltaBadge,
   ErrorState,
   GlassCard,
+  GlassGroup,
   ListRow,
   Screen,
+  ScreenHeader,
   SearchField,
   SegmentedControl,
   Skeleton,
@@ -42,7 +44,7 @@ export default function CryptoScreen() {
   return (
     <Screen>
       <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xl }}>
-        <Text variant="title">{t('crypto.title')}</Text>
+        <ScreenHeader title={t('crypto.title')} />
 
         <SearchField placeholder={t('crypto.searchPlaceholder')} />
 
@@ -138,7 +140,10 @@ export default function CryptoScreen() {
         </GlassCard>
 
         <GlassCard title={t('crypto.markets')}>
-          <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+          <GlassGroup
+            spacing={theme.spacing.sm}
+            style={{ flexDirection: 'row', gap: theme.spacing.sm }}
+          >
             {(['crypto', 'fiat', 'stock'] as const).map((kind) => (
               <Chip
                 key={kind}
@@ -147,7 +152,7 @@ export default function CryptoScreen() {
                 onPress={() => setAssetKind(kind)}
               />
             ))}
-          </View>
+          </GlassGroup>
 
           <View style={{ marginTop: theme.spacing.md }}>
             {(markets.data ?? []).map((asset, index) => (

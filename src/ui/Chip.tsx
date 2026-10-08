@@ -2,6 +2,8 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
 
+import { Glass, isNativeGlassAvailable } from './Glass';
+import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 import { Touchable } from './Pressable';
 import { Text } from './Text';
 
@@ -12,28 +14,31 @@ export type ChipProps = {
   style?: ViewStyle;
 };
 
-/** чип категории: мятная заливка и зелёный текст, когда выбран (карточка Markets) */
+/**
+ * стеклянный чип категории (карточка Markets, выбор языка). выбранный
+ * подсвечен мятным оттенком и зелёным текстом. на iOS 26 нативное стекло
+ * реагирует на касание, поэтому JS-сжатие отключается.
+ */
 export function Chip({ label, selected = false, onPress, style }: ChipProps) {
   const theme = useTheme();
+  const { reduceTransparency } = useAccessibilityFlags();
+  const nativeGlass = isNativeGlassAvailable && !reduceTransparency;
 
   const content = (
-    <View
-      style={[
-        styles.chip,
-        {
-          paddingHorizontal: theme.spacing.lg,
-          minHeight: 32,
-          borderRadius: theme.radii.pill,
-          backgroundColor: selected ? theme.colors.accentMuted : 'transparent',
-          borderColor: selected ? 'transparent' : theme.colors.divider,
-        },
-        style,
-      ]}
+    <Glass
+      variant="clear"
+      interactive={Boolean(onPress)}
+      tint={selected ? theme.colors.accentMuted : undefined}
+      radius={theme.radii.pill}
+      elevated={false}
+      style={[{ minHeight: 32 }, style]}
     >
-      <Text variant="bodyStrong" color={selected ? 'accent' : 'textMuted'}>
-        {label}
-      </Text>
-    </View>
+      <View style={[styles.chip, { paddingHorizontal: theme.spacing.lg }]}>
+        <Text variant="bodyStrong" color={selected ? 'accent' : 'textMuted'}>
+          {label}
+        </Text>
+      </View>
+    </Glass>
   );
 
   if (!onPress) return content;
@@ -44,7 +49,7 @@ export function Chip({ label, selected = false, onPress, style }: ChipProps) {
       accessibilityState={{ selected }}
       accessibilityLabel={label}
       onPress={onPress}
-      pressedScale={0.96}
+      pressedScale={nativeGlass ? 1 : 0.96}
     >
       {content}
     </Touchable>
@@ -53,8 +58,8 @@ export function Chip({ label, selected = false, onPress, style }: ChipProps) {
 
 const styles = StyleSheet.create({
   chip: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
   },
 });

@@ -2,6 +2,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
@@ -18,6 +19,7 @@ import {
   mockLosers,
   mockPortfolio,
   mockPromo,
+  mockRates,
   mockTransactions,
   mockUser,
 } from './fixtures';
@@ -55,6 +57,8 @@ export const mockApi = {
     respond(direction === 'gainers' ? mockGainers : mockLosers),
 
   getPortfolio: (): Promise<Portfolio> => respond(mockPortfolio),
+
+  getRates: (): Promise<ExchangeRates> => respond(mockRates),
 };
 
 export type MockApi = typeof mockApi;

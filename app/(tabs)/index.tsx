@@ -1,94 +1,74 @@
+import { useIsFocused, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { useBalance } from '@/api';
+import { useBalance, useTransactions, useUser } from '@/api';
+import { BalanceChartWidget } from '@/features/home/BalanceChartWidget';
+import { GreetingIcon } from '@/features/home/GreetingIcon';
+import { QuickActions } from '@/features/home/QuickActions';
 import { useTheme } from '@/theme';
 import {
-  ActionCircle,
-  DeltaBadge,
   ErrorState,
   GlassCard,
   Icon,
   Screen,
+  ScreenHeader,
   Skeleton,
   Text,
+  Touchable,
+  TransactionRow,
+  useTilt,
 } from '@/ui';
 import { greetingSlotFor } from '@/utils/format';
-import { splitMoneyParts } from '@/utils/money';
 
 /**
- * главный экран — временная раскладка, подключённая к настоящей
- * дизайн-системе и mock API. итоговая попиксельная вёрстка будет сделана
- * после появления макетов; сейчас она сквозным образом проверяет
- * примитив Glass, фон Screen и слой данных.
+ * главный экран (минимализм): крупный баланс с живым графиком на весь
+ * первый экран, под ним быстрые действия, промо и последние операции.
+ * фоновая Σ за суммой смещается при наклоне телефона (параллакс).
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const router = useRouter();
   const balance = useBalance();
+  const user = useUser();
+  const transactions = useTransactions({ limit: 3 });
+  const { parallaxStyle } = useTilt({ maxShift: 18, enabled: useIsFocused() });
 
-  const greetingKey = `greeting.${greetingSlotFor()}` as const;
+  const greetingSlot = greetingSlotFor();
 
   return (
-    <Screen>
-      <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xl }}>
-        <View>
-          <Text variant="body" color="textMuted">
-            {t(greetingKey)}
-          </Text>
-          <Text variant="title">Alex ☀</Text>
-        </View>
+    <Screen
+      onRefresh={() => {
+        void balance.refetch();
+        void user.refetch();
+        void transactions.refetch();
+      }}
+      refreshing={balance.isRefetching}
+    >
+      <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xxl }}>
+        <ScreenHeader
+          size="large"
+          eyebrow={t(`greeting.${greetingSlot}`)}
+          title={user.data?.firstName ?? ''}
+          titleAccessory={user.data ? <GreetingIcon slot={greetingSlot} /> : null}
+        />
 
-        <GlassCard>
-          <Text variant="label" color="textMuted">
-            {t('home.totalBalance').toUpperCase()}
-          </Text>
-
+        <View style={{ marginTop: -theme.spacing.md }}>
           {balance.isPending ? (
-            <Skeleton height={40} width={160} style={{ marginTop: theme.spacing.sm }} />
+            <View style={{ gap: theme.spacing.md }}>
+              <Skeleton height={14} width={120} />
+              <Skeleton height={60} width={260} />
+              <Skeleton height={220} radius={theme.radii.cardLg} />
+            </View>
           ) : balance.isError ? (
             <ErrorState onRetry={() => balance.refetch()} />
           ) : (
-            <>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-end',
-                  gap: theme.spacing.xs,
-                  marginTop: theme.spacing.xs,
-                }}
-              >
-                <Text variant="display">
-                  {splitMoneyParts(balance.data.total).integer}
-                </Text>
-                <Text variant="balanceCents" color="textPrimary" style={{ opacity: 0.6 }}>
-                  .{splitMoneyParts(balance.data.total).fraction}
-                </Text>
-                <Text variant="balanceCurrency" color="textMuted">
-                  {balance.data.total.currency}
-                </Text>
-              </View>
-
-              <DeltaBadge
-                value={balance.data.monthChangePercent}
-                caption={t('home.deltaVsLastMonth')}
-                style={{ marginTop: theme.spacing.sm }}
-              />
-            </>
+            <BalanceChartWidget balance={balance.data} decorStyle={parallaxStyle} />
           )}
+        </View>
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: theme.spacing.xxl,
-            }}
-          >
-            <ActionCircle icon="transfer" label={t('home.actions.transfer')} />
-            <ActionCircle icon="plus" label={t('home.actions.topUp')} accent />
-            <ActionCircle icon="bitcoin" label={t('home.actions.buyCrypto')} />
-          </View>
-        </GlassCard>
+        <QuickActions />
 
         <GlassCard radius={theme.radii.bannerSm}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
@@ -101,6 +81,31 @@ export default function HomeScreen() {
             </View>
             <Icon name="chevronRight" size={18} color={theme.colors.textMuted} />
           </View>
+        </GlassCard>
+
+        <GlassCard
+          title={t('home.recent')}
+          headerRight={
+            <Touchable accessibilityRole="link" hitSlop={8} onPress={() => router.push('/cards')}>
+              <Text variant="bodyStrong" color="accent">
+                {`${t('common.seeAll')} ›`}
+              </Text>
+            </Touchable>
+          }
+        >
+          {transactions.isPending ? (
+            <Skeleton height={60} />
+          ) : transactions.isError ? (
+            <ErrorState onRetry={() => transactions.refetch()} />
+          ) : (
+            transactions.data.map((tx, index) => (
+              <TransactionRow
+                key={tx.id}
+                transaction={tx}
+                showDivider={index < transactions.data.length - 1}
+              />
+            ))
+          )}
         </GlassCard>
       </View>
     </Screen>

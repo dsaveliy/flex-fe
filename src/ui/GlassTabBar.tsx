@@ -17,7 +17,6 @@ const TAB_ICONS: Record<string, IconName> = {
   index: 'home',
   crypto: 'crypto',
   cards: 'cards',
-  account: 'account',
 };
 
 /**

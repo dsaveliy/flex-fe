@@ -26,6 +26,7 @@ export function SearchField({
   return (
     <Glass
       variant="clear"
+      interactive
       radius={theme.radii.pill}
       style={[{ height: theme.sizes.searchHeight }, style]}
     >

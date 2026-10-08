@@ -11,8 +11,7 @@
   "tabs": {
     "home": "Home",
     "crypto": "Crypto",
-    "cards": "Cards",
-    "account": "Account"
+    "cards": "Cards"
   },
   "greeting": {
     "morning": "Good morning,",
@@ -26,12 +25,33 @@
     "actions": {
       "transfer": "Transfer",
       "topUp": "Top up",
-      "buyCrypto": "Buy crypto"
+      "buyCrypto": "Buy crypto",
+      "more": "More",
+      "exchange": "Exchange",
+      "pay": "Pay",
+      "withdraw": "Withdraw",
+      "cancel": "Cancel"
     },
     "promo": {
       "title": "Your money works for you",
       "subtitle": "Earn up to 4.5% APY on your balance"
-    }
+    },
+    "periods": {
+      "1D": "1D",
+      "1W": "1W",
+      "1M": "1M",
+      "1Y": "1Y",
+      "ALL": "All"
+    },
+    "periodCaption": {
+      "1D": "today",
+      "1W": "this week",
+      "1M": "this month",
+      "1Y": "this year",
+      "ALL": "all time"
+    },
+    "recent": "Recent activity",
+    "currencyMenuTitle": "Show balance in"
   },
   "crypto": {
     "title": "Crypto",
@@ -69,14 +89,28 @@
       "security": "Security",
       "language": "Language",
       "theme": "Theme",
-      "logOut": "Log out"
+      "logOut": "Log out",
+      "hideBalance": "Hide balance",
+      "displayCurrency": "Balance currency"
     },
     "themeLight": "Light",
-    "themeComingSoon": "Dark mode coming soon"
+    "hideBalanceHint": "Amounts are replaced with dots",
+    "themeDark": "Dark",
+    "displayCurrencyHint": "Used to show your total balance"
   },
   "a11y": {
     "avatarPlaceholder": "Profile picture placeholder",
     "notifications": "Notifications",
-    "settings": "Settings"
+    "settings": "Settings",
+    "openProfile": "Open profile",
+    "toggleBalance": "Hide or show balance",
+    "balanceChart": "Balance chart, drag to explore",
+    "changeCurrency": "Change balance currency"
+  },
+  "currencies": {
+    "BYN": "Belarusian ruble",
+    "USD": "US dollar",
+    "EUR": "Euro",
+    "BTC": "Bitcoin"
   }
 }

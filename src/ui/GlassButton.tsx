@@ -2,7 +2,8 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
 
-import { Glass } from './Glass';
+import { Glass, isNativeGlassAvailable } from './Glass';
+import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 import { Icon, type IconName } from './icons/Icon';
 import { Touchable } from './Pressable';
 import { Text } from './Text';
@@ -37,6 +38,10 @@ export function GlassButton({
   testID,
 }: GlassButtonProps) {
   const theme = useTheme();
+  const { reduceTransparency } = useAccessibilityFlags();
+  // нативное стекло само пружинит и подсвечивается под пальцем;
+  // дополнительное JS-сжатие поверх него даёт «дёрганье»
+  const nativeGlass = isNativeGlassAvailable && !reduceTransparency;
   const diameter = size ?? theme.sizes.actionCircle;
   const iconColor = accent ? theme.colors.textInverse : theme.colors.textPrimary;
 
@@ -45,6 +50,7 @@ export function GlassButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       onPress={onPress}
+      pressedScale={nativeGlass ? 1 : undefined}
       testID={testID}
       style={style}
     >

@@ -4,6 +4,7 @@ import { money } from '@/utils/money';
 import type {
   BalanceSummary,
   BankCard,
+  ExchangeRates,
   Mover,
   Portfolio,
   PromoOffer,
@@ -14,14 +15,88 @@ import { makeSeries } from './series';
 
 export const mockUser: User = {
   id: 'usr_1',
-  firstName: 'Alex',
-  lastName: 'Ivanov',
+  firstName: 'Роман',
+  lastName: 'Понявин',
   avatarUrl: null,
 };
+
+const BALANCE_TOTAL = 12_480.5;
+
+/** ряд, который заканчивается ровно на текущем балансе */
+function balanceHistory(seed: number, points: number, volatility: number, drift: number) {
+  const raw = makeSeries({ seed, points, start: 100, drift, volatility });
+  const last = raw.at(-1) ?? 100;
+  return raw.map((value) => Number(((value / last) * BALANCE_TOTAL).toFixed(2)));
+}
 
 export const mockBalance: BalanceSummary = {
   total: money(1_248_050, 'BYN'),
   monthChangePercent: 2.4,
+  history: {
+    '1D': balanceHistory(11, 48, 0.35, 0.01),
+    '1W': balanceHistory(12, 42, 0.8, 0.04),
+    '1M': balanceHistory(13, 60, 1.2, 0.06),
+    '1Y': balanceHistory(14, 52, 2.6, 0.4),
+    ALL: balanceHistory(15, 60, 3.4, 0.9),
+  },
+  // сумма valueBase по счетам = total (12 480.50 BYN)
+  accounts: [
+    {
+      id: 'acc_byn',
+      currency: 'BYN',
+      kind: 'fiat',
+      name: 'Белорусский рубль',
+      amount: money(673_950, 'BYN'),
+      amountDigits: 2,
+      valueBase: money(673_950, 'BYN'),
+      changePercent: 0.4,
+      color: palette.accent,
+      series: makeSeries({ seed: 21, start: 100, drift: 0.05, volatility: 0.4 }),
+    },
+    {
+      id: 'acc_usd',
+      currency: 'USD',
+      kind: 'fiat',
+      name: 'Доллар США',
+      amount: money(30_000, 'USD'),
+      amountDigits: 2,
+      valueBase: money(98_100, 'BYN'),
+      changePercent: -0.3,
+      color: palette.blobBlue,
+      series: makeSeries({ seed: 22, start: 100, drift: -0.02, volatility: 0.5 }),
+    },
+    {
+      id: 'acc_btc',
+      currency: 'BTC',
+      kind: 'crypto',
+      name: 'Bitcoin',
+      amount: money(4_120_000, 'BTC'),
+      amountDigits: 8,
+      valueBase: money(352_010, 'BYN'),
+      changePercent: 4.8,
+      color: palette.mastercardOrange,
+      series: makeSeries({ seed: 23, start: 100, drift: 0.3, volatility: 2.4 }),
+    },
+    {
+      id: 'acc_eth',
+      currency: 'ETH',
+      kind: 'crypto',
+      name: 'Ethereum',
+      amount: money(9_800_000, 'ETH'),
+      amountDigits: 8,
+      valueBase: money(123_990, 'BYN'),
+      changePercent: 2.1,
+      color: palette.coinB,
+      series: makeSeries({ seed: 24, start: 100, drift: 0.15, volatility: 2 }),
+    },
+  ],
+};
+
+export const mockRates: ExchangeRates = {
+  base: 'BYN',
+  // курс BTC согласован со счётом acc_btc: 0.0412 BTC = 3 520.10 BYN
+  rates: { BYN: 1, USD: 3.27, EUR: 3.55, BTC: 85_440 },
+  updatedAt: new Date().toISOString(),
 };
 
 export const mockPromo: PromoOffer = {

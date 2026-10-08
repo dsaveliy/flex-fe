@@ -1,25 +1,43 @@
-import { Tabs } from 'expo-router';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 
-import { GlassTabBar } from '@/ui';
+import { fonts, useTheme } from '@/theme';
 
 /**
- * тонкий файл маршрута: только раскладка и подписи. вся визуальная часть
- * живёт в `src/ui/GlassTabBar.tsx`, чтобы её можно было переиспользовать
- * и тестировать независимо.
+ * три вкладки; профиль открывается с аватара в шапке (`app/account.tsx`).
+ * системный таб-бар: на iOS 26 это настоящий Liquid Glass `UITabBar`
+ * (зажатие и перетаскивание выделения, линза, сворачивание при скролле),
+ * на Android — Material 3. для web используется `_layout.web.tsx` со
+ * своим `GlassTabBar`.
  */
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   return (
-    <Tabs
-      tabBar={(props) => <GlassTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+    <NativeTabs
+      tintColor={theme.colors.accent}
+      minimizeBehavior="onScrollDown"
+      labelStyle={{ fontFamily: fonts.medium }}
     >
-      <Tabs.Screen name="index" options={{ title: t('tabs.home') }} />
-      <Tabs.Screen name="crypto" options={{ title: t('tabs.crypto') }} />
-      <Tabs.Screen name="cards" options={{ title: t('tabs.cards') }} />
-      <Tabs.Screen name="account" options={{ title: t('tabs.account') }} />
-    </Tabs>
+      <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+        <NativeTabs.Trigger.Label>{t('tabs.home')}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="crypto">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'bitcoinsign.circle', selected: 'bitcoinsign.circle.fill' }}
+          md="currency_bitcoin"
+        />
+        <NativeTabs.Trigger.Label>{t('tabs.crypto')}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="cards">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'creditcard', selected: 'creditcard.fill' }}
+          md="credit_card"
+        />
+        <NativeTabs.Trigger.Label>{t('tabs.cards')}</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

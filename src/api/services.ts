@@ -5,6 +5,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
@@ -24,6 +25,7 @@ export type FlexApi = {
   getMarkets(params?: { kind?: AssetKind }): Promise<MarketAsset[]>;
   getMovers(direction: MoverDirection): Promise<Mover[]>;
   getPortfolio(): Promise<Portfolio>;
+  getRates(): Promise<ExchangeRates>;
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -45,6 +47,7 @@ function createHttpApi(baseUrl: string): FlexApi {
       transport.get<MarketAsset[]>(params?.kind ? `/markets?kind=${params.kind}` : '/markets'),
     getMovers: (direction) => transport.get<Mover[]>(`/markets/movers?direction=${direction}`),
     getPortfolio: () => transport.get<Portfolio>('/portfolio'),
+    getRates: () => transport.get<ExchangeRates>('/exchange-rates'),
   };
 }
 

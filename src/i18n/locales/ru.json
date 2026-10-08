@@ -11,8 +11,7 @@
   "tabs": {
     "home": "Главная",
     "crypto": "Крипто",
-    "cards": "Карты",
-    "account": "Профиль"
+    "cards": "Карты"
   },
   "greeting": {
     "morning": "Доброе утро,",
@@ -26,12 +25,33 @@
     "actions": {
       "transfer": "Перевод",
       "topUp": "Пополнить",
-      "buyCrypto": "Купить крипто"
+      "buyCrypto": "Купить крипто",
+      "more": "Ещё",
+      "exchange": "Обменять",
+      "pay": "Оплатить",
+      "withdraw": "Вывести",
+      "cancel": "Отмена"
     },
     "promo": {
       "title": "Деньги работают на вас",
       "subtitle": "До 4,5% годовых на остаток"
-    }
+    },
+    "periods": {
+      "1D": "1Д",
+      "1W": "1Н",
+      "1M": "1М",
+      "1Y": "1Г",
+      "ALL": "Всё"
+    },
+    "periodCaption": {
+      "1D": "за день",
+      "1W": "за неделю",
+      "1M": "за месяц",
+      "1Y": "за год",
+      "ALL": "за всё время"
+    },
+    "recent": "Последние операции",
+    "currencyMenuTitle": "Показывать баланс в"
   },
   "crypto": {
     "title": "Крипто",
@@ -69,14 +89,28 @@
       "security": "Безопасность",
       "language": "Язык",
       "theme": "Тема",
-      "logOut": "Выйти"
+      "logOut": "Выйти",
+      "hideBalance": "Скрыть баланс",
+      "displayCurrency": "Валюта баланса"
     },
     "themeLight": "Светлая",
-    "themeComingSoon": "Тёмная тема скоро"
+    "hideBalanceHint": "Суммы заменятся точками",
+    "themeDark": "Тёмная",
+    "displayCurrencyHint": "В ней показывается общий баланс"
   },
   "a11y": {
     "avatarPlaceholder": "Заглушка фото профиля",
     "notifications": "Уведомления",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "openProfile": "Открыть профиль",
+    "toggleBalance": "Скрыть или показать баланс",
+    "balanceChart": "График баланса, проведите пальцем для деталей",
+    "changeCurrency": "Сменить валюту баланса"
+  },
+  "currencies": {
+    "BYN": "Белорусский рубль",
+    "USD": "Доллар США",
+    "EUR": "Евро",
+    "BTC": "Bitcoin"
   }
 }

@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import {
+  Platform,
   RefreshControl,
   ScrollView,
   type ScrollViewProps,
@@ -21,7 +22,7 @@ export type ScreenProps = {
   /** обработчик pull-to-refresh; показывает нативный RefreshControl */
   onRefresh?: () => void;
   refreshing?: boolean;
-  /** дополнительный нижний отступ, чтобы контент не заходил под плавающий таб-бар */
+  /** нижний отступ контента; по умолчанию учитывает таб-бар текущей платформы */
   contentBottomInset?: number;
   contentContainerStyle?: ViewStyle;
   style?: ViewStyle;
@@ -45,18 +46,30 @@ export function Screen({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
+  /**
+   * на web таб-бар свой и плавающий — отступы считаем вручную. на iOS
+   * системный `UITabBar` сам выставляет инсеты ScrollView (статус-бар сверху,
+   * бар снизу), это же нужно для его сворачивания при скролле. на Android
+   * Material-бар не перекрывает контент.
+   */
+  const isWeb = Platform.OS === 'web';
+  const isIOS = Platform.OS === 'ios';
+
+  const topInset = (isIOS ? 0 : insets.top) + theme.spacing.sm;
   const bottomInset =
     contentBottomInset ??
-    insets.bottom + theme.sizes.tabBarHeight + theme.sizes.tabBarInset + theme.spacing.xxl;
+    (isWeb
+      ? insets.bottom + theme.sizes.tabBarHeight + theme.sizes.tabBarInset + theme.spacing.xxl
+      : theme.spacing.xxl);
 
   const content = scrollable ? (
     <ScrollView
       {...scrollProps}
       showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="never"
+      contentInsetAdjustmentBehavior={isIOS ? 'automatic' : 'never'}
       contentContainerStyle={[
         {
-          paddingTop: insets.top + theme.spacing.sm,
+          paddingTop: topInset,
           paddingBottom: bottomInset,
         },
         contentContainerStyle,

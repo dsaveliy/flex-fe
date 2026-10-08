@@ -1,11 +1,11 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Appearance } from 'react-native';
 
 import { type Theme, type ThemeName, themes } from './tokens';
 
 type ThemeContextValue = {
   theme: Theme;
   themeName: ThemeName;
-  /** тёмная тема существует как заглушка; переключение пока намеренно отключено */
   canSwitchTheme: boolean;
   setThemeName: (name: ThemeName) => void;
 };
@@ -18,8 +18,20 @@ type ThemeProviderProps = {
   initialTheme?: ThemeName;
 };
 
-export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProviderProps) {
+/**
+ * тема приложения; по умолчанию тёмная. выбранная тема передаётся и в
+ * систему через `Appearance.setColorScheme`, чтобы нативные элементы —
+ * таб-бар, хедеры, свитчи, статус-бар, Liquid Glass — были в том же режиме.
+ */
+export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProviderProps) {
   const [themeName, setThemeName] = useState<ThemeName>(initialTheme);
+
+  useEffect(() => {
+    // на web метода может не быть
+    if (typeof Appearance.setColorScheme === 'function') {
+      Appearance.setColorScheme(themeName);
+    }
+  }, [themeName]);
 
   const handleSetThemeName = useCallback((name: ThemeName) => {
     setThemeName(name);
@@ -29,7 +41,7 @@ export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProvide
     () => ({
       theme: themes[themeName],
       themeName,
-      canSwitchTheme: false,
+      canSwitchTheme: true,
       setThemeName: handleSetThemeName,
     }),
     [handleSetThemeName, themeName],

@@ -6,6 +6,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
@@ -57,4 +58,8 @@ export function useMovers(direction: MoverDirection): UseQueryResult<Mover[]> {
 
 export function usePortfolio(): UseQueryResult<Portfolio> {
   return useQuery({ queryKey: queryKeys.portfolio, queryFn: () => api.getPortfolio() });
+}
+
+export function useRates(): UseQueryResult<ExchangeRates> {
+  return useQuery({ queryKey: queryKeys.rates, queryFn: () => api.getRates() });
 }

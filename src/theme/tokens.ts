@@ -40,6 +40,8 @@ export const radii = {
 export const sizes = {
   touchTarget: 44,
   avatar: 44,
+  /** аватар в крупной шапке главного экрана */
+  avatarLarge: 48,
   iconButton: 40,
   actionCircle: 56,
   coinBadge: 48,
@@ -60,12 +62,21 @@ export const durations = {
 export const springs = {
   pill: { damping: 18, stiffness: 180, mass: 0.6 },
   press: { damping: 14, stiffness: 260, mass: 0.5 },
+  /** перекатывание цифр баланса */
+  roll: { damping: 20, stiffness: 140, mass: 0.8 },
+  /** мягкое следование за наклоном телефона */
+  tilt: { damping: 22, stiffness: 90, mass: 1 },
 } as const;
 
 export type TypographyToken =
+  | 'decor'
+  | 'hero'
+  | 'heroCents'
   | 'display'
   | 'balanceCents'
   | 'balanceCurrency'
+  | 'largeTitle'
+  | 'greeting'
   | 'title'
   | 'sectionTitle'
   | 'bodyStrong'
@@ -77,9 +88,16 @@ export type TypographyToken =
 export type Typography = Record<TypographyToken, TextStyle>;
 
 const typography: Typography = {
+  /** декоративный фоновый знак (Σ за балансом) */
+  decor: { fontFamily: fonts.bold, fontSize: 240, lineHeight: 260 },
+  hero: { fontFamily: fonts.bold, fontSize: 52, lineHeight: 60, letterSpacing: -1.5 },
+  heroCents: { fontFamily: fonts.bold, fontSize: 28, lineHeight: 34 },
   display: { fontFamily: fonts.bold, fontSize: 40, lineHeight: 46 },
   balanceCents: { fontFamily: fonts.bold, fontSize: 24, lineHeight: 28 },
   balanceCurrency: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 18 },
+  /** крупный заголовок iOS (имя в приветствии на Home) */
+  largeTitle: { fontFamily: fonts.bold, fontSize: 34, lineHeight: 40, letterSpacing: -0.6 },
+  greeting: { fontFamily: fonts.medium, fontSize: 17, lineHeight: 22 },
   title: { fontFamily: fonts.bold, fontSize: 26, lineHeight: 32 },
   sectionTitle: { fontFamily: fonts.bold, fontSize: 15, lineHeight: 20 },
   bodyStrong: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 18 },
@@ -232,10 +250,7 @@ export const lightTheme: Theme = {
   blurIntensity: 55,
 };
 
-/**
- * заглушка тёмной темы — той же формы, что и `lightTheme`, чтобы
- * последующее переключение не требовало рефакторинга. значения временные.
- */
+/** тёмная тема — основная тема приложения; той же формы, что и `lightTheme` */
 export const darkTheme: Theme = {
   ...lightTheme,
   name: 'dark',

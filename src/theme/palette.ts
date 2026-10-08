@@ -23,6 +23,11 @@ export const palette = {
   textMuted: '#526469',
   inactive: '#6C7B78',
 
+  // иконки приветствия по времени суток
+  sun: '#F7C948',
+  sunset: '#F59933',
+  moon: '#C9C3FF',
+
   accent: '#248C66',
   accentSoft: '#99CCB8',
   leafDark: '#298061',

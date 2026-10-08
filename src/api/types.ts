@@ -22,10 +22,48 @@ export type User = {
   avatarUrl: string | null;
 };
 
+/** валюты, в которых можно показывать общий баланс */
+export type DisplayCurrency = 'BYN' | 'USD' | 'EUR' | 'BTC';
+
+/** курсы к базовой валюте (из таблицы `exchange_rates` бэкенда) */
+export type ExchangeRates = {
+  /** базовая валюта, в которой хранятся суммы `valueBase` и история баланса */
+  base: 'BYN';
+  /** сколько базовой валюты стоит 1 единица валюты: USD → 3.27 */
+  rates: Record<DisplayCurrency, number>;
+  /** время обновления курсов, ISO 8601 */
+  updatedAt: string;
+};
+
+/** периоды графика баланса на главном экране */
+export type BalancePeriod = '1D' | '1W' | '1M' | '1Y' | 'ALL';
+
+/** отдельный счёт пользователя: фиатный или криптовалютный */
+export type AccountBalance = {
+  id: string;
+  /** ISO-код валюты или тикер монеты: BYN, USD, BTC, ETH */
+  currency: string;
+  kind: 'fiat' | 'crypto';
+  name: string;
+  /** сумма в валюте счёта; для крипты минорные единицы — 1e-8 (сатоши) */
+  amount: Money;
+  /** число знаков после запятой у `amount` */
+  amountDigits: number;
+  /** стоимость счёта в базовой валюте (BYN) */
+  valueBase: Money;
+  changePercent: number;
+  /** hex-цвет счёта для графиков и значков */
+  color: string;
+  series: number[];
+};
+
 export type BalanceSummary = {
   total: Money;
   /** изменение по сравнению с предыдущим месяцем в процентах */
   monthChangePercent: number;
+  /** история общего баланса в базовой валюте (основные единицы) по периодам */
+  history: Record<BalancePeriod, number[]>;
+  accounts: AccountBalance[];
 };
 
 export type QuickActionId = 'transfer' | 'topUp' | 'buyCrypto';
