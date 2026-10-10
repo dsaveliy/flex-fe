@@ -44,8 +44,29 @@ export const palette = {
   cardPurpleA: '#C7B8F0',
   cardPurpleB: '#998CDB',
 
+  // лёд замороженной карты
+  ice: '#CFEAFF',
+  iceDeep: '#8CCBF5',
+
   mastercardOrange: '#F59933',
   mastercardRed: '#EB4D47',
+
+  // оригинальные цвета логотипов платёжных систем
+  visaBlue: '#1A1F71',
+  mcRed: '#EB001B',
+  mcYellow: '#F79E1B',
+  mcOverlap: '#FF5F00',
+
+  // EMV-чип на пластике
+  chipLight: '#F6E3A6',
+  chipMid: '#D2AE5C',
+  chipDark: '#8F6A23',
+
+  // голографическое переливание пластика
+  holoPink: '#FF9AD5',
+  holoCyan: '#7EF0FF',
+  holoYellow: '#FFF1A1',
+  holoViolet: '#B79CFF',
 
   coinA: '#26262E',
   coinB: '#5966D9',

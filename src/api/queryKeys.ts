@@ -6,6 +6,7 @@ export const queryKeys = {
   balance: ['balance'] as const,
   promo: ['promo'] as const,
   cards: ['cards'] as const,
+  cardDetails: (cardId: string) => ['cards', cardId, 'details'] as const,
   transactions: (params?: { cardId?: string; limit?: number }) =>
     ['transactions', params?.cardId ?? 'all', params?.limit ?? 'all'] as const,
   markets: (kind?: AssetKind) => ['markets', kind ?? 'all'] as const,

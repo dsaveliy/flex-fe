@@ -1,4 +1,6 @@
 export { ActionCircle } from './ActionCircle';
+export { ActionMenu } from './ActionMenu';
+export type { ActionMenuItem } from './ActionMenu';
 export { AnimatedNumber } from './AnimatedNumber';
 export { AvatarButton } from './AvatarButton';
 export { Chip } from './Chip';

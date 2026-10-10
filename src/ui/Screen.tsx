@@ -26,7 +26,10 @@ export type ScreenProps = {
   contentBottomInset?: number;
   contentContainerStyle?: ViewStyle;
   style?: ViewStyle;
-} & Pick<ScrollViewProps, 'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle'>;
+} & Pick<
+  ScrollViewProps,
+  'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle' | 'onScrollBeginDrag'
+>;
 
 /**
  * оболочка страницы: градиент мята → аква → небо и мягкие цветные пятна.

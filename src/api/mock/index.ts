@@ -2,6 +2,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  BankCardDetails,
   ExchangeRates,
   MarketAsset,
   Mover,
@@ -11,9 +12,11 @@ import type {
   Transaction,
   User,
 } from '../types';
+import { ApiError } from '../client';
 import { respond } from './delay';
 import {
   mockBalance,
+  mockCardDetails,
   mockCards,
   mockGainers,
   mockLosers,
@@ -38,6 +41,14 @@ export const mockApi = {
   getPromo: (): Promise<PromoOffer> => respond(mockPromo),
 
   getCards: (): Promise<BankCard[]> => respond(mockCards),
+
+  getCardDetails: async (cardId: string): Promise<BankCardDetails> => {
+    const details = mockCardDetails.find((item) => item.cardId === cardId);
+    if (!details) {
+      throw new ApiError({ status: 404, code: 'card_not_found', message: 'Card not found' });
+    }
+    return respond(details);
+  },
 
   getTransactions: (params?: { cardId?: string; limit?: number }): Promise<Transaction[]> => {
     const filtered = params?.cardId

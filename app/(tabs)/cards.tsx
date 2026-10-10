@@ -1,110 +1,190 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 
-import { useCards, useTransactions } from '@/api';
+import { type CardStatus, useCards } from '@/api';
+import { CardActions } from '@/features/cards/CardActions';
+import { CardPager } from '@/features/cards/CardPager';
+import { CardTransactions } from '@/features/cards/CardTransactions';
+import { playFreezeHaptics } from '@/features/cards/frost';
+import { MINI_CARD_WIDTH } from '@/features/cards/MiniCard';
 import { useTheme } from '@/theme';
 import {
+  ActionMenu,
   ErrorState,
   GlassButton,
-  GlassCard,
-  GlassGroup,
-  MoneyAmount,
   Screen,
   ScreenHeader,
   SearchField,
   Skeleton,
-  Text,
-  TransactionRow,
 } from '@/ui';
 
 /**
- * экран карт — временная раскладка. настоящие `CardCarousel` /
- * `CardThumbStrip` (постраничные, синхронизированные со свайпом) будут
- * сделаны, когда появится макет; пока карты выводятся простым списком,
- * чтобы проверить поток данных.
+ * экран карт в стиле Home: крупный заголовок, карусель пластиков на всю
+ * ширину и лента мини-карт, круглые действия («Ещё» раскрывает ещё два
+ * ряда) и операции по выбранной карте. тап по карте переворачивает её
+ * реквизитами вверх.
  */
 export default function CardsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
+  const queryClient = useQueryClient();
 
   const cards = useCards();
-  const transactions = useTransactions({ limit: 5 });
+  const [index, setIndex] = useState(0);
+  // заморозка пока только на клиенте — в API ещё нет метода для смены статуса
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, CardStatus>>({});
+  const [flipped, setFlipped] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  // при смене карты контент может стать короче (меньше операций, свернулось «Ещё»),
+  // и прокрутка подпрыгнула бы вверх. держим прежнюю высоту, пока пользователь
+  // сам не потянет экран
+  const contentHeight = useRef(0);
+  const [heldHeight, setHeldHeight] = useState(0);
+
+  const list = (cards.data ?? []).map((card) => ({
+    ...card,
+    status: statusOverrides[card.id] ?? card.status,
+  }));
+  const active = list[Math.min(index, list.length - 1)];
+
+  const toggleFreeze = () => {
+    if (!active) return;
+    playFreezeHaptics(active.status !== 'frozen');
+    setStatusOverrides((prev) => ({
+      ...prev,
+      [active.id]: active.status === 'frozen' ? 'active' : 'frozen',
+    }));
+  };
+
+  const unflip = useCallback(() => setFlipped(false), []);
+  const toggleFlip = useCallback(() => setFlipped((value) => !value), []);
+  // меню «Ещё» и реквизиты относятся к одной карте: при смене карты всё закрывается
+  const changeIndex = useCallback((next: number) => {
+    setHeldHeight(contentHeight.current);
+    setIndex(next);
+    setFlipped(false);
+    setExpanded(false);
+  }, []);
+  // реквизиты открываются из «Ещё», поэтому при его сворачивании карта возвращается лицом
+  const toggleExpanded = useCallback(() => {
+    if (expanded) setFlipped(false);
+    setExpanded(!expanded);
+  }, [expanded]);
+
+  const padded = { paddingHorizontal: theme.spacing.xl };
 
   return (
-    <Screen>
-      <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xl }}>
-        <ScreenHeader
-          title={t('cards.title')}
-          subtitle={t('common.tagline')}
-          actions={
-            <GlassButton
-              shape="circle"
-              icon="plus"
-              accent
-              size={theme.sizes.avatar}
-              accessibilityLabel={t('cards.addCard')}
-            />
-          }
-        />
-
-        <SearchField placeholder={t('cards.searchPlaceholder')} />
+    <Screen
+      onRefresh={() => {
+        void cards.refetch();
+        void queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      }}
+      refreshing={cards.isRefetching}
+      onScrollBeginDrag={() => setHeldHeight(0)}
+    >
+      <View
+        onLayout={(event) => {
+          contentHeight.current = event.nativeEvent.layout.height;
+        }}
+        style={{ gap: theme.spacing.xxl, minHeight: heldHeight }}
+      >
+        <View style={padded}>
+          <ScreenHeader
+            size="large"
+            title={t('cards.title')}
+            actions={
+              // заглушки: выпуск и привязка карт появятся вместе с API
+              <ActionMenu
+                title={t('cards.add.title')}
+                cancelLabel={t('common.cancel')}
+                accessibilityLabel={t('cards.addCard')}
+                items={[
+                  {
+                    id: 'issue',
+                    label: t('cards.add.issue'),
+                    systemImage: 'creditcard',
+                    onPress: () => {},
+                  },
+                  {
+                    id: 'virtual',
+                    label: t('cards.add.virtual'),
+                    systemImage: 'iphone',
+                    onPress: () => {},
+                  },
+                  {
+                    id: 'link',
+                    label: t('cards.add.link'),
+                    systemImage: 'link',
+                    onPress: () => {},
+                  },
+                ]}
+              >
+                <GlassButton
+                  shape="circle"
+                  icon="plus"
+                  accent
+                  size={theme.sizes.avatarLarge}
+                  accessibilityLabel={t('cards.addCard')}
+                />
+              </ActionMenu>
+            }
+          />
+          <SearchField
+            size="small"
+            placeholder={t('cards.searchPlaceholder')}
+            style={{ marginTop: theme.spacing.lg }}
+          />
+        </View>
 
         {cards.isPending ? (
-          <Skeleton height={180} radius={theme.radii.cardLg} />
-        ) : cards.isError ? (
-          <ErrorState onRetry={() => cards.refetch()} />
-        ) : (
-          <View style={{ gap: theme.spacing.md }}>
-            {cards.data.map((card) => (
-              <GlassCard key={card.id} padding={theme.spacing.lg}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text variant="bodyStrong">
-                    {card.productName} · {t('cards.debit')}
-                  </Text>
-                  <Text variant="caption" color="textMuted">
-                    •••• {card.last4}
-                  </Text>
-                </View>
-                <MoneyAmount
-                  value={card.balance}
-                  size="title"
-                  style={{ marginTop: theme.spacing.sm }}
+          <View style={[padded, { gap: theme.spacing.lg }]}>
+            <Skeleton
+              height={(screenWidth - theme.spacing.xl * 2) / theme.sizes.cardAspectRatio}
+              radius={theme.radii.bankCard}
+            />
+            <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
+              {[0, 1, 2].map((key) => (
+                <Skeleton
+                  key={key}
+                  width={MINI_CARD_WIDTH}
+                  height={MINI_CARD_WIDTH / theme.sizes.cardAspectRatio}
+                  radius={theme.radii.md}
                 />
-              </GlassCard>
-            ))}
+              ))}
+            </View>
           </View>
+        ) : cards.isError ? (
+          <View style={padded}>
+            <ErrorState onRetry={() => cards.refetch()} />
+          </View>
+        ) : (
+          <CardPager
+            cards={list}
+            index={index}
+            onIndexChange={changeIndex}
+            flipped={flipped}
+            onCardPress={toggleFlip}
+            onDragStart={unflip}
+          />
         )}
 
-        <GlassGroup
-          spacing={theme.spacing.md}
-          style={{ flexDirection: 'row', gap: theme.spacing.md }}
-        >
-          <GlassButton label={t('cards.actions.transfer')} icon="transfer" style={{ flex: 1 }} />
-          <GlassButton label={t('cards.actions.topUp')} icon="plus" style={{ flex: 1 }} />
-          <GlassButton label={t('cards.actions.details')} style={{ flex: 1 }} />
-        </GlassGroup>
+        {active ? (
+          <View style={[padded, { gap: theme.spacing.xxl }]}>
+            <CardActions
+              card={active}
+              flipped={flipped}
+              expanded={expanded}
+              onToggleExpanded={toggleExpanded}
+              onToggleFlip={toggleFlip}
+              onToggleFreeze={toggleFreeze}
+            />
 
-        <GlassCard title={t('cards.recentTransactions')}>
-          {transactions.isPending ? (
-            <Skeleton height={60} />
-          ) : transactions.isError ? (
-            <ErrorState onRetry={() => transactions.refetch()} />
-          ) : (
-            transactions.data.map((tx, index) => (
-              <TransactionRow
-                key={tx.id}
-                transaction={tx}
-                showDivider={index < transactions.data.length - 1}
-              />
-            ))
-          )}
-        </GlassCard>
+            <CardTransactions cardId={active.id} />
+          </View>
+        ) : null}
       </View>
     </Screen>
   );

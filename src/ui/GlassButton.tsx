@@ -19,6 +19,8 @@ export type GlassButtonProps = {
   shape?: 'pill' | 'circle';
   /** сплошная акцентная заливка вместо стекла (зелёная кнопка "+") */
   accent?: boolean;
+  /** включённое состояние переключателя: мятный оттенок стекла и акцентная иконка */
+  selected?: boolean;
   size?: number;
   accessibilityLabel?: string;
   style?: ViewStyle;
@@ -32,6 +34,7 @@ export function GlassButton({
   onPress,
   shape = 'pill',
   accent = false,
+  selected = false,
   size,
   accessibilityLabel,
   style,
@@ -43,7 +46,11 @@ export function GlassButton({
   // дополнительное JS-сжатие поверх него даёт «дёрганье»
   const nativeGlass = isNativeGlassAvailable && !reduceTransparency;
   const diameter = size ?? theme.sizes.actionCircle;
-  const iconColor = accent ? theme.colors.textInverse : theme.colors.textPrimary;
+  const iconColor = accent
+    ? theme.colors.textInverse
+    : selected
+      ? theme.colors.accent
+      : theme.colors.textPrimary;
 
   return (
     <Touchable
@@ -57,7 +64,7 @@ export function GlassButton({
       <Glass
         variant="regular"
         interactive
-        tint={accent ? theme.colors.accent : undefined}
+        tint={accent ? theme.colors.accent : selected ? theme.colors.accentMuted : undefined}
         radius={theme.radii.pill}
         style={
           shape === 'circle'
@@ -75,7 +82,10 @@ export function GlassButton({
         >
           {icon ? <Icon name={icon} size={shape === 'circle' ? 22 : 18} color={iconColor} /> : null}
           {label && shape === 'pill' ? (
-            <Text variant="bodyStrong" color={accent ? 'textInverse' : 'textPrimary'}>
+            <Text
+              variant="bodyStrong"
+              color={accent ? 'textInverse' : selected ? 'accent' : 'textPrimary'}
+            >
               {label}
             </Text>
           ) : null}

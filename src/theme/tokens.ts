@@ -33,6 +33,8 @@ export const radii = {
   cardLg: 24,
   widget: 22,
   bannerSm: 18,
+  /** пластик банковской карты в карусели */
+  bankCard: 16,
   pill: 999,
 } as const;
 
@@ -46,6 +48,8 @@ export const sizes = {
   actionCircle: 56,
   coinBadge: 48,
   searchHeight: 44,
+  /** компактное поле поиска (над картами) */
+  searchHeightSmall: 36,
   segmentHeight: 42,
   tabBarHeight: 64,
   tabBarInset: 16,
@@ -64,6 +68,8 @@ export const springs = {
   press: { damping: 14, stiffness: 260, mass: 0.5 },
   /** перекатывание цифр баланса */
   roll: { damping: 20, stiffness: 140, mass: 0.8 },
+  /** переворот карты реквизитами вверх */
+  flip: { damping: 16, stiffness: 120, mass: 0.9 },
   /** мягкое следование за наклоном телефона */
   tilt: { damping: 22, stiffness: 90, mass: 1 },
 } as const;

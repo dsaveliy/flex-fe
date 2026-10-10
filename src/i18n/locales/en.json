@@ -6,7 +6,8 @@
     "retry": "Retry",
     "loading": "Loading…",
     "errorTitle": "Something went wrong",
-    "errorSubtitle": "Please check your connection and try again."
+    "errorSubtitle": "Please check your connection and try again.",
+    "cancel": "Cancel"
   },
   "tabs": {
     "home": "Home",
@@ -74,13 +75,61 @@
     "title": "Cards",
     "searchPlaceholder": "Search or pay",
     "addCard": "Add card",
-    "debit": "Debit",
+    "kinds": {
+      "debit": "Debit",
+      "credit": "Credit"
+    },
+    "frozen": "Frozen",
     "actions": {
       "transfer": "Transfer",
       "topUp": "Top up",
-      "details": "Details"
+      "freeze": "Freeze",
+      "unfreeze": "Unfreeze",
+      "more": "More",
+      "collapse": "Less"
     },
-    "recentTransactions": "Recent transactions"
+    "transactions": "Card transactions",
+    "noTransactions": "No transactions on this card yet",
+    "a11y": {
+      "selectCard": "Card •••• {{last4}}",
+      "flipHint": "Tap to flip and see card details",
+      "filter": "Filter by period"
+    },
+    "more": {
+      "details": "Details",
+      "limits": "Limits",
+      "pin": "PIN code",
+      "wallet": "To Wallet",
+      "statement": "Statement",
+      "cashback": "Cashback",
+      "reissue": "Reissue",
+      "settings": "Settings"
+    },
+    "details": {
+      "number": "Card number",
+      "expiry": "Expires",
+      "cvv": "CVV",
+      "holder": "Cardholder",
+      "show": "Show card details",
+      "hide": "Hide card details",
+      "tapToShow": "Tap to show",
+      "tapToHide": "Hide"
+    },
+    "periods": {
+      "title": "Period",
+      "week": "Week",
+      "month": "Month",
+      "quarter": "3 months",
+      "year": "Year",
+      "all": "All time"
+    },
+    "noTransactionsInPeriod": "No transactions in this period",
+    "add": {
+      "title": "New card",
+      "issue": "Order a plastic card",
+      "virtual": "Virtual card",
+      "link": "Link another bank's card"
+    }
   },
   "account": {
     "title": "Account",

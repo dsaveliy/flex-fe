@@ -86,6 +86,21 @@ export type BankCard = {
   contactless: boolean;
 };
 
+/**
+ * реквизиты карты. отдаются отдельным запросом и только по требованию —
+ * чувствительные данные не должны приходить вместе со списком карт.
+ */
+export type BankCardDetails = {
+  cardId: string;
+  /** полный номер, 16 цифр без пробелов */
+  pan: string;
+  /** срок действия в формате MM/YY */
+  expiry: string;
+  cvv: string;
+  /** имя держателя латиницей, как на пластике */
+  holderName: string;
+};
+
 export type TransactionDirection = 'incoming' | 'outgoing';
 
 export type TransactionCategory =

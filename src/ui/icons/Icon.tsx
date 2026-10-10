@@ -22,6 +22,19 @@ export type IconName =
   | 'shield'
   | 'moon'
   | 'logout'
+  | 'snowflake'
+  | 'lock'
+  | 'wallet'
+  | 'refresh'
+  | 'gauge'
+  | 'check'
+  | 'cardNumber'
+  | 'undo'
+  | 'chevronUp'
+  | 'document'
+  | 'percent'
+  | 'sliders'
+  | 'filter'
   | 'more';
 
 export type IconProps = {
@@ -156,6 +169,71 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
           <Circle cx={6} cy={12} r={1.3} {...common} />
           <Circle cx={12} cy={12} r={1.3} {...common} />
           <Circle cx={18} cy={12} r={1.3} {...common} />
+        </>
+      )}
+      {name === 'snowflake' && (
+        <>
+          <Path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" {...common} />
+          <Path d="M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5" {...common} />
+        </>
+      )}
+      {name === 'lock' && (
+        <>
+          <Rect x={5} y={10.5} width={14} height={9.5} rx={2.5} {...common} />
+          <Path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" {...common} />
+        </>
+      )}
+      {name === 'wallet' && (
+        <>
+          <Rect x={3.5} y={6} width={17} height={13} rx={2.5} {...common} />
+          <Path d="M3.5 10h17M15.5 14.5h2" {...common} />
+        </>
+      )}
+      {name === 'refresh' && (
+        <>
+          <Path d="M19 12a7 7 0 1 1-2.05-4.95" {...common} />
+          <Path d="M19 4.5v3.5h-3.5" {...common} />
+        </>
+      )}
+      {name === 'gauge' && (
+        <>
+          <Path d="M4.5 16.5a8 8 0 1 1 15 0" {...common} />
+          <Path d="M12 14l3.5-4" {...common} />
+        </>
+      )}
+      {name === 'check' && <Path d="M5.5 12.5l4 4 9-9" {...common} />}
+      {name === 'cardNumber' && (
+        <>
+          <Rect x={3} y={6} width={18} height={12} rx={3.5} {...common} />
+          <Path d="M7 13.5h.01M10 13.5h.01M13 13.5h.01M16 13.5h1.5" {...common} />
+        </>
+      )}
+      {name === 'undo' && (
+        <>
+          <Path d="M9 14.5 4.5 10 9 5.5" {...common} />
+          <Path d="M4.5 10H14a5 5 0 0 1 0 10h-3" {...common} />
+        </>
+      )}
+      {name === 'filter' && <Path d="M4 6h16l-6 7.5V19l-4-2v-3.5z" {...common} />}
+      {name === 'chevronUp' && <Path d="M5.5 14.5 12 8l6.5 6.5" {...common} />}
+      {name === 'document' && (
+        <>
+          <Path d="M14 3.5H7.5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V8z" {...common} />
+          <Path d="M14 3.5V8h4.5M9 12.5h6M9 16h4" {...common} />
+        </>
+      )}
+      {name === 'percent' && (
+        <>
+          <Path d="M18 6 6 18" {...common} />
+          <Circle cx={7.5} cy={7.5} r={2.2} {...common} />
+          <Circle cx={16.5} cy={16.5} r={2.2} {...common} />
+        </>
+      )}
+      {name === 'sliders' && (
+        <>
+          <Path d="M4 7.5h9M18 7.5h2M4 16.5h3M11 16.5h9" {...common} />
+          <Circle cx={15.5} cy={7.5} r={2.2} {...common} />
+          <Circle cx={8.5} cy={16.5} r={2.2} {...common} />
         </>
       )}
       {name === 'logout' && (

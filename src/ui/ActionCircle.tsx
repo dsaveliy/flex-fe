@@ -11,11 +11,20 @@ export type ActionCircleProps = {
   label: string;
   onPress?: () => void;
   accent?: boolean;
+  /** включённое состояние переключателя (например, «Разморозить») */
+  selected?: boolean;
   style?: ViewStyle;
 };
 
 /** круглое стеклянное действие с подписью снизу (Home: Transfer / Top up / Buy crypto) */
-export function ActionCircle({ icon, label, onPress, accent = false, style }: ActionCircleProps) {
+export function ActionCircle({
+  icon,
+  label,
+  onPress,
+  accent = false,
+  selected = false,
+  style,
+}: ActionCircleProps) {
   const theme = useTheme();
 
   return (
@@ -24,10 +33,11 @@ export function ActionCircle({ icon, label, onPress, accent = false, style }: Ac
         shape="circle"
         icon={icon}
         accent={accent}
+        selected={selected}
         onPress={onPress}
         accessibilityLabel={label}
       />
-      <Text variant="caption" color="textMuted" align="center">
+      <Text variant="caption" color={selected ? 'accent' : 'textMuted'} align="center">
         {label}
       </Text>
     </View>

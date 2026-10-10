@@ -4,6 +4,7 @@ import { money } from '@/utils/money';
 import type {
   BalanceSummary,
   BankCard,
+  BankCardDetails,
   ExchangeRates,
   Mover,
   Portfolio,
@@ -152,62 +153,87 @@ export const mockCards: BankCard[] = [
   },
 ];
 
-export const mockTransactions: Transaction[] = [
-  {
-    id: 'tx_1',
-    cardId: 'card_1',
-    merchant: 'MAK.by',
-    category: 'shopping',
-    direction: 'outgoing',
-    amount: money(12_490, 'BYN'),
-    occurredAt: '2026-02-12T18:24:00.000Z',
-  },
-  {
-    id: 'tx_2',
-    cardId: 'card_1',
-    merchant: 'Salary',
-    category: 'salary',
-    direction: 'incoming',
-    amount: money(285_000, 'BYN'),
-    occurredAt: '2026-02-10T09:02:00.000Z',
-  },
-  {
-    id: 'tx_3',
-    cardId: 'card_1',
-    merchant: 'Café 101',
-    category: 'cafe',
-    direction: 'outgoing',
-    amount: money(4_250, 'BYN'),
-    occurredAt: '2026-02-09T12:41:00.000Z',
-  },
-  {
-    id: 'tx_4',
-    cardId: 'card_2',
-    merchant: 'Yandex Go',
-    category: 'transport',
-    direction: 'outgoing',
-    amount: money(1_830, 'BYN'),
-    occurredAt: '2026-02-08T21:15:00.000Z',
-  },
-  {
-    id: 'tx_5',
-    cardId: 'card_1',
-    merchant: 'Spotify',
-    category: 'subscription',
-    direction: 'outgoing',
-    amount: money(2_199, 'BYN'),
-    occurredAt: '2026-02-07T07:30:00.000Z',
-  },
-  {
-    id: 'tx_6',
-    cardId: 'card_3',
-    merchant: 'Transfer to Maria',
-    category: 'transfer',
-    direction: 'outgoing',
-    amount: money(50_000, 'BYN'),
-    occurredAt: '2026-02-06T16:05:00.000Z',
-  },
+export const mockCardDetails: BankCardDetails[] = [
+  { cardId: 'card_1', pan: '4532718209344821', expiry: '08/29', cvv: '417', holderName: 'ROMAN PONYAVIN' },
+  { cardId: 'card_2', pan: '5375410366207734', expiry: '03/28', cvv: '902', holderName: 'ROMAN PONYAVIN' },
+  { cardId: 'card_3', pan: '4916052877311092', expiry: '11/30', cvv: '158', holderName: 'ROMAN PONYAVIN' },
+  { cardId: 'card_4', pan: '5168442190855510', expiry: '01/27', cvv: '664', holderName: 'ROMAN PONYAVIN' },
 ];
+
+type TxTemplate = [
+  merchant: string,
+  category: Transaction['category'],
+  direction: Transaction['direction'],
+  amountMinor: number,
+  /** сколько дней назад, дробная часть — время суток */
+  daysAgo: number,
+];
+
+/**
+ * операции по картам за последний год. даты считаются от текущего момента,
+ * чтобы список всегда выглядел свежим и фильтр по периодам было на чём проверить.
+ */
+const TX_BY_CARD: Record<string, TxTemplate[]> = {
+  card_1: [
+    ['MAK.by', 'shopping', 'outgoing', 12_490, 0.3],
+    ['Café 101', 'cafe', 'outgoing', 4_250, 0.9],
+    ['Yandex Go', 'transport', 'outgoing', 1_830, 1.4],
+    ['Salary', 'salary', 'incoming', 285_000, 3.6],
+    ['Spotify', 'subscription', 'outgoing', 2_199, 5.3],
+    ['Евроопт', 'shopping', 'outgoing', 6_874, 8.7],
+    ['Transfer from Ivan', 'transfer', 'incoming', 15_000, 13.5],
+    ['Coffee Lab', 'cafe', 'outgoing', 890, 19.4],
+    ['Belarusbank ATM', 'other', 'outgoing', 20_000, 27.6],
+    ['Salary', 'salary', 'incoming', 285_000, 34.6],
+    ['Zara', 'shopping', 'outgoing', 18_990, 52.7],
+    ['Netflix', 'subscription', 'outgoing', 1_699, 66.3],
+    ['Belavia', 'transport', 'outgoing', 74_500, 128.5],
+    ['IKEA', 'shopping', 'outgoing', 41_230, 210.6],
+  ],
+  card_2: [
+    ['Wolt', 'cafe', 'outgoing', 3_640, 0.6],
+    ['Binance P2P', 'transfer', 'incoming', 48_000, 2.4],
+    ['Apple', 'subscription', 'outgoing', 999, 4.3],
+    ['Green', 'shopping', 'outgoing', 9_315, 6.8],
+    ['Яндекс Такси', 'transport', 'outgoing', 1_270, 11.9],
+    ['Transfer to Maria', 'transfer', 'outgoing', 50_000, 17.5],
+    ['Starbucks', 'cafe', 'outgoing', 1_150, 31.4],
+    ['Ozon', 'shopping', 'outgoing', 7_420, 75.6],
+    ['Cashback', 'other', 'incoming', 2_310, 97.5],
+    ['Steam', 'shopping', 'outgoing', 5_999, 160.8],
+  ],
+  card_3: [
+    ['Lamoda', 'shopping', 'outgoing', 12_900, 1.7],
+    ['A1', 'subscription', 'outgoing', 2_500, 3.4],
+    ['Pizza Tempo', 'cafe', 'outgoing', 4_870, 9.8],
+    ['Transfer from Anna', 'transfer', 'incoming', 30_000, 22.5],
+    ['Белнефтехим', 'transport', 'outgoing', 9_000, 45.4],
+    ['Wildberries', 'shopping', 'outgoing', 3_215, 88.7],
+    ['Interest', 'other', 'incoming', 1_120, 181.5],
+  ],
+  card_4: [
+    ['Booking.com', 'shopping', 'outgoing', 61_400, 12.6],
+    ['Airbnb', 'shopping', 'outgoing', 38_750, 40.5],
+    ['Credit repayment', 'transfer', 'incoming', 100_000, 70.4],
+    ['Uber', 'transport', 'outgoing', 2_340, 139.9],
+  ],
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const mockTransactions: Transaction[] = Object.entries(TX_BY_CARD)
+  .flatMap(([cardId, templates]) =>
+    templates.map(([merchant, category, direction, amountMinor, daysAgo], index) => ({
+      id: `tx_${cardId}_${index + 1}`,
+      cardId,
+      merchant,
+      category,
+      direction,
+      amount: money(amountMinor, 'BYN'),
+      occurredAt: new Date(Date.now() - daysAgo * DAY_MS).toISOString(),
+    })),
+  )
+  .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
 
 export const mockGainers: Mover[] = [
   { id: 'api3', symbol: 'API3', changePercent: 79.79, badgeColor: palette.coinB },

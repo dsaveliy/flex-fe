@@ -5,6 +5,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  BankCardDetails,
   ExchangeRates,
   MarketAsset,
   Mover,
@@ -21,6 +22,7 @@ export type FlexApi = {
   getBalance(): Promise<BalanceSummary>;
   getPromo(): Promise<PromoOffer>;
   getCards(): Promise<BankCard[]>;
+  getCardDetails(cardId: string): Promise<BankCardDetails>;
   getTransactions(params?: { cardId?: string; limit?: number }): Promise<Transaction[]>;
   getMarkets(params?: { kind?: AssetKind }): Promise<MarketAsset[]>;
   getMovers(direction: MoverDirection): Promise<Mover[]>;
@@ -36,6 +38,8 @@ function createHttpApi(baseUrl: string): FlexApi {
     getBalance: () => transport.get<BalanceSummary>('/balance'),
     getPromo: () => transport.get<PromoOffer>('/promo'),
     getCards: () => transport.get<BankCard[]>('/cards'),
+    getCardDetails: (cardId) =>
+      transport.get<BankCardDetails>(`/cards/${encodeURIComponent(cardId)}/details`),
     getTransactions: (params) => {
       const query = new URLSearchParams();
       if (params?.cardId) query.set('card_id', params.cardId);

@@ -13,6 +13,8 @@ export type PrivateAmountProps = {
   /** типографика скрываемой суммы — по ней считается размер точек */
   maskVariant?: TypographyToken;
   maskColor?: keyof ThemeColors;
+  /** цвет точек не из темы — для сумм на пластике карты, где фон свой */
+  maskColorValue?: string;
   /** тап по сумме переключает режим скрытия */
   toggleOnPress?: boolean;
   style?: ViewStyle;
@@ -34,6 +36,7 @@ export function PrivateAmount({
   children,
   maskVariant = 'display',
   maskColor = 'textPrimary',
+  maskColorValue,
   toggleOnPress = false,
   style,
 }: PrivateAmountProps) {
@@ -83,7 +86,7 @@ export function PrivateAmount({
                   width: dot,
                   height: dot,
                   borderRadius: dot / 2,
-                  backgroundColor: theme.colors[maskColor],
+                  backgroundColor: maskColorValue ?? theme.colors[maskColor],
                 }}
               />
             ))

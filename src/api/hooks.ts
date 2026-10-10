@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { queryKeys } from './queryKeys';
 import { api } from './services';
@@ -6,6 +6,7 @@ import type {
   AssetKind,
   BalanceSummary,
   BankCard,
+  BankCardDetails,
   ExchangeRates,
   MarketAsset,
   Mover,
@@ -32,6 +33,20 @@ export function useCards(): UseQueryResult<BankCard[]> {
   return useQuery({ queryKey: queryKeys.cards, queryFn: () => api.getCards() });
 }
 
+/** реквизиты карты; запрашиваются только когда `enabled` (пользователь их открыл) */
+export function useCardDetails(
+  cardId: string | undefined,
+  { enabled = true }: { enabled?: boolean } = {},
+): UseQueryResult<BankCardDetails> {
+  return useQuery({
+    queryKey: queryKeys.cardDetails(cardId ?? ''),
+    queryFn: () => api.getCardDetails(cardId ?? ''),
+    enabled: enabled && Boolean(cardId),
+    // реквизиты не держим в кэше дольше, чем нужно
+    gcTime: 60_000,
+  });
+}
+
 export function useTransactions(params?: {
   cardId?: string;
   limit?: number;
@@ -39,6 +54,8 @@ export function useTransactions(params?: {
   return useQuery({
     queryKey: queryKeys.transactions(params),
     queryFn: () => api.getTransactions(params),
+    // при смене карты список не мигает скелетоном, пока грузится новый
+    placeholderData: keepPreviousData,
   });
 }
 

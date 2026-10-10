@@ -10,6 +10,8 @@ export type SearchFieldProps = {
   value?: string;
   onChangeText?: (text: string) => void;
   editable?: boolean;
+  /** `small` — компактное лёгкое поле (экран Cards) */
+  size?: 'default' | 'small';
   style?: ViewStyle;
 };
 
@@ -19,19 +21,29 @@ export function SearchField({
   value,
   onChangeText,
   editable = true,
+  size = 'default',
   style,
 }: SearchFieldProps) {
   const theme = useTheme();
+  const small = size === 'small';
 
   return (
     <Glass
       variant="clear"
       interactive
       radius={theme.radii.pill}
-      style={[{ height: theme.sizes.searchHeight }, style]}
+      style={[{ height: small ? theme.sizes.searchHeightSmall : theme.sizes.searchHeight }, style]}
     >
-      <View style={[styles.row, { paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm }]}>
-        <Icon name="search" size={18} color={theme.colors.textMuted} />
+      <View
+        style={[
+          styles.row,
+          {
+            paddingHorizontal: small ? theme.spacing.md : theme.spacing.lg,
+            gap: small ? theme.spacing.xs + 2 : theme.spacing.sm,
+          },
+        ]}
+      >
+        <Icon name="search" size={small ? 15 : 18} color={theme.colors.textMuted} />
         <TextInput
           accessibilityLabel={placeholder}
           placeholder={placeholder}
@@ -42,7 +54,7 @@ export function SearchField({
           returnKeyType="search"
           style={[
             styles.input,
-            theme.typography.bodyStrong,
+            small ? theme.typography.body : theme.typography.bodyStrong,
             { color: theme.colors.textPrimary },
           ]}
         />
