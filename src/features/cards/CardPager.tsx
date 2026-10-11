@@ -18,13 +18,12 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import type { BankCard } from '@/api';
 import { useTheme } from '@/theme';
-import { Touchable, useAccessibilityFlags, useTilt } from '@/ui';
+import { PageDots, Touchable, useAccessibilityFlags, useTilt } from '@/ui';
 
 import { BankCardBack } from './BankCardBack';
 import { BankCardView } from './BankCardView';
 import { CardStrip } from './CardStrip';
 import { MINI_CARD_WIDTH } from './MiniCard';
-import { PageDots } from './PageDots';
 
 /** поворот соседней карты при перелистывании, в градусах */
 const FLIP_DEG = 24;

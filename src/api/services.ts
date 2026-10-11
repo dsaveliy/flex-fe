@@ -6,10 +6,14 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  CryptoLayout,
+  EarnProduct,
+  FearGreedIndex,
   ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
+  NewsItem,
   Portfolio,
   PromoOffer,
   Transaction,
@@ -28,6 +32,11 @@ export type FlexApi = {
   getMovers(direction: MoverDirection): Promise<Mover[]>;
   getPortfolio(): Promise<Portfolio>;
   getRates(): Promise<ExchangeRates>;
+  getCryptoLayout(): Promise<CryptoLayout>;
+  saveCryptoLayout(widgets: CryptoLayout['widgets']): Promise<CryptoLayout>;
+  getNews(params?: { limit?: number }): Promise<NewsItem[]>;
+  getFearGreed(): Promise<FearGreedIndex>;
+  getEarnProducts(): Promise<EarnProduct[]>;
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -52,6 +61,12 @@ function createHttpApi(baseUrl: string): FlexApi {
     getMovers: (direction) => transport.get<Mover[]>(`/markets/movers?direction=${direction}`),
     getPortfolio: () => transport.get<Portfolio>('/portfolio'),
     getRates: () => transport.get<ExchangeRates>('/exchange-rates'),
+    getCryptoLayout: () => transport.get<CryptoLayout>('/me/crypto-layout'),
+    saveCryptoLayout: (widgets) => transport.put<CryptoLayout>('/me/crypto-layout', { widgets }),
+    getNews: (params) =>
+      transport.get<NewsItem[]>(params?.limit ? `/news?limit=${params.limit}` : '/news'),
+    getFearGreed: () => transport.get<FearGreedIndex>('/markets/fear-greed'),
+    getEarnProducts: () => transport.get<EarnProduct[]>('/earn/products'),
   };
 }
 

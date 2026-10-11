@@ -50,6 +50,8 @@ export const sizes = {
   searchHeight: 44,
   /** компактное поле поиска (над картами) */
   searchHeightSmall: 36,
+  /** большая «+» под виджетами стола Crypto в режиме редактирования */
+  addWidgetHeight: 72,
   segmentHeight: 42,
   tabBarHeight: 64,
   tabBarInset: 16,
@@ -84,7 +86,9 @@ export type TypographyToken =
   | 'largeTitle'
   | 'greeting'
   | 'title'
+  | 'headline'
   | 'sectionTitle'
+  | 'button'
   | 'bodyStrong'
   | 'body'
   | 'caption'
@@ -105,7 +109,11 @@ const typography: Typography = {
   largeTitle: { fontFamily: fonts.bold, fontSize: 34, lineHeight: 40, letterSpacing: -0.6 },
   greeting: { fontFamily: fonts.medium, fontSize: 17, lineHeight: 22 },
   title: { fontFamily: fonts.bold, fontSize: 26, lineHeight: 32 },
+  /** заголовок строки и крупная подпись кнопки, как headline в iOS */
+  headline: { fontFamily: fonts.semibold, fontSize: 17, lineHeight: 22 },
   sectionTitle: { fontFamily: fonts.bold, fontSize: 15, lineHeight: 20 },
+  /** подпись крупной капсулы («Готово» в шапке) */
+  button: { fontFamily: fonts.semibold, fontSize: 14, lineHeight: 18 },
   bodyStrong: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 18 },
   body: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: fonts.regular, fontSize: 11, lineHeight: 15 },
@@ -153,6 +161,11 @@ export type ThemeColors = {
   /** почти непрозрачная «таблетка» для выбранного сегмента или активного элемента на стекле */
   glassSelected: string;
   glassTint: string;
+
+  /** матовые пилюли без стекла (строка разделов Crypto): заливка, плотная кромка, выбранная — мятная */
+  pillFill: string;
+  pillBorder: string;
+  pillSelectedFill: string;
 
   divider: string;
   skeleton: string;
@@ -241,6 +254,10 @@ export const lightTheme: Theme = {
     glassSelected: 'rgba(255, 255, 255, 0.85)',
     glassTint: 'rgba(255, 255, 255, 0.55)',
 
+    pillFill: 'rgba(13, 38, 31, 0.14)',
+    pillBorder: palette.white,
+    pillSelectedFill: 'rgba(36, 140, 102, 0.22)',
+
     divider: 'rgba(20, 31, 41, 0.08)',
     skeleton: 'rgba(20, 31, 41, 0.06)',
     shadow: palette.shadow,
@@ -285,6 +302,10 @@ export const darkTheme: Theme = {
     glassShade: 'rgba(0, 0, 0, 0.18)',
     glassSelected: 'rgba(255, 255, 255, 0.22)',
     glassTint: 'rgba(12, 24, 20, 0.5)',
+
+    pillFill: 'rgba(255, 255, 255, 0.06)',
+    pillBorder: 'rgba(255, 255, 255, 0.22)',
+    pillSelectedFill: 'rgba(36, 140, 102, 0.32)',
 
     divider: 'rgba(255, 255, 255, 0.1)',
     skeleton: 'rgba(255, 255, 255, 0.08)',

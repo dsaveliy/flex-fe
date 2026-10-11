@@ -44,6 +44,15 @@ export default function RootLayout() {
             headerTintColor: palette.accent,
           }}
         />
+        {/* галерея виджетов Crypto: на iOS 26 шторка получает системный фон Liquid Glass */}
+        <Stack.Screen
+          name="widget-gallery"
+          options={{
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.8, 1],
+            sheetGrabberVisible: true,
+          }}
+        />
       </Stack>
     </AppProviders>
   );

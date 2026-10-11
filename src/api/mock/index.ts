@@ -3,10 +3,14 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  CryptoLayout,
+  EarnProduct,
+  FearGreedIndex,
   ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
+  NewsItem,
   Portfolio,
   PromoOffer,
   Transaction,
@@ -26,7 +30,19 @@ import {
   mockTransactions,
   mockUser,
 } from './fixtures';
+import {
+  defaultCryptoLayout,
+  mockEarnProducts,
+  mockFearGreed,
+  mockNews,
+} from './crypto.fixtures';
 import { mockMarkets } from './markets.fixtures';
+
+/**
+ * имитация настроек пользователя на сервере: раскладка живёт в памяти до
+ * перезапуска приложения
+ */
+let cryptoLayout: CryptoLayout = defaultCryptoLayout();
 
 /**
  * mock-реализация будущих эндпоинтов FastAPI.
@@ -70,6 +86,20 @@ export const mockApi = {
   getPortfolio: (): Promise<Portfolio> => respond(mockPortfolio),
 
   getRates: (): Promise<ExchangeRates> => respond(mockRates),
+
+  getCryptoLayout: (): Promise<CryptoLayout> => respond(cryptoLayout),
+
+  saveCryptoLayout: (widgets: CryptoLayout['widgets']): Promise<CryptoLayout> => {
+    cryptoLayout = { widgets, updatedAt: new Date().toISOString() };
+    return respond(cryptoLayout);
+  },
+
+  getNews: (params?: { limit?: number }): Promise<NewsItem[]> =>
+    respond(params?.limit ? mockNews.slice(0, params.limit) : mockNews),
+
+  getFearGreed: (): Promise<FearGreedIndex> => respond(mockFearGreed),
+
+  getEarnProducts: (): Promise<EarnProduct[]> => respond(mockEarnProducts),
 };
 
 export type MockApi = typeof mockApi;

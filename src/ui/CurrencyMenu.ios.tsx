@@ -23,7 +23,7 @@ export function CurrencyMenu(props: CurrencyMenuProps) {
   const { currency, setCurrency } = useDisplayCurrency();
 
   return (
-    <Host matchContents colorScheme={theme.isDark ? 'dark' : 'light'}>
+    <Host matchContents ignoreSafeArea="all" colorScheme={theme.isDark ? 'dark' : 'light'}>
       <Menu
         label={
           <RNHostView matchContents>

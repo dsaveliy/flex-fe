@@ -162,6 +162,86 @@ export type Portfolio = {
   holdings: PortfolioHolding[];
 };
 
+/** вид виджета на рабочем столе Crypto; пул расширяется вместе с реестром на фронте */
+export type WidgetKind =
+  | 'assetRate'
+  | 'portfolio'
+  | 'movers'
+  | 'watchlist'
+  | 'news'
+  | 'convert'
+  | 'fearGreed';
+
+/** размер в ячейках сетки из 2 колонок: small 1×1, medium 2×1, large 2×2 */
+export type WidgetSize = 'small' | 'medium' | 'large';
+
+export type CryptoWidget = {
+  /** уникален в пределах раскладки пользователя */
+  id: string;
+  kind: WidgetKind;
+  size: WidgetSize;
+  /** настройки конкретного виджета, например выбранная монета */
+  params?: CryptoWidgetParams;
+};
+
+/** настройки виджета; какие ключи допустимы, зависит от `kind` */
+export type CryptoWidgetParams = {
+  /** монета курса (`assetRate`) */
+  assetId?: string;
+  /** монеты списка наблюдения (`watchlist`) */
+  assetIds?: string[];
+  /** рост или падение (`movers`) */
+  direction?: MoverDirection;
+  /** пара быстрого обмена (`convert`) */
+  from?: string;
+  to?: string;
+};
+
+/** раскладка рабочего стола Crypto, хранится в настройках пользователя на бэкенде */
+export type CryptoLayout = {
+  /** порядок важен: сетка укладывает виджеты по нему */
+  widgets: CryptoWidget[];
+  /** временная метка в формате ISO 8601 */
+  updatedAt: string;
+};
+
+export type NewsItem = {
+  id: string;
+  title: string;
+  /** название издания */
+  source: string;
+  /** временная метка в формате ISO 8601 */
+  publishedAt: string;
+  /** тикер монеты, о которой новость, если она есть */
+  assetSymbol?: string;
+  url?: string;
+};
+
+export type FearGreedLevel = 'extremeFear' | 'fear' | 'neutral' | 'greed' | 'extremeGreed';
+
+/** индекс страха и жадности рынка, 0 — паника, 100 — эйфория */
+export type FearGreedIndex = {
+  value: number;
+  level: FearGreedLevel;
+  /** значение днём ранее — для стрелки изменения */
+  previousValue: number;
+  updatedAt: string;
+};
+
+/** продукт стейкинга / Earn */
+export type EarnProduct = {
+  id: string;
+  assetId: string;
+  symbol: string;
+  badgeColor: string;
+  /** годовая доходность в процентах, например `4.8` */
+  apyPercent: number;
+  /** срок блокировки в днях; `null` — гибкий, вывод в любой момент */
+  termDays: number | null;
+  /** минимальная сумма в единицах монеты */
+  minAmount: number;
+};
+
 export type PromoOffer = {
   id: string;
   titleKey: string;

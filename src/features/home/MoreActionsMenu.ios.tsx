@@ -17,7 +17,7 @@ export function MoreActionsMenu({ label, actions }: MoreActionsMenuProps) {
   const theme = useTheme();
 
   return (
-    <Host matchContents colorScheme={theme.isDark ? 'dark' : 'light'}>
+    <Host matchContents ignoreSafeArea="all" colorScheme={theme.isDark ? 'dark' : 'light'}>
       <Menu
         label={
           <RNHostView matchContents>

@@ -1,6 +1,6 @@
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
-import { useTheme } from '@/theme';
+import { type TypographyToken, useTheme } from '@/theme';
 
 import { Glass, isNativeGlassAvailable } from './Glass';
 import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
@@ -21,7 +21,10 @@ export type GlassButtonProps = {
   accent?: boolean;
   /** включённое состояние переключателя: мятный оттенок стекла и акцентная иконка */
   selected?: boolean;
+  /** диаметр круга; у капсулы — её высота */
   size?: number;
+  /** типографика подписи капсулы; по умолчанию `bodyStrong` */
+  labelVariant?: TypographyToken;
   accessibilityLabel?: string;
   style?: ViewStyle;
   testID?: string;
@@ -36,6 +39,7 @@ export function GlassButton({
   accent = false,
   selected = false,
   size,
+  labelVariant = 'bodyStrong',
   accessibilityLabel,
   style,
   testID,
@@ -69,7 +73,7 @@ export function GlassButton({
         style={
           shape === 'circle'
             ? { width: diameter, height: diameter }
-            : { minHeight: theme.sizes.touchTarget }
+            : { minHeight: size ?? theme.sizes.touchTarget }
         }
       >
         <View
@@ -83,7 +87,7 @@ export function GlassButton({
           {icon ? <Icon name={icon} size={shape === 'circle' ? 22 : 18} color={iconColor} /> : null}
           {label && shape === 'pill' ? (
             <Text
-              variant="bodyStrong"
+              variant={labelVariant}
               color={accent ? 'textInverse' : selected ? 'accent' : 'textPrimary'}
             >
               {label}

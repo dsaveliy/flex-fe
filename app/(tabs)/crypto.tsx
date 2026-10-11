@@ -1,179 +1,115 @@
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 
-import { useMarkets, useMovers, usePortfolio } from '@/api';
-import type { MoverDirection } from '@/api';
+import { CryptoLogo } from '@/features/crypto/CryptoLogo';
+import { EditControls } from '@/features/crypto/EditControls';
+import type { CryptoSection } from '@/features/crypto/cryptoSections';
+import { SectionBar } from '@/features/crypto/SectionBar';
+import { ConvertSection } from '@/features/crypto/sections/ConvertSection';
+import { DesktopSection } from '@/features/crypto/sections/DesktopSection';
+import { EarnSection } from '@/features/crypto/sections/EarnSection';
+import { FiatSection } from '@/features/crypto/sections/FiatSection';
+import { NewsSection } from '@/features/crypto/sections/NewsSection';
+import { PortfolioSection } from '@/features/crypto/sections/PortfolioSection';
+import { RatesSection } from '@/features/crypto/sections/RatesSection';
+import { TradeSection } from '@/features/crypto/sections/TradeSection';
 import { useTheme } from '@/theme';
-import {
-  Chip,
-  CoinBadge,
-  DeltaBadge,
-  ErrorState,
-  GlassCard,
-  GlassGroup,
-  ListRow,
-  Screen,
-  ScreenHeader,
-  SearchField,
-  SegmentedControl,
-  Skeleton,
-  Sparkline,
-  Text,
-} from '@/ui';
-import { formatPercentAbs } from '@/utils/format';
-import { formatMoney, formatPrice } from '@/utils/money';
+import { Screen, ScreenHeader, SearchField } from '@/ui';
 
 /**
- * экран крипто — временная раскладка, использующая весь слой данных
- * (markets, movers, portfolio) с компонентами дизайн-системы. точная
- * вёрстка появится после получения макета из Figma.
+ * экран Crypto. под поиском — строка разделов: «Мой стол» пользователь
+ * собирает сам из виджетов (раскладка хранится в его настройках на бэкенде),
+ * остальные разделы — готовые экраны банка. карандаш включает режим
+ * редактирования стола (покачивание, «−», перетаскивание): аватар прячется,
+ * справа «+» (галерея виджетов) и капсула «Готово»
  */
 export default function CryptoScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const queryClient = useQueryClient();
+  const [section, setSection] = useState<CryptoSection>('desktop');
+  const [editing, setEditing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  // пока виджет под пальцем, прокрутка экрана выключена (ставится из UI-потока жеста)
+  const scrollLock = useSharedValue(false);
 
-  const [moversDirection, setMoversDirection] = useState<MoverDirection>('gainers');
-  const [assetKind, setAssetKind] = useState<'crypto' | 'fiat' | 'stock'>('crypto');
+  const enterEdit = useCallback(() => setEditing(true), []);
+  const openGallery = useCallback(() => router.push('/widget-gallery'), []);
+  // редактирование относится только к столу: при уходе в другой раздел оно выключается
+  const changeSection = useCallback((next: CryptoSection) => {
+    setEditing(false);
+    setSection(next);
+  }, []);
 
-  const topAssets = useMarkets('crypto');
-  const movers = useMovers(moversDirection);
-  const portfolio = usePortfolio();
-  const markets = useMarkets(assetKind);
+  const refresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries();
+    setRefreshing(false);
+  };
+
+  const onDesktop = section === 'desktop';
 
   return (
-    <Screen>
-      <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xl }}>
-        <ScreenHeader title={t('crypto.title')} />
-
-        <SearchField placeholder={t('crypto.searchPlaceholder')} />
-
-        <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-          {(topAssets.data ?? []).slice(0, 2).map((asset) => (
-            <GlassCard key={asset.id} style={{ flex: 1 }} padding={theme.spacing.lg}>
-              <Text variant="label" color="textMuted">
-                {asset.symbol}
-              </Text>
-              <Text variant="sectionTitle" style={{ marginTop: theme.spacing.xs }}>
-                {formatPrice(asset.price, { currency: asset.quoteCurrency })}
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginTop: theme.spacing.sm,
-                }}
-              >
-                <DeltaBadge value={asset.trend.changePercent} variant="caption" />
-                {asset.trend.series ? <Sparkline data={asset.trend.series} /> : null}
-              </View>
-            </GlassCard>
-          ))}
+    <Screen
+      onRefresh={editing ? undefined : () => void refresh()}
+      refreshing={refreshing}
+      scrollLock={scrollLock}
+    >
+      <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xxl }}>
+        <View style={{ gap: theme.spacing.md }}>
+          <ScreenHeader
+            size="large"
+            title={t('crypto.title')}
+            titleNode={<CryptoLogo />}
+            // на столе аватар рисует EditControls: в режиме редактирования его накрывает «Готово»
+            hideAvatar={onDesktop}
+            actions={
+              onDesktop ? (
+                <EditControls
+                  editing={editing}
+                  onEdit={enterEdit}
+                  onDone={() => setEditing(false)}
+                  onAdd={openGallery}
+                />
+              ) : null
+            }
+          />
+          <SearchField
+            size="small"
+            placeholder={t('crypto.searchPlaceholder')}
+            editable={!editing}
+            style={{ marginTop: theme.spacing.xs }}
+          />
+          <SectionBar value={section} onChange={changeSection} />
         </View>
 
-        <GlassCard title={t('crypto.topMovers')}>
-          <SegmentedControl
-            options={[
-              { value: 'gainers', label: t('crypto.segments.gainers') },
-              { value: 'losers', label: t('crypto.segments.losers') },
-            ]}
-            value={moversDirection}
-            onChange={setMoversDirection}
+        {section === 'desktop' ? (
+          <DesktopSection
+            editing={editing}
+            onEnterEdit={enterEdit}
+            scrollLock={scrollLock}
+            onOpenGallery={openGallery}
+            onOpenSection={changeSection}
           />
-
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              marginTop: theme.spacing.lg,
-              gap: theme.spacing.md,
-            }}
-          >
-            {(movers.data ?? []).map((mover) => (
-              <View key={mover.id} style={{ width: '22%', alignItems: 'center' }}>
-                <CoinBadge symbol={mover.symbol} color={mover.badgeColor} size={40} />
-                <Text variant="caption" style={{ marginTop: theme.spacing.xs }}>
-                  {mover.symbol}
-                </Text>
-                <Text
-                  variant="micro"
-                  color={mover.changePercent >= 0 ? 'positive' : 'negative'}
-                >
-                  {mover.changePercent >= 0 ? '▲' : '▼'} {formatPercentAbs(mover.changePercent)}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </GlassCard>
-
-        <GlassCard>
-          <Text variant="label" color="textMuted">
-            {t('crypto.portfolio').toUpperCase()}
-          </Text>
-          {portfolio.isPending ? (
-            <Skeleton height={30} width={140} style={{ marginTop: theme.spacing.sm }} />
-          ) : portfolio.isError ? (
-            <ErrorState onRetry={() => portfolio.refetch()} />
-          ) : (
-            <>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: theme.spacing.xs,
-                }}
-              >
-                <Text variant="sectionTitle">
-                  {formatMoney(portfolio.data.value, { withCurrency: false })} $
-                </Text>
-                <Sparkline data={portfolio.data.series} tone="positive" />
-              </View>
-              <DeltaBadge
-                value={portfolio.data.dayChangePercent}
-                caption={t('crypto.today')}
-                style={{ marginTop: theme.spacing.xs }}
-              />
-            </>
-          )}
-        </GlassCard>
-
-        <GlassCard title={t('crypto.markets')}>
-          <GlassGroup
-            spacing={theme.spacing.sm}
-            style={{ flexDirection: 'row', gap: theme.spacing.sm }}
-          >
-            {(['crypto', 'fiat', 'stock'] as const).map((kind) => (
-              <Chip
-                key={kind}
-                label={t(`crypto.categories.${kind === 'stock' ? 'stocks' : kind}`)}
-                selected={assetKind === kind}
-                onPress={() => setAssetKind(kind)}
-              />
-            ))}
-          </GlassGroup>
-
-          <View style={{ marginTop: theme.spacing.md }}>
-            {(markets.data ?? []).map((asset, index) => (
-              <ListRow
-                key={asset.id}
-                title={asset.name}
-                subtitle={asset.symbol}
-                left={<CoinBadge symbol={asset.symbol} color={asset.badgeColor} size={36} />}
-                right={
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text variant="bodyStrong">
-                      {formatPrice(asset.price, { currency: asset.quoteCurrency })}
-                    </Text>
-                    <DeltaBadge value={asset.trend.changePercent} variant="micro" />
-                  </View>
-                }
-                showDivider={index < (markets.data?.length ?? 0) - 1}
-              />
-            ))}
-          </View>
-        </GlassCard>
+        ) : section === 'rates' ? (
+          <RatesSection />
+        ) : section === 'news' ? (
+          <NewsSection />
+        ) : section === 'trade' ? (
+          <TradeSection />
+        ) : section === 'convert' ? (
+          <ConvertSection />
+        ) : section === 'fiat' ? (
+          <FiatSection />
+        ) : section === 'portfolio' ? (
+          <PortfolioSection />
+        ) : (
+          <EarnSection />
+        )}
       </View>
     </Screen>
   );

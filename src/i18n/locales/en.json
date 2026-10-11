@@ -69,6 +69,127 @@
       "crypto": "Crypto",
       "fiat": "Fiat",
       "stocks": "Stocks"
+    },
+    "logo": {
+      "brand": "Flex",
+      "section": "Crypto"
+    },
+    "edit": "Edit widgets",
+    "done": "Done",
+    "addWidget": "Add widget",
+    "gallery": {
+      "title": "Widgets",
+      "add": "Add",
+      "chooseAsset": "Choose a coin",
+      "chooseDirection": "Gainers or losers",
+      "chooseFrom": "You give",
+      "chooseTo": "You get"
+    },
+    "widgets": {
+      "unavailable": "No data",
+      "assetRate": {
+        "name": "Coin price",
+        "description": "Price of a favourite coin, 24h change and a chart",
+        "a11y": "{{name}}, {{price}}",
+        "period": "24h",
+        "low": "Low",
+        "high": "High"
+      },
+      "portfolio": {
+        "name": "My portfolio",
+        "description": "Value of your assets, daily change and coin allocation"
+      },
+      "movers": {
+        "name": "Gainers & losers",
+        "description": "Coins that rose or fell the most in 24 hours",
+        "gainers": "Top gainers",
+        "losers": "Top losers"
+      },
+      "watchlist": {
+        "name": "Favourite coins",
+        "description": "A few favourite coins with price and chart"
+      },
+      "news": {
+        "name": "Market news",
+        "description": "Latest crypto headlines"
+      },
+      "convert": {
+        "name": "Quick convert",
+        "description": "Quick swap of a chosen pair at market rate",
+        "action": "Convert"
+      },
+      "fearGreed": {
+        "name": "Fear & Greed",
+        "short": "Sentiment",
+        "description": "Market mood from panic to euphoria",
+        "a11y": "Fear and greed index {{value}}, {{level}}",
+        "sinceYesterday": "in 24h"
+      }
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "subtitle": "Build your own desktop from widgets: rates, charts and portfolio"
+    },
+    "a11y": {
+      "removeWidget": "Remove “{{name}}” widget",
+      "widgetHint": "Hold to edit the desktop"
+    },
+    "sections": {
+      "desktop": "My desk",
+      "rates": "Rates",
+      "news": "News",
+      "trade": "Trade",
+      "convert": "Convert",
+      "fiat": "Fiat",
+      "portfolio": "Portfolio",
+      "earn": "Earn"
+    },
+    "sizes": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "ago": {
+      "minutes": "{{count}} min ago",
+      "hours": "{{count}} h ago",
+      "days": "{{count}} d ago"
+    },
+    "fearGreed": {
+      "extremeFear": "Extreme fear",
+      "fear": "Fear",
+      "neutral": "Neutral",
+      "greed": "Greed",
+      "extremeGreed": "Extreme greed"
+    },
+    "rates": {
+      "all": "All"
+    },
+    "fiat": {
+      "title": "Exchange rates",
+      "subtitle": "Against the Belarusian ruble, 24h change"
+    },
+    "portfolioSection": {
+      "allocation": "Allocation"
+    },
+    "trade": {
+      "buy": "Buy",
+      "sell": "Sell",
+      "noOrders": "No open orders"
+    },
+    "convert": {
+      "from": "You give",
+      "to": "You get",
+      "amount": "Amount to convert",
+      "swap": "Swap",
+      "action": "Convert"
+    },
+    "earn": {
+      "subtitle": "Earn on your crypto: flexible withdrawals or a higher rate for a fixed term",
+      "flexible": "Flexible, withdraw any time",
+      "locked": "{{days}} days",
+      "apy": "APY",
+      "min": "From {{amount}} {{symbol}}",
+      "subscribe": "Subscribe"
     }
   },
   "cards": {

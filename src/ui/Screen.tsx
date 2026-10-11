@@ -3,12 +3,12 @@ import type { ReactNode } from 'react';
 import {
   Platform,
   RefreshControl,
-  ScrollView,
   type ScrollViewProps,
   StyleSheet,
   View,
   type ViewStyle,
 } from 'react-native';
+import Animated, { type SharedValue, useAnimatedProps } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -26,9 +26,14 @@ export type ScreenProps = {
   contentBottomInset?: number;
   contentContainerStyle?: ViewStyle;
   style?: ViewStyle;
+  /**
+   * блокировка прокрутки прямо из UI-потока (перетаскивание виджета): через
+   * `scrollEnabled` из JS она доходит на несколько кадров позже, и страница успевает уехать за пальцем
+   */
+  scrollLock?: SharedValue<boolean>;
 } & Pick<
   ScrollViewProps,
-  'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle' | 'onScrollBeginDrag'
+  'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle' | 'onScrollBeginDrag' | 'scrollEnabled'
 >;
 
 /**
@@ -44,10 +49,12 @@ export function Screen({
   contentBottomInset,
   contentContainerStyle,
   style,
+  scrollLock,
   ...scrollProps
 }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const lockProps = useAnimatedProps(() => ({ scrollEnabled: !scrollLock?.value }));
 
   /**
    * на web таб-бар свой и плавающий — отступы считаем вручную. на iOS
@@ -66,8 +73,9 @@ export function Screen({
       : theme.spacing.xxl);
 
   const content = scrollable ? (
-    <ScrollView
+    <Animated.ScrollView
       {...scrollProps}
+      animatedProps={scrollLock ? lockProps : undefined}
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior={isIOS ? 'automatic' : 'never'}
       contentContainerStyle={[
@@ -90,7 +98,7 @@ export function Screen({
       }
     >
       {children}
-    </ScrollView>
+    </Animated.ScrollView>
   ) : (
     <View
       style={[

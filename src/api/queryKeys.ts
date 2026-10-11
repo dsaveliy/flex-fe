@@ -13,4 +13,8 @@ export const queryKeys = {
   movers: (direction: MoverDirection) => ['movers', direction] as const,
   portfolio: ['portfolio'] as const,
   rates: ['rates'] as const,
+  cryptoLayout: ['me', 'crypto-layout'] as const,
+  news: (limit?: number) => ['news', limit ?? 'all'] as const,
+  fearGreed: ['fear-greed'] as const,
+  earnProducts: ['earn-products'] as const,
 };

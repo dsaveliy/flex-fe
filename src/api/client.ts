@@ -15,6 +15,7 @@ export class ApiError extends Error implements ApiErrorShape {
 export type ApiTransport = {
   get<T>(path: string, init?: RequestInit): Promise<T>;
   post<T>(path: string, body?: unknown, init?: RequestInit): Promise<T>;
+  put<T>(path: string, body?: unknown, init?: RequestInit): Promise<T>;
 };
 
 /**
@@ -47,5 +48,7 @@ export function createHttpTransport(baseUrl: string): ApiTransport {
     get: (path, init) => request(path, { ...init, method: 'GET' }),
     post: (path, body, init) =>
       request(path, { ...init, method: 'POST', body: JSON.stringify(body ?? {}) }),
+    put: (path, body, init) =>
+      request(path, { ...init, method: 'PUT', body: JSON.stringify(body ?? {}) }),
   };
 }

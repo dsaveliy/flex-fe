@@ -35,7 +35,18 @@ export type IconName =
   | 'percent'
   | 'sliders'
   | 'filter'
-  | 'more';
+  | 'more'
+  | 'pencil'
+  | 'minus'
+  | 'grid'
+  | 'chart'
+  | 'news'
+  | 'candles'
+  | 'swap'
+  | 'banknote'
+  | 'pie'
+  | 'coins'
+  | 'star';
 
 export type IconProps = {
   name: IconName;
@@ -170,6 +181,72 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
           <Circle cx={12} cy={12} r={1.3} {...common} />
           <Circle cx={18} cy={12} r={1.3} {...common} />
         </>
+      )}
+      {name === 'pencil' && (
+        <>
+          <Path d="M4.5 19.5 5.3 15.6 15.8 5.1a2 2 0 0 1 2.9 0l.2.2a2 2 0 0 1 0 2.9L8.4 18.7z" {...common} />
+          <Path d="M13.8 7.1 16.9 10.2" {...common} />
+        </>
+      )}
+      {name === 'minus' && <Path d="M6 12h12" {...common} />}
+      {name === 'grid' && (
+        <>
+          <Rect x={4} y={4} width={7} height={7} rx={2} {...common} />
+          <Rect x={13} y={4} width={7} height={7} rx={2} {...common} />
+          <Rect x={4} y={13} width={16} height={7} rx={2} {...common} />
+        </>
+      )}
+      {name === 'chart' && (
+        <>
+          <Path d="M4 19h16" {...common} />
+          <Path d="m5 15 4.5-4.5 3.5 3 6-6.5" {...common} />
+          <Path d="M15.5 7H19v3.5" {...common} />
+        </>
+      )}
+      {name === 'news' && (
+        <>
+          <Rect x={3.5} y={5} width={13} height={14} rx={2.5} {...common} />
+          <Path d="M16.5 9h2.5a1.5 1.5 0 0 1 1.5 1.5V17a2 2 0 0 1-4 0" {...common} />
+          <Path d="M7 9h6M7 12.5h6M7 16h3.5" {...common} />
+        </>
+      )}
+      {name === 'candles' && (
+        <>
+          <Path d="M7 4v3M7 15v5M17 4v5M17 17v3" {...common} />
+          <Rect x={5} y={7} width={4} height={8} rx={1} {...common} />
+          <Rect x={15} y={9} width={4} height={8} rx={1} {...common} />
+        </>
+      )}
+      {name === 'swap' && (
+        <>
+          <Path d="M7 4v15M3.5 7.5 7 4l3.5 3.5" {...common} />
+          <Path d="M17 20V5M20.5 16.5 17 20l-3.5-3.5" {...common} />
+        </>
+      )}
+      {name === 'banknote' && (
+        <>
+          <Rect x={2.5} y={6} width={19} height={12} rx={2.5} {...common} />
+          <Circle cx={12} cy={12} r={2.5} {...common} />
+          <Path d="M6 9.5v5M18 9.5v5" {...common} />
+        </>
+      )}
+      {name === 'pie' && (
+        <>
+          <Path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z" {...common} />
+          <Path d="M15 3.9A8.5 8.5 0 0 1 20.1 9H15z" {...common} />
+        </>
+      )}
+      {name === 'coins' && (
+        <>
+          <Circle cx={9} cy={9} r={5.5} {...common} />
+          <Path d="M14.5 9.6a5.5 5.5 0 1 1-5 5" {...common} />
+        </>
+      )}
+      {name === 'star' && (
+        <Path
+          d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8z"
+          {...common}
+        />
       )}
       {name === 'snowflake' && (
         <>

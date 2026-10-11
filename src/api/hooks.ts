@@ -1,4 +1,10 @@
-import { keepPreviousData, useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 
 import { queryKeys } from './queryKeys';
 import { api } from './services';
@@ -7,10 +13,15 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  CryptoLayout,
+  CryptoWidget,
+  EarnProduct,
+  FearGreedIndex,
   ExchangeRates,
   MarketAsset,
   Mover,
   MoverDirection,
+  NewsItem,
   Portfolio,
   PromoOffer,
   Transaction,
@@ -79,4 +90,49 @@ export function usePortfolio(): UseQueryResult<Portfolio> {
 
 export function useRates(): UseQueryResult<ExchangeRates> {
   return useQuery({ queryKey: queryKeys.rates, queryFn: () => api.getRates() });
+}
+
+/** раскладка виджетов рабочего стола Crypto текущего пользователя */
+export function useCryptoLayout(): UseQueryResult<CryptoLayout> {
+  return useQuery({ queryKey: queryKeys.cryptoLayout, queryFn: () => api.getCryptoLayout() });
+}
+
+/**
+ * сохранение раскладки. кэш обновляется сразу (оптимистично), поэтому сетка
+ * и галерея виджетов видят изменения мгновенно; при ошибке откатываемся
+ */
+export function useSaveCryptoLayout() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (widgets: CryptoWidget[]) => api.saveCryptoLayout(widgets),
+    onMutate: async (widgets) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.cryptoLayout });
+      const previous = queryClient.getQueryData<CryptoLayout>(queryKeys.cryptoLayout);
+      queryClient.setQueryData<CryptoLayout>(queryKeys.cryptoLayout, {
+        widgets,
+        updatedAt: new Date().toISOString(),
+      });
+      return { previous };
+    },
+    onError: (_error, _widgets, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.cryptoLayout, context.previous);
+    },
+    onSuccess: (layout) => queryClient.setQueryData(queryKeys.cryptoLayout, layout),
+  });
+}
+
+export function useNews(limit?: number): UseQueryResult<NewsItem[]> {
+  return useQuery({
+    queryKey: queryKeys.news(limit),
+    queryFn: () => api.getNews(limit ? { limit } : undefined),
+  });
+}
+
+export function useFearGreed(): UseQueryResult<FearGreedIndex> {
+  return useQuery({ queryKey: queryKeys.fearGreed, queryFn: () => api.getFearGreed() });
+}
+
+export function useEarnProducts(): UseQueryResult<EarnProduct[]> {
+  return useQuery({ queryKey: queryKeys.earnProducts, queryFn: () => api.getEarnProducts() });
 }

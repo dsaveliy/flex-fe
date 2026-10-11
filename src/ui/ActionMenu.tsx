@@ -11,6 +11,8 @@ export type ActionMenuItem = {
   systemImage?: SFSymbol;
   /** отмечен галочкой (выбранный вариант фильтра) */
   checked?: boolean;
+  /** серый и не нажимается (функция пока недоступна) */
+  disabled?: boolean;
   onPress: () => void;
 };
 
@@ -22,6 +24,11 @@ export type ActionMenuProps = {
   accessibilityLabel: string;
   /** кнопка, по которой открывается меню; касания обрабатывает само меню */
   children: ReactNode;
+  /**
+   * фиксированный размер кнопки. на iOS без него SwiftUI-контейнер подгоняет
+   * рамку под содержимое на кадр позже, и при перерисовке кнопка дёргается
+   */
+  triggerSize?: { width: number; height: number };
 };
 
 /**
@@ -43,7 +50,8 @@ export function ActionMenu({
         Alert.alert(title ?? accessibilityLabel, undefined, [
           ...items.map((item) => ({
             text: item.checked ? `✓ ${item.label}` : item.label,
-            onPress: item.onPress,
+            // системный диалог не умеет серые кнопки — неактивный пункт просто ничего не делает
+            onPress: item.disabled ? undefined : item.onPress,
           })),
           { text: cancelLabel, style: 'cancel' as const },
         ])

@@ -12,10 +12,14 @@ export type ScreenHeaderProps = {
   eyebrow?: string;
   /** мелкая строка под заголовком */
   subtitle?: string;
+  /** собственный заголовок вместо текста (логотип Flex Crypto); `title` остаётся подписью для VoiceOver */
+  titleNode?: ReactNode;
   /** значок сразу после заголовка (солнце/месяц в приветствии) */
   titleAccessory?: ReactNode;
   /** дополнительные кнопки слева от аватара */
   actions?: ReactNode;
+  /** не рисовать аватар: экран ставит его сам в `actions` (стол Crypto) */
+  hideAvatar?: boolean;
   /** `large` — крупное приветствие главного экрана */
   size?: 'default' | 'large';
 };
@@ -25,8 +29,10 @@ export function ScreenHeader({
   title,
   eyebrow,
   subtitle,
+  titleNode,
   titleAccessory,
   actions,
+  hideAvatar = false,
   size = 'default',
 }: ScreenHeaderProps) {
   const theme = useTheme();
@@ -40,12 +46,18 @@ export function ScreenHeader({
             {eyebrow}
           </Text>
         ) : null}
-        <View style={[styles.row, { gap: theme.spacing.sm }]}>
-          <Text variant={large ? 'largeTitle' : 'title'} numberOfLines={1} style={styles.shrink}>
-            {title}
-          </Text>
-          {titleAccessory}
-        </View>
+        {titleNode ? (
+          <View accessible accessibilityRole="header" accessibilityLabel={title}>
+            {titleNode}
+          </View>
+        ) : (
+          <View style={[styles.row, { gap: theme.spacing.sm }]}>
+            <Text variant={large ? 'largeTitle' : 'title'} numberOfLines={1} style={styles.shrink}>
+              {title}
+            </Text>
+            {titleAccessory}
+          </View>
+        )}
         {subtitle ? (
           <Text variant="caption" color="textMuted">
             {subtitle}
@@ -54,7 +66,9 @@ export function ScreenHeader({
       </View>
       <View style={[styles.row, { gap: theme.spacing.sm }]}>
         {actions}
-        <AvatarButton size={large ? theme.sizes.avatarLarge : theme.sizes.avatar} />
+        {hideAvatar ? null : (
+          <AvatarButton size={large ? theme.sizes.avatarLarge : theme.sizes.avatar} />
+        )}
       </View>
     </View>
   );
