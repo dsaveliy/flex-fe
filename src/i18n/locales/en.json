@@ -247,9 +247,10 @@
     "noTransactionsInPeriod": "No transactions in this period",
     "add": {
       "title": "New card",
-      "issue": "Order a plastic card",
+      "physical": "Plastic card — coming soon",
       "virtual": "Virtual card",
-      "link": "Link another bank's card"
+      "link": "Link another bank's card",
+      "limit": "Up to {{max}} cards — limit reached"
     }
   },
   "account": {

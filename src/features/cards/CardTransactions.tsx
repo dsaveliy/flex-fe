@@ -28,6 +28,8 @@ const PERIOD_DAYS: Record<Exclude<Period, 'all'>, number> = {
 };
 /** сколько операций видно, пока список свёрнут */
 const COLLAPSED_COUNT = 5;
+/** размер значка-воронки фильтра периода */
+const FILTER_ICON = 18;
 
 /**
  * операции выбранной карты. справа в шапке — фильтр по периоду (системное
@@ -53,31 +55,34 @@ export function CardTransactions({ cardId }: { cardId: string }) {
 
   const header = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.lg }}>
-      <ActionMenu
-        title={t('cards.periods.title')}
-        cancelLabel={t('common.cancel')}
-        accessibilityLabel={t('cards.a11y.filter')}
-        items={PERIODS.map((value) => ({
-          id: value,
-          label: t(`cards.periods.${value}`),
-          checked: value === period,
-          onPress: () => setPeriod(value),
-        }))}
-      >
-        {/* выбранный период подсвечен рядом с воронкой */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
-          {period !== 'all' ? (
-            <Text variant="bodyStrong" color="accent">
-              {t(`cards.periods.${period}`)}
-            </Text>
-          ) : null}
+      {/* подпись периода живёт вне SwiftUI-меню: его контейнер подстраивает
+          ширину на кадр позже, и новая подпись сначала была бы обрезана */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
+        {period !== 'all' ? (
+          <Text variant="bodyStrong" color="accent">
+            {t(`cards.periods.${period}`)}
+          </Text>
+        ) : null}
+        <ActionMenu
+          title={t('cards.periods.title')}
+          cancelLabel={t('common.cancel')}
+          accessibilityLabel={t('cards.a11y.filter')}
+          // размер под значок: воронка стоит на одной линии с подписью периода и не прыгает
+          triggerSize={{ width: FILTER_ICON, height: FILTER_ICON }}
+          items={PERIODS.map((value) => ({
+            id: value,
+            label: t(`cards.periods.${value}`),
+            checked: value === period,
+            onPress: () => setPeriod(value),
+          }))}
+        >
           <Icon
             name="filter"
-            size={18}
+            size={FILTER_ICON}
             color={period === 'all' ? theme.colors.textMuted : theme.colors.accent}
           />
-        </View>
-      </ActionMenu>
+        </ActionMenu>
+      </View>
       {canExpand ? (
         <Touchable accessibilityRole="button" hitSlop={8} onPress={() => setShowAll((v) => !v)}>
           <Text variant="bodyStrong" color="accent">

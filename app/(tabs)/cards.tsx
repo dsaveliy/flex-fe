@@ -5,6 +5,7 @@ import { useWindowDimensions, View } from 'react-native';
 
 import { type CardStatus, useCards } from '@/api';
 import { CardActions } from '@/features/cards/CardActions';
+import { MAX_CARDS_PER_USER } from '@/features/cards/cardLimits';
 import { CardPager } from '@/features/cards/CardPager';
 import { CardTransactions } from '@/features/cards/CardTransactions';
 import { playFreezeHaptics } from '@/features/cards/frost';
@@ -49,6 +50,7 @@ export default function CardsScreen() {
     status: statusOverrides[card.id] ?? card.status,
   }));
   const active = list[Math.min(index, list.length - 1)];
+  const atCardLimit = list.length >= MAX_CARDS_PER_USER;
 
   const toggleFreeze = () => {
     if (!active) return;
@@ -102,22 +104,38 @@ export default function CardsScreen() {
                 cancelLabel={t('common.cancel')}
                 accessibilityLabel={t('cards.addCard')}
                 items={[
-                  {
-                    id: 'issue',
-                    label: t('cards.add.issue'),
-                    systemImage: 'creditcard',
-                    onPress: () => {},
-                  },
+                  // на лимите вместо выпуска — объяснение, почему нельзя добавить ещё
+                  ...(atCardLimit
+                    ? [
+                        {
+                          id: 'limit',
+                          label: t('cards.add.limit', { max: MAX_CARDS_PER_USER }),
+                          systemImage: 'exclamationmark.circle' as const,
+                          disabled: true,
+                          onPress: () => {},
+                        },
+                      ]
+                    : []),
                   {
                     id: 'virtual',
                     label: t('cards.add.virtual'),
                     systemImage: 'iphone',
+                    disabled: atCardLimit,
+                    onPress: () => {},
+                  },
+                  // пластиковые карты банк пока не выпускает — только виртуальные
+                  {
+                    id: 'physical',
+                    label: t('cards.add.physical'),
+                    systemImage: 'lock',
+                    disabled: true,
                     onPress: () => {},
                   },
                   {
                     id: 'link',
                     label: t('cards.add.link'),
                     systemImage: 'link',
+                    disabled: atCardLimit,
                     onPress: () => {},
                   },
                 ]}
