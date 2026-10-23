@@ -1,7 +1,7 @@
-import { Alert } from 'react-native';
+import { useState } from 'react';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
-import { ActionCircle } from '@/ui';
+import { ActionCircle, MenuSheet } from '@/ui';
 
 export type MoreAction = {
   id: string;
@@ -18,20 +18,22 @@ export type MoreActionsMenuProps = {
 };
 
 /**
- * web/Android: круг «Ещё» открывает системный диалог со списком действий.
+ * web/Android: круг «Ещё» открывает шторку со списком действий.
  * на iOS — `MoreActionsMenu.ios.tsx` с нативным стеклянным меню.
  */
 export function MoreActionsMenu({ label, cancelLabel, actions }: MoreActionsMenuProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <ActionCircle
-      icon="more"
-      label={label}
-      onPress={() =>
-        Alert.alert(label, undefined, [
-          ...actions.map((action) => ({ text: action.label, onPress: action.onPress })),
-          { text: cancelLabel, style: 'cancel' as const },
-        ])
-      }
-    />
+    <>
+      <ActionCircle icon="more" label={label} onPress={() => setOpen(true)} />
+      <MenuSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={label}
+        cancelLabel={cancelLabel}
+        items={actions}
+      />
+    </>
   );
 }

@@ -1,18 +1,19 @@
 import * as Haptics from 'expo-haptics';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform } from 'react-native';
 
 import type { DisplayCurrency } from '@/api';
 import { DISPLAY_CURRENCIES, useDisplayCurrency } from '@/providers/DisplayCurrencyProvider';
 
 import { CurrencyMenuLabel, type CurrencyMenuProps } from './CurrencyMenuLabel';
+import { MenuSheet } from './MenuSheet';
 import { Touchable } from './Pressable';
 
 export type { CurrencyMenuProps } from './CurrencyMenuLabel';
 
 /**
- * выбор валюты отображения баланса. Android — системный диалог, web — тап
- * переключает валюты по кругу. на iOS — `CurrencyMenu.ios.tsx` с нативным меню.
+ * выбор валюты отображения баланса. web и Android — шторка со списком,
+ * на iOS — `CurrencyMenu.ios.tsx` с нативным меню.
  */
 export function CurrencyMenu(props: CurrencyMenuProps) {
   const { t } = useTranslation();
@@ -23,31 +24,32 @@ export function CurrencyMenu(props: CurrencyMenuProps) {
     setCurrency(next);
   };
 
-  const handlePress = () => {
-    if (Platform.OS === 'web') {
-      const index = DISPLAY_CURRENCIES.indexOf(currency);
-      choose(DISPLAY_CURRENCIES[(index + 1) % DISPLAY_CURRENCIES.length]);
-      return;
-    }
-    Alert.alert(t('home.currencyMenuTitle'), undefined, [
-      ...DISPLAY_CURRENCIES.map((code) => ({
-        text: `${code === currency ? '✓ ' : ''}${code} · ${t(`currencies.${code}`)}`,
-        onPress: () => choose(code),
-      })),
-      { text: t('home.actions.cancel'), style: 'cancel' as const },
-    ]);
-  };
+  const [open, setOpen] = useState(false);
 
   return (
-    <Touchable
-      accessibilityRole="button"
-      accessibilityLabel={t('a11y.changeCurrency')}
-      accessibilityValue={{ text: currency }}
-      hitSlop={10}
-      haptic={false}
-      onPress={handlePress}
-    >
-      <CurrencyMenuLabel {...props} />
-    </Touchable>
+    <>
+      <Touchable
+        accessibilityRole="button"
+        accessibilityLabel={t('a11y.changeCurrency')}
+        accessibilityValue={{ text: currency }}
+        hitSlop={10}
+        haptic={false}
+        onPress={() => setOpen(true)}
+      >
+        <CurrencyMenuLabel {...props} />
+      </Touchable>
+      <MenuSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={t('home.currencyMenuTitle')}
+        cancelLabel={t('home.actions.cancel')}
+        items={DISPLAY_CURRENCIES.map((code) => ({
+          id: code,
+          label: `${code} · ${t(`currencies.${code}`)}`,
+          checked: code === currency,
+          onPress: () => choose(code),
+        }))}
+      />
+    </>
   );
 }

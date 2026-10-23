@@ -21,6 +21,7 @@ import {
   useSaveCryptoLayout,
   type WidgetKind,
 } from '@/api';
+import { useCryptoSession } from '@/auth';
 import { cellSize, widgetPixelSize } from '@/features/crypto/gridLayout';
 import { PickerPill } from '@/features/crypto/PickerPill';
 import { createWidget, WIDGET_KINDS, WIDGET_REGISTRY } from '@/features/crypto/widgets/registry';
@@ -50,6 +51,12 @@ export default function WidgetGalleryScreen() {
   // строка, к которой прокрутить после раскрытия: её позиция известна только после раскладки
   const scrollTarget = useRef<WidgetKind | null>(null);
   const listY = useRef(0);
+  const unlocked = Boolean(useCryptoSession().token);
+
+  // раскладка — данные crypto-api: криптосессия закрылась — закрываем и шторку
+  useEffect(() => {
+    if (!unlocked && router.canGoBack()) router.back();
+  }, [unlocked]);
 
   const toggle = (kind: WidgetKind) => {
     void Haptics.selectionAsync();

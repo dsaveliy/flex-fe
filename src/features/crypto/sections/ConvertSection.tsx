@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, View } from 'react-native';
@@ -10,7 +11,7 @@ import { formatCoinAmount, pairRate } from '../convertRate';
 import { PickerPill } from '../PickerPill';
 import { SectionState } from './SectionState';
 
-/** обмен одной монеты на другую по рыночному курсу; сама операция пока заглушка */
+/** обмен одной монеты на другую по рыночному курсу; подтверждение — в шторке обмена */
 export function ConvertSection() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -97,8 +98,17 @@ export function ConvertSection() {
         </Text>
       ) : null}
 
-      {/* заглушка: обмен появится вместе с торговым API */}
-      <GlassButton label={t('crypto.convert.action')} icon="swap" accent onPress={() => {}} />
+      <GlassButton
+        label={t('crypto.convert.action')}
+        icon="swap"
+        accent
+        onPress={() =>
+          router.push({
+            pathname: '/exchange',
+            params: { mode: 'crypto', from: from?.symbol, to: to?.symbol, amount },
+          })
+        }
+      />
     </View>
   );
 }

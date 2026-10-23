@@ -15,11 +15,21 @@ export type Trend = {
   series?: number[];
 };
 
+/** роль клиента: basic — фиатный банкинг, pro — плюс криптораздел (после KYC) */
+export type Role = 'basic' | 'pro';
+
+/** статус заявки KYC для криптоопераций */
+export type KycStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
 export type User = {
   id: string;
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
+  phone: string;
+  email: string;
+  role: Role;
+  kycStatus: KycStatus;
 };
 
 /** валюты, в которых можно показывать общий баланс */
@@ -74,6 +84,8 @@ export type CardStatus = 'active' | 'frozen';
 
 export type BankCard = {
   id: string;
+  /** счёт карты: с него переводят и на него пополняют */
+  accountId: string;
   /** название продукта на пластике, например "Flex" */
   productName: string;
   brand: CardBrand;
@@ -253,6 +265,237 @@ export type PromoOffer = {
 /** нормализованная ошибка API, используемая слоем запросов */
 export type ApiErrorShape = {
   status: number;
+  /** машинный код ошибки (`TOKEN_EXPIRED`, `FACTOR_INVALID`, …), см. `docs/auth.md` */
   code: string;
   message: string;
+  /** сколько попыток ввода фактора осталось до временной блокировки */
+  attemptsLeft?: number;
+  /** через сколько секунд можно повторить (заголовок `Retry-After`) */
+  retryAfter?: number;
+  /** дополнительные поля ошибки, например `verificationId` при неподтверждённых контактах */
+  details?: Record<string, unknown>;
+};
+
+/* ---------- аутентификация, docs/auth.md ---------- */
+
+/** канал подтверждения контакта одноразовым кодом */
+export type VerificationChannel = 'phone' | 'email';
+
+export type RegisterRequest = {
+  phone: string;
+  email: string;
+  password: string;
+};
+
+/** токены при регистрации не выдаются: сначала подтверждение контактов, затем вход */
+export type RegisterResponse = {
+  verificationId: string;
+  channels: VerificationChannel[];
+};
+
+export type VerifyContactRequest = {
+  verificationId: string;
+  channel: VerificationChannel;
+  code: string;
+};
+
+export type VerifyContactResponse = {
+  /** каналы, которые ещё нужно подтвердить; пустой массив — можно входить */
+  remaining: VerificationChannel[];
+};
+
+export type LoginRequest = {
+  /** телефон или email */
+  identifier: string;
+  password: string;
+  deviceId: string;
+};
+
+/** пара токенов Уровня 1 (JWS compact) */
+export type TokenPair = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+export type RefreshRequest = {
+  refreshToken: string;
+  deviceId: string;
+};
+
+/** второй фактор для входа в криптораздел */
+export type CryptoFactor =
+  | { type: 'pin'; pin: string }
+  /** секрет устройства, который отдаётся только после Face ID / Touch ID */
+  | { type: 'biometric'; credential: string };
+
+export type CryptoLoginRequest = {
+  factor: CryptoFactor;
+  deviceId: string;
+};
+
+/** crypto-токен Уровня 2: без refresh, по истечении фактор запрашивается снова */
+export type CryptoSession = {
+  cryptoToken: string;
+  /** таймаут неактивности, секунды; каждый запрос к crypto-api продлевает его */
+  idleTimeoutSec: number;
+  /** абсолютный предел жизни токена, ISO */
+  expiresAt: string;
+};
+
+export type CryptoSetupRequest = {
+  pin: string;
+  deviceId: string;
+};
+
+export type CryptoBiometricRequest = {
+  enabled: boolean;
+  deviceId: string;
+};
+
+export type CryptoBiometricResponse = {
+  /** секрет для Keychain; `null`, если биометрия выключена */
+  credential: string | null;
+};
+
+/** всё, что нужно экрану Crypto, чтобы решить: KYC, настройка PIN, ввод фактора */
+export type CryptoAccessStatus = {
+  role: Role;
+  kycStatus: KycStatus;
+  /** крипто-PIN задан */
+  factorConfigured: boolean;
+  /** на этом устройстве включён вход по биометрии */
+  biometricEnabled: boolean;
+  /** временная блокировка после 3 неверных попыток, ISO */
+  lockedUntil: string | null;
+  /** 10 неудач подряд: только через поддержку */
+  blocked: boolean;
+};
+
+/* ---------- операции с виртуальными деньгами, flex-be docs/api.md §6, §8–10 ---------- */
+
+/** выпуск карты: банк выпускает только виртуальные */
+export type IssueCardRequest = {
+  brand: CardBrand;
+  style: CardStyle;
+};
+
+/** счёт, открытый под обмен или покупку монеты (`POST /accounts`) */
+export type OpenedAccount = {
+  id: string;
+  currency: string;
+  kind: 'fiat' | 'crypto';
+  name: string;
+};
+
+export type TransferRequest = {
+  fromAccountId: string;
+  /** номер клиента Flex в любом формате, например `+375 29 111-22-33` */
+  recipientPhone: string;
+  amountMinor: number;
+  comment?: string;
+};
+
+export type TransferResult = {
+  transactionId: string;
+  status: 'completed';
+  fromAccountId: string;
+  /** имя получателя в виде «Анна К.» */
+  recipientName: string;
+  amount: Money;
+  fee: Money;
+  createdAt: string;
+};
+
+/** обмен между своими счетами; `amountMinor` — сколько списать со счёта `from` */
+export type ExchangeRequest = {
+  fromAccountId: string;
+  toAccountId: string;
+  amountMinor: number;
+};
+
+export type ExchangeResult = {
+  transactionId: string;
+  status: 'completed';
+  fromAmount: Money;
+  toAmount: Money;
+  fee: Money;
+  /** сколько единиц `to` за 1 единицу `from` */
+  rate: number;
+  createdAt: string;
+};
+
+/** карта другого банка, с которой пополняют счёт (хранятся только последние цифры) */
+export type LinkedCard = {
+  id: string;
+  brand: CardBrand;
+  last4: string;
+  expiry: string;
+  holderName: string;
+  createdAt: string;
+};
+
+export type LinkCardRequest = {
+  pan: string;
+  /** MM/YY */
+  expiry: string;
+  holderName: string;
+};
+
+export type TopUpRequest = {
+  toAccountId: string;
+  linkedCardId: string;
+  amountMinor: number;
+};
+
+export type WithdrawalRequest = {
+  fromAccountId: string;
+  linkedCardId: string;
+  amountMinor: number;
+};
+
+/** оплата картой: эмулятор терминала или QR-кода магазина */
+export type PaymentRequest = {
+  cardId: string;
+  merchant: string;
+  amountMinor: number;
+  category?: TransactionCategory;
+  channel?: 'pos' | 'online' | 'qr' | 'atm';
+};
+
+export type OperationResult = {
+  transactionId: string;
+  status: 'completed';
+  amount: Money;
+  fee: Money;
+  createdAt: string;
+};
+
+export type EarnSubscribeRequest = {
+  productId: string;
+  /** в минорных единицах монеты продукта */
+  amountMinor: number;
+};
+
+export type EarnPosition = {
+  id: string;
+  productId: string;
+  assetId: string;
+  symbol: string;
+  badgeColor: string;
+  principal: Money;
+  apyPercent: number;
+  termDays: number | null;
+  startedAt: string;
+  maturesAt: string | null;
+  status: 'active' | 'matured' | 'redeemed';
+  accruedInterest: Money;
+  redeemedAt: string | null;
+  interestPaid: Money | null;
+};
+
+export type PaymentResult = OperationResult & {
+  /** списано с криптокошелька при оплате криптой (автоконвертация) */
+  fundedWith?: Money | null;
+  rate?: number | null;
+  cashback: Money;
 };

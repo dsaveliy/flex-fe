@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWindowDimensions, View } from 'react-native';
@@ -21,7 +22,7 @@ import { SectionState } from './SectionState';
 /** пары, доступные для торговли в учебном прототипе */
 const TRADE_PAIRS = ['btc', 'eth', 'sol'];
 
-/** торговля: выбор пары, цена с графиком, купить / продать (пока заглушки) */
+/** торговля: выбор пары, цена с графиком; купить и продать — по рынку через шторку обмена */
 export function TradeSection() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -29,6 +30,8 @@ export function TradeSection() {
   const markets = useMarkets('crypto');
   const [pair, setPair] = useState(TRADE_PAIRS[0]);
   const asset = markets.data?.find((item) => item.id === pair);
+  const trade = (from?: string, to?: string) =>
+    router.push({ pathname: '/exchange', params: { mode: 'crypto', from, to } });
 
   if (!markets.data) {
     return <SectionState error={markets.isError} onRetry={() => markets.refetch()} />;
@@ -68,10 +71,19 @@ export function TradeSection() {
         </GlassCard>
       ) : null}
 
-      {/* заглушки: ордера появятся вместе с торговым API */}
+      {/* рыночные сделки: покупка за рубли, продажа в рубли; лимитных ордеров пока нет */}
       <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-        <GlassButton label={t('crypto.trade.buy')} accent onPress={() => {}} style={{ flex: 1 }} />
-        <GlassButton label={t('crypto.trade.sell')} onPress={() => {}} style={{ flex: 1 }} />
+        <GlassButton
+          label={t('crypto.trade.buy')}
+          accent
+          onPress={() => trade('BYN', asset?.symbol)}
+          style={{ flex: 1 }}
+        />
+        <GlassButton
+          label={t('crypto.trade.sell')}
+          onPress={() => trade(asset?.symbol, 'BYN')}
+          style={{ flex: 1 }}
+        />
       </View>
       <Text variant="caption" color="textMuted" align="center">
         {t('crypto.trade.noOrders')}

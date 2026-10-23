@@ -283,5 +283,263 @@
     "USD": "US dollar",
     "EUR": "Euro",
     "BTC": "Bitcoin"
+  },
+  "operations": {
+    "from": "From",
+    "to": "To",
+    "amount": "Amount",
+    "available": "Available {{amount}}",
+    "fee": "Fee {{amount}}",
+    "rate": "1 {{from}} ≈ {{rate}} {{to}}",
+    "done": "Done",
+    "chooseAccount": "Choose an account",
+    "newAccount": "{{currency}} — a new account will be opened",
+    "success": "Done",
+    "transfer": {
+      "title": "Transfer",
+      "subtitle": "To a Flex client by phone number",
+      "phone": "Recipient phone",
+      "phonePlaceholder": "+375 29 000-00-00",
+      "comment": "Comment",
+      "commentPlaceholder": "Optional",
+      "submit": "Send",
+      "success": "Sent to {{name}}"
+    },
+    "topUp": {
+      "title": "Top up",
+      "subtitle": "From another bank's card",
+      "card": "From card",
+      "linkFirst": "Link the card you will top up from first",
+      "link": "Link a card",
+      "submit": "Top up",
+      "success": "Account topped up"
+    },
+    "link": {
+      "title": "Link a card",
+      "subtitle": "Money in Flex is virtual, so only test cards are accepted",
+      "pan": "Card number",
+      "panPlaceholder": "4111 1111 1111 1111",
+      "expiry": "Expiry",
+      "expiryPlaceholder": "MM/YY",
+      "holder": "Name on card",
+      "holderPlaceholder": "IVAN IVANOV",
+      "testCards": "Test cards: 4111 1111 1111 1111 — success, 4000 0000 0000 0002 — declined",
+      "submit": "Link",
+      "success": "Card •• {{last4}} linked"
+    },
+    "exchange": {
+      "title": "Exchange",
+      "subtitle": "Between your accounts at the current rate",
+      "submit": "Exchange",
+      "success": "Received {{amount}}"
+    },
+    "trade": {
+      "buyTitle": "Buy {{symbol}}",
+      "sellTitle": "Sell {{symbol}}",
+      "subtitle": "At the market rate, 1% fee",
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "earn": {
+      "title": "Earn: {{symbol}}",
+      "subtitle": "{{apy}} APY · {{term}}",
+      "submit": "Subscribe",
+      "success": "Subscribed: {{amount}}"
+    },
+    "issueCard": {
+      "success": "Card •• {{last4}} issued",
+      "error": "Could not issue the card"
+    },
+    "withdraw": {
+      "title": "Withdraw",
+      "subtitle": "To another bank's card",
+      "card": "To card",
+      "submit": "Withdraw",
+      "success": "Withdrawn {{amount}}"
+    },
+    "pay": {
+      "title": "Pay by QR",
+      "subtitle": "Store terminal emulator: the card is charged and cashback is credited",
+      "card": "Card",
+      "merchant": "Store",
+      "merchantPlaceholder": "Coffee Lab",
+      "category": "Category",
+      "submit": "Pay",
+      "success": "Paid: {{merchant}}",
+      "cashback": "Cashback {{amount}}"
+    },
+    "categories": {
+      "shopping": "Shopping",
+      "cafe": "Cafes and restaurants",
+      "transport": "Transport",
+      "subscription": "Subscriptions",
+      "other": "Other"
+    },
+    "errors": {
+      "generic": "The operation failed. Please try again",
+      "amountRequired": "Enter an amount",
+      "phoneRequired": "Enter the recipient's phone",
+      "INSUFFICIENT_FUNDS": "Insufficient funds",
+      "RECIPIENT_NOT_FOUND": "No Flex client with this phone",
+      "RECIPIENT_NO_ACCOUNT": "The recipient has no account in this currency",
+      "SELF_TRANSFER": "You can't transfer to yourself — use exchange",
+      "SAME_CURRENCY": "Choose different currencies",
+      "AMOUNT_TOO_SMALL": "The amount is too small",
+      "LIMIT_EXCEEDED": "Operation limit exceeded",
+      "CARD_DECLINED": "The card issuer declined the operation",
+      "ISSUER_INSUFFICIENT_FUNDS": "Insufficient funds on the other bank's card",
+      "TEST_CARDS_ONLY": "Only test cards are accepted, e.g. 4111 1111 1111 1111",
+      "PAN_INVALID": "Invalid card number",
+      "CARD_EXPIRED": "The card has expired",
+      "CARD_BRAND_NOT_SUPPORTED": "Only Visa and Mastercard are supported",
+      "CARD_ALREADY_LINKED": "This card is already linked",
+      "card_limit_reached": "Card limit reached",
+      "card_frozen": "The card is frozen",
+      "ACCOUNT_LOCKED": "Funds on this account are locked",
+      "KYC_REQUIRED": "Identity verification (KYC) required",
+      "CRYPTO_AUTH_REQUIRED": "Unlock the Crypto section and try again",
+      "RATE_UNAVAILABLE": "The rate is temporarily unavailable",
+      "CURRENCY_NOT_SUPPORTED": "This currency isn't supported for the operation",
+      "WALLET_NOT_FOUND": "You have no wallet for this coin",
+      "PHONE_INVALID": "Use the format +375 XX XXX-XX-XX"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Use your phone number or email",
+      "identifier": "Phone or email",
+      "identifierPlaceholder": "+375 29 000-00-00 or name@mail.by",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "No account yet?",
+      "register": "Sign up",
+      "registered": "Your account is ready. Sign in to continue",
+      "demoTitle": "Demo access (mock)",
+      "demoHint": "Password for both: {{password}}"
+    },
+    "reason": {
+      "revoked": "The session was ended for security reasons. Please sign in again",
+      "expired": "Your session has expired. Please sign in again"
+    },
+    "register": {
+      "title": "Sign up",
+      "subtitle": "Open a Flex account in a couple of minutes",
+      "phone": "Phone",
+      "phonePlaceholder": "+375 29 000-00-00",
+      "email": "Email",
+      "emailPlaceholder": "name@mail.by",
+      "password": "Password",
+      "passwordHint": "At least {{min}} characters",
+      "confirm": "Repeat password",
+      "submit": "Continue",
+      "haveAccount": "Already have an account?",
+      "login": "Sign in"
+    },
+    "verify": {
+      "title": "Verification",
+      "step": "Step {{current}} of {{total}}",
+      "phone": "SMS code",
+      "email": "Email code",
+      "phoneHint": "We sent a code to your phone number",
+      "emailHint": "We sent a code to your email",
+      "code": "Code",
+      "submit": "Confirm",
+      "resend": "Send the code again",
+      "resendIn": "Resend in {{time}}",
+      "resent": "Code sent",
+      "mockHint": "Test code: {{code}}"
+    },
+    "errors": {
+      "phoneFormat": "Use the format +375 XX XXX-XX-XX",
+      "emailFormat": "Check the email address",
+      "passwordShort": "The password must be at least 12 characters",
+      "passwordMismatch": "Passwords do not match",
+      "required": "Required field",
+      "INVALID_CREDENTIALS": "Incorrect login or password",
+      "TOO_MANY_ATTEMPTS": "Too many attempts. Try again in {{time}}",
+      "PHONE_TAKEN": "This phone number is already registered",
+      "EMAIL_TAKEN": "This email is already registered",
+      "PHONE_INVALID": "Use the format +375 XX XXX-XX-XX",
+      "EMAIL_INVALID": "Check the email address",
+      "PASSWORD_WEAK": "The password must be at least 12 characters",
+      "PASSWORD_LEAKED": "This password appeared in data leaks, choose another one",
+      "OTP_INVALID": "Incorrect code",
+      "VERIFICATION_NOT_FOUND": "The code has expired. Sign in to get a new one",
+      "FACTOR_INVALID": "Incorrect PIN. Attempts left: {{count}}",
+      "FACTOR_INVALID_BIO": "Biometric sign-in failed. Enter your PIN",
+      "ACCOUNT_BLOCKED": "Account is blocked. Contact support",
+      "CRYPTO_LOCKED": "Crypto access is blocked. Please contact support",
+      "KYC_REQUIRED": "Please verify your identity first",
+      "generic": "Something went wrong. Please try again"
+    },
+    "biometry": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "biometrics": "biometrics"
+    },
+    "crypto": {
+      "unlockTitle": "Crypto sign-in",
+      "unlockSubtitle": "Enter your crypto PIN",
+      "biometricPrompt": "Sign in to Flex Crypto",
+      "useBiometric": "Use {{kind}}",
+      "lockReason": {
+        "idle": "Crypto was closed after inactivity",
+        "expired": "The crypto session has expired",
+        "background": "Crypto was closed while the app was in the background",
+        "server": "Please confirm sign-in again",
+        "manual": "Crypto is closed"
+      },
+      "lockedTitle": "Too many attempts",
+      "lockedUntil": "Try again in {{time}}",
+      "blockedTitle": "Crypto is blocked",
+      "blockedText": "Sign-in was blocked after 10 incorrect attempts. Contact support to verify your identity.",
+      "setupTitle": "Create a crypto PIN",
+      "setupSubtitle": "6 digits. Don't reuse your password or phone passcode",
+      "confirmTitle": "Repeat the PIN",
+      "confirmSubtitle": "Enter the same PIN again",
+      "mismatch": "PINs do not match, try again",
+      "bioOfferTitle": "Sign in with {{kind}}?",
+      "bioOfferText": "Your PIN stays as a backup",
+      "enable": "Turn on",
+      "notNow": "Not now",
+      "kycTitle": "Crypto opens after identity verification",
+      "kycText": "Complete KYC to buy, sell and hold crypto in Flex. Fiat accounts are already available.",
+      "kycSubmit": "Submit application",
+      "kycPendingTitle": "Application under review",
+      "kycPendingText": "It usually takes a few minutes. Crypto opens right after approval.",
+      "kycRejectedTitle": "Application rejected",
+      "kycRetry": "Apply again"
+    },
+    "account": {
+      "biometric": "Crypto sign-in with {{kind}}",
+      "biometricHint": "Your PIN stays as a backup",
+      "biometricHintLocked": "Open Crypto to change this",
+      "lockCrypto": "Close Crypto",
+      "lockCryptoHint": "Next time sign in with your PIN"
+    },
+    "pin": {
+      "delete": "Delete",
+      "digit": "Digit {{digit}}",
+      "entered": "{{count}} of {{total}} entered"
+    },
+    "debug": {
+      "title": "Auth debug (mock)",
+      "role": "Role",
+      "session": "Session",
+      "access": "Access expires in",
+      "crypto": "Crypto",
+      "cryptoClosed": "closed",
+      "cryptoOpen": "closes in {{time}}",
+      "expireAccess": "Expire access",
+      "stealRefresh": "Steal refresh",
+      "revokeSession": "Revoke session",
+      "resetDb": "Reset mock DB",
+      "events": "Event log",
+      "noEvents": "No events yet",
+      "notified": "client notified"
+    }
   }
 }

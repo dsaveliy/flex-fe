@@ -17,4 +17,13 @@ export const queryKeys = {
   news: (limit?: number) => ['news', limit ?? 'all'] as const,
   fearGreed: ['fear-greed'] as const,
   earnProducts: ['earn-products'] as const,
+  linkedCards: ['linked-cards'] as const,
+  cryptoAccess: ['auth', 'crypto-access'] as const,
 };
+
+/** данные crypto-api: удаляются из кэша, как только криптораздел закрывается */
+export const cryptoProtectedKeys = [
+  queryKeys.portfolio,
+  queryKeys.cryptoLayout,
+  queryKeys.earnProducts,
+] as const;

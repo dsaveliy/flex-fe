@@ -18,18 +18,7 @@ import type {
 } from '../types';
 import { ApiError } from '../client';
 import { respond } from './delay';
-import {
-  mockBalance,
-  mockCardDetails,
-  mockCards,
-  mockGainers,
-  mockLosers,
-  mockPortfolio,
-  mockPromo,
-  mockRates,
-  mockTransactions,
-  mockUser,
-} from './fixtures';
+import { mockGainers, mockLosers, mockPortfolio, mockPromo, mockRates } from './fixtures';
 import {
   defaultCryptoLayout,
   mockEarnProducts,
@@ -37,6 +26,9 @@ import {
   mockNews,
 } from './crypto.fixtures';
 import { mockMarkets } from './markets.fixtures';
+import { requireAccess, requireCrypto } from './auth/guards';
+import { mockAuthApi } from './auth';
+import { mockOperationsApi, mockOperationsState } from './operations';
 
 /**
  * имитация настроек пользователя на сервере: раскладка живёт в памяти до
@@ -50,26 +42,55 @@ let cryptoLayout: CryptoLayout = defaultCryptoLayout();
  * подменить реализацию, не затрагивая код фич.
  */
 export const mockApi = {
-  getUser: (): Promise<User> => respond(mockUser),
+  ...mockAuthApi,
+  ...mockOperationsApi,
 
-  getBalance: (): Promise<BalanceSummary> => respond(mockBalance),
+  // приватные данные проверяются так же, как на бэкенде: access или crypto-токен (guards.ts)
+  getUser: async (): Promise<User> => {
+    const { user } = await requireAccess();
+    return respond({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: null,
+      phone: user.phone,
+      email: user.email,
+      role: user.role,
+      kycStatus: user.kycStatus,
+    });
+  },
 
-  getPromo: (): Promise<PromoOffer> => respond(mockPromo),
+  getBalance: async (): Promise<BalanceSummary> => {
+    await requireAccess();
+    return respond(mockOperationsState.balance());
+  },
 
-  getCards: (): Promise<BankCard[]> => respond(mockCards),
+  getPromo: async (): Promise<PromoOffer> => {
+    await requireAccess();
+    return respond(mockPromo);
+  },
+
+  getCards: async (): Promise<BankCard[]> => {
+    await requireAccess();
+    return respond(mockOperationsState.cards());
+  },
 
   getCardDetails: async (cardId: string): Promise<BankCardDetails> => {
-    const details = mockCardDetails.find((item) => item.cardId === cardId);
+    await requireAccess();
+    const details = mockOperationsState.details().find((item) => item.cardId === cardId);
     if (!details) {
       throw new ApiError({ status: 404, code: 'card_not_found', message: 'Card not found' });
     }
     return respond(details);
   },
 
-  getTransactions: (params?: { cardId?: string; limit?: number }): Promise<Transaction[]> => {
-    const filtered = params?.cardId
-      ? mockTransactions.filter((item) => item.cardId === params.cardId)
-      : mockTransactions;
+  getTransactions: async (params?: {
+    cardId?: string;
+    limit?: number;
+  }): Promise<Transaction[]> => {
+    await requireAccess();
+    const all = mockOperationsState.transactions();
+    const filtered = params?.cardId ? all.filter((item) => item.cardId === params.cardId) : all;
     return respond(params?.limit ? filtered.slice(0, params.limit) : filtered);
   },
 
@@ -83,13 +104,20 @@ export const mockApi = {
   getMovers: (direction: MoverDirection): Promise<Mover[]> =>
     respond(direction === 'gainers' ? mockGainers : mockLosers),
 
-  getPortfolio: (): Promise<Portfolio> => respond(mockPortfolio),
+  getPortfolio: async (): Promise<Portfolio> => {
+    await requireCrypto();
+    return respond(mockPortfolio);
+  },
 
   getRates: (): Promise<ExchangeRates> => respond(mockRates),
 
-  getCryptoLayout: (): Promise<CryptoLayout> => respond(cryptoLayout),
+  getCryptoLayout: async (): Promise<CryptoLayout> => {
+    await requireCrypto();
+    return respond(cryptoLayout);
+  },
 
-  saveCryptoLayout: (widgets: CryptoLayout['widgets']): Promise<CryptoLayout> => {
+  saveCryptoLayout: async (widgets: CryptoLayout['widgets']): Promise<CryptoLayout> => {
+    await requireCrypto();
     cryptoLayout = { widgets, updatedAt: new Date().toISOString() };
     return respond(cryptoLayout);
   },
@@ -99,7 +127,10 @@ export const mockApi = {
 
   getFearGreed: (): Promise<FearGreedIndex> => respond(mockFearGreed),
 
-  getEarnProducts: (): Promise<EarnProduct[]> => respond(mockEarnProducts),
+  getEarnProducts: async (): Promise<EarnProduct[]> => {
+    await requireCrypto();
+    return respond(mockEarnProducts);
+  },
 };
 
 export type MockApi = typeof mockApi;

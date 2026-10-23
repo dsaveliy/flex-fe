@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
-import { Alert, View } from 'react-native';
+import { type ReactNode, useState } from 'react';
+import { View } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
+import { MenuSheet } from './MenuSheet';
 import { Touchable } from './Pressable';
 
 export type ActionMenuItem = {
@@ -32,7 +33,7 @@ export type ActionMenuProps = {
 };
 
 /**
- * web/Android: по тапу на кнопку открывается системный диалог со списком.
+ * web/Android: по тапу на кнопку снизу открывается шторка со списком (`MenuSheet`).
  * на iOS — `ActionMenu.ios.tsx` с нативным стеклянным меню.
  */
 export function ActionMenu({
@@ -42,22 +43,24 @@ export function ActionMenu({
   accessibilityLabel,
   children,
 }: ActionMenuProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Touchable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={() =>
-        Alert.alert(title ?? accessibilityLabel, undefined, [
-          ...items.map((item) => ({
-            text: item.checked ? `✓ ${item.label}` : item.label,
-            // системный диалог не умеет серые кнопки — неактивный пункт просто ничего не делает
-            onPress: item.disabled ? undefined : item.onPress,
-          })),
-          { text: cancelLabel, style: 'cancel' as const },
-        ])
-      }
-    >
-      <View pointerEvents="none">{children}</View>
-    </Touchable>
+    <>
+      <Touchable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={() => setOpen(true)}
+      >
+        <View pointerEvents="none">{children}</View>
+      </Touchable>
+      <MenuSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={title ?? accessibilityLabel}
+        cancelLabel={cancelLabel}
+        items={items}
+      />
+    </>
   );
 }

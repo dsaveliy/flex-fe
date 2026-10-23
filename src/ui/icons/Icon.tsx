@@ -46,7 +46,9 @@ export type IconName =
   | 'banknote'
   | 'pie'
   | 'coins'
-  | 'star';
+  | 'star'
+  | 'backspace'
+  | 'faceId';
 
 export type IconProps = {
   name: IconName;
@@ -311,6 +313,20 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
           <Path d="M4 7.5h9M18 7.5h2M4 16.5h3M11 16.5h9" {...common} />
           <Circle cx={15.5} cy={7.5} r={2.2} {...common} />
           <Circle cx={8.5} cy={16.5} r={2.2} {...common} />
+        </>
+      )}
+      {name === 'backspace' && (
+        <>
+          <Path d="M9 5.5h10a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H9L3.5 12z" {...common} />
+          <Path d="M11.5 9.5l5 5M16.5 9.5l-5 5" {...common} />
+        </>
+      )}
+      {name === 'faceId' && (
+        <>
+          <Path d="M4 8.5V6.5A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2" {...common} />
+          <Path d="M4 15.5v2A2.5 2.5 0 0 0 6.5 20h2M15.5 20h2a2.5 2.5 0 0 0 2.5-2.5v-2" {...common} />
+          <Path d="M9 9.5v1.5M15 9.5v1.5M12 9.5v3.5h-1" {...common} />
+          <Path d="M9.5 16a3.6 3.6 0 0 0 5 0" {...common} />
         </>
       )}
       {name === 'logout' && (

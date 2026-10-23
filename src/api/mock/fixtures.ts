@@ -10,16 +10,8 @@ import type {
   Portfolio,
   PromoOffer,
   Transaction,
-  User,
 } from '../types';
 import { makeSeries } from './series';
-
-export const mockUser: User = {
-  id: 'usr_1',
-  firstName: 'Роман',
-  lastName: 'Понявин',
-  avatarUrl: null,
-};
 
 const BALANCE_TOTAL = 12_480.5;
 
@@ -109,6 +101,7 @@ export const mockPromo: PromoOffer = {
 export const mockCards: BankCard[] = [
   {
     id: 'card_1',
+    accountId: 'acc_byn',
     productName: 'Flex',
     brand: 'visa',
     kind: 'debit',
@@ -120,6 +113,7 @@ export const mockCards: BankCard[] = [
   },
   {
     id: 'card_2',
+    accountId: 'acc_byn',
     productName: 'Flex',
     brand: 'mastercard',
     kind: 'debit',
@@ -131,6 +125,7 @@ export const mockCards: BankCard[] = [
   },
   {
     id: 'card_3',
+    accountId: 'acc_byn',
     productName: 'Flex',
     brand: 'visa',
     kind: 'debit',
@@ -142,6 +137,7 @@ export const mockCards: BankCard[] = [
   },
   {
     id: 'card_4',
+    accountId: 'acc_byn',
     productName: 'Flex',
     brand: 'mastercard',
     kind: 'credit',

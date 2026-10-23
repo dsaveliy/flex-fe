@@ -22,7 +22,19 @@
       "expo-font",
       "expo-status-bar",
       "expo-localization",
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Flex использует Face ID для входа в раздел Crypto"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Flex использует Face ID для входа в раздел Crypto"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

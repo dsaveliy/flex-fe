@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
@@ -5,7 +6,13 @@ import { ActionCircle, GlassGroup, type IconName } from '@/ui';
 
 import { MoreActionsMenu } from './MoreActionsMenu';
 
-type Action = { id: string; icon: IconName; label: string; accent?: boolean };
+type Action = {
+  id: string;
+  icon: IconName;
+  label: string;
+  accent?: boolean;
+  onPress: () => void;
+};
 
 /**
  * быстрые действия на Home: три стеклянных круга и «Ещё», который
@@ -17,9 +24,26 @@ export function QuickActions() {
   const theme = useTheme();
 
   const actions: Action[] = [
-    { id: 'transfer', icon: 'transfer', label: t('home.actions.transfer') },
-    { id: 'topUp', icon: 'plus', label: t('home.actions.topUp'), accent: true },
-    { id: 'buyCrypto', icon: 'bitcoin', label: t('home.actions.buyCrypto') },
+    {
+      id: 'transfer',
+      icon: 'transfer',
+      label: t('home.actions.transfer'),
+      onPress: () => router.push('/transfer'),
+    },
+    {
+      id: 'topUp',
+      icon: 'plus',
+      label: t('home.actions.topUp'),
+      accent: true,
+      onPress: () => router.push('/top-up'),
+    },
+    // покупка — в Trade: раздел Crypto сам проведёт через KYC и PIN
+    {
+      id: 'buyCrypto',
+      icon: 'bitcoin',
+      label: t('home.actions.buyCrypto'),
+      onPress: () => router.push({ pathname: '/crypto', params: { section: 'trade' } }),
+    },
   ];
 
   return (
@@ -33,6 +57,7 @@ export function QuickActions() {
           icon={action.icon}
           label={action.label}
           accent={action.accent}
+          onPress={action.onPress}
         />
       ))}
       <MoreActionsMenu
@@ -43,19 +68,19 @@ export function QuickActions() {
             id: 'exchange',
             label: t('home.actions.exchange'),
             systemImage: 'arrow.left.arrow.right',
-            onPress: () => {},
+            onPress: () => router.push('/exchange'),
           },
           {
             id: 'pay',
             label: t('home.actions.pay'),
             systemImage: 'qrcode.viewfinder',
-            onPress: () => {},
+            onPress: () => router.push('/pay'),
           },
           {
             id: 'withdraw',
             label: t('home.actions.withdraw'),
             systemImage: 'arrow.up.right',
-            onPress: () => {},
+            onPress: () => router.push('/withdraw'),
           },
         ]}
       />

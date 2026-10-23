@@ -170,6 +170,8 @@ export type ThemeColors = {
   divider: string;
   skeleton: string;
   shadow: string;
+  /** затемнение под шторкой меню */
+  overlay: string;
 };
 
 export type Theme = {
@@ -261,6 +263,7 @@ export const lightTheme: Theme = {
     divider: 'rgba(20, 31, 41, 0.08)',
     skeleton: 'rgba(20, 31, 41, 0.06)',
     shadow: palette.shadow,
+    overlay: 'rgba(13, 38, 31, 0.32)',
   },
   spacing,
   radii,
@@ -310,6 +313,7 @@ export const darkTheme: Theme = {
     divider: 'rgba(255, 255, 255, 0.1)',
     skeleton: 'rgba(255, 255, 255, 0.08)',
     shadow: '#000000',
+    overlay: 'rgba(0, 0, 0, 0.55)',
   },
   blurIntensity: 40,
 };

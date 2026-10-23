@@ -2,7 +2,10 @@ import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Switch, View } from 'react-native';
 
-import { useUser } from '@/api';
+import { USE_MOCK_API, useUser } from '@/api';
+import { useLogout } from '@/auth';
+import { AuthDebugCard } from '@/features/auth/AuthDebugCard';
+import { CryptoSecurityCard } from '@/features/auth/CryptoSecurityCard';
 import { type AppLanguage, changeLanguage, getCurrentLanguage } from '@/i18n';
 import { useBalancePrivacy } from '@/providers/BalancePrivacyProvider';
 import { useTheme, useThemeContext } from '@/theme';
@@ -29,6 +32,7 @@ export default function AccountScreen() {
   const { themeName, setThemeName } = useThemeContext();
   const { hidden, setHidden } = useBalancePrivacy();
   const user = useUser();
+  const logout = useLogout();
   const currentLanguage = getCurrentLanguage();
 
   const handleLanguageChange = (language: AppLanguage) => {
@@ -85,6 +89,8 @@ export default function AccountScreen() {
             onPress={() => {}}
           />
         </GlassCard>
+
+        <CryptoSecurityCard />
 
         <GlassCard contentStyle={rowPadding}>
           <ListRow
@@ -156,9 +162,11 @@ export default function AccountScreen() {
           <ListRow
             title={t('account.rows.logOut')}
             left={<Icon name="logout" color={theme.colors.negative} />}
-            onPress={() => {}}
+            onPress={logout.isPending ? undefined : () => logout.mutate()}
           />
         </GlassCard>
+
+        {__DEV__ && USE_MOCK_API ? <AuthDebugCard /> : null}
       </View>
     </Screen>
   );

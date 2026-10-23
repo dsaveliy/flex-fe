@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -62,8 +63,20 @@ export function CardActions({
   const frozen = card.status === 'frozen';
 
   const main: Cell[] = [
-    { id: 'transfer', icon: 'transfer', label: t('cards.actions.transfer') },
-    { id: 'topUp', icon: 'plus', label: t('cards.actions.topUp'), accent: true },
+    // перевод и пополнение — со счёта этой карты и на него
+    {
+      id: 'transfer',
+      icon: 'transfer',
+      label: t('cards.actions.transfer'),
+      onPress: () => router.push({ pathname: '/transfer', params: { from: card.accountId } }),
+    },
+    {
+      id: 'topUp',
+      icon: 'plus',
+      label: t('cards.actions.topUp'),
+      accent: true,
+      onPress: () => router.push({ pathname: '/top-up', params: { to: card.accountId } }),
+    },
     {
       id: 'freeze',
       icon: 'snowflake',

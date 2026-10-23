@@ -3,7 +3,9 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWindowDimensions, View } from 'react-native';
 
-import { type CardStatus, useCards } from '@/api';
+import { router } from 'expo-router';
+
+import { type CardStyle, useCards, useIssueCard, useSetCardFrozen } from '@/api';
 import { CardActions } from '@/features/cards/CardActions';
 import { MAX_CARDS_PER_USER } from '@/features/cards/cardLimits';
 import { CardPager } from '@/features/cards/CardPager';
@@ -27,6 +29,8 @@ import {
  * ряда) и операции по выбранной карте. тап по карте переворачивает её
  * реквизитами вверх.
  */
+const CARD_STYLES: CardStyle[] = ['mint', 'dark', 'grey', 'purple'];
+
 export default function CardsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -34,9 +38,9 @@ export default function CardsScreen() {
   const queryClient = useQueryClient();
 
   const cards = useCards();
+  const setFrozen = useSetCardFrozen();
+  const issueCard = useIssueCard();
   const [index, setIndex] = useState(0);
-  // заморозка пока только на клиенте — в API ещё нет метода для смены статуса
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, CardStatus>>({});
   const [flipped, setFlipped] = useState(false);
   const [expanded, setExpanded] = useState(false);
   // при смене карты контент может стать короче (меньше операций, свернулось «Ещё»),
@@ -45,20 +49,21 @@ export default function CardsScreen() {
   const contentHeight = useRef(0);
   const [heldHeight, setHeldHeight] = useState(0);
 
-  const list = (cards.data ?? []).map((card) => ({
-    ...card,
-    status: statusOverrides[card.id] ?? card.status,
-  }));
+  const list = cards.data ?? [];
   const active = list[Math.min(index, list.length - 1)];
   const atCardLimit = list.length >= MAX_CARDS_PER_USER;
 
+  // статус в кэше меняется сразу (оптимистично), сервер подтверждает в фоне
   const toggleFreeze = () => {
     if (!active) return;
-    playFreezeHaptics(active.status !== 'frozen');
-    setStatusOverrides((prev) => ({
-      ...prev,
-      [active.id]: active.status === 'frozen' ? 'active' : 'frozen',
-    }));
+    const frozen = active.status !== 'frozen';
+    playFreezeHaptics(frozen);
+    setFrozen.mutate({ cardId: active.id, frozen });
+  };
+
+  // новая виртуальная карта — следующего цвета; появляется в конце ленты мини-карт
+  const issueVirtual = () => {
+    issueCard.mutate({ brand: 'visa', style: CARD_STYLES[list.length % CARD_STYLES.length] });
   };
 
   const unflip = useCallback(() => setFlipped(false), []);
@@ -98,7 +103,6 @@ export default function CardsScreen() {
             size="large"
             title={t('cards.title')}
             actions={
-              // заглушки: выпуск и привязка карт появятся вместе с API
               <ActionMenu
                 title={t('cards.add.title')}
                 cancelLabel={t('common.cancel')}
@@ -121,7 +125,7 @@ export default function CardsScreen() {
                     label: t('cards.add.virtual'),
                     systemImage: 'iphone',
                     disabled: atCardLimit,
-                    onPress: () => {},
+                    onPress: issueVirtual,
                   },
                   // пластиковые карты банк пока не выпускает — только виртуальные
                   {
@@ -136,7 +140,7 @@ export default function CardsScreen() {
                     label: t('cards.add.link'),
                     systemImage: 'link',
                     disabled: atCardLimit,
-                    onPress: () => {},
+                    onPress: () => router.push('/link-card'),
                   },
                 ]}
               >

@@ -283,5 +283,263 @@
     "USD": "Доллар США",
     "EUR": "Евро",
     "BTC": "Bitcoin"
+  },
+  "operations": {
+    "from": "Откуда",
+    "to": "Куда",
+    "amount": "Сумма",
+    "available": "Доступно {{amount}}",
+    "fee": "Комиссия {{amount}}",
+    "rate": "1 {{from}} ≈ {{rate}} {{to}}",
+    "done": "Готово",
+    "chooseAccount": "Выберите счёт",
+    "newAccount": "{{currency}} — откроется новый счёт",
+    "success": "Операция выполнена",
+    "transfer": {
+      "title": "Перевод",
+      "subtitle": "Клиенту Flex по номеру телефона",
+      "phone": "Телефон получателя",
+      "phonePlaceholder": "+375 29 000-00-00",
+      "comment": "Комментарий",
+      "commentPlaceholder": "Необязательно",
+      "submit": "Перевести",
+      "success": "Отправлено: {{name}}"
+    },
+    "topUp": {
+      "title": "Пополнение",
+      "subtitle": "С карты другого банка",
+      "card": "С карты",
+      "linkFirst": "Сначала привяжите карту, с которой будете пополнять",
+      "link": "Привязать карту",
+      "submit": "Пополнить",
+      "success": "Счёт пополнен"
+    },
+    "link": {
+      "title": "Привязка карты",
+      "subtitle": "Деньги в Flex виртуальные, поэтому подходят только тестовые карты",
+      "pan": "Номер карты",
+      "panPlaceholder": "4111 1111 1111 1111",
+      "expiry": "Срок действия",
+      "expiryPlaceholder": "ММ/ГГ",
+      "holder": "Имя на карте",
+      "holderPlaceholder": "IVAN IVANOV",
+      "testCards": "Тестовые карты: 4111 1111 1111 1111 — успешно, 4000 0000 0000 0002 — отказ банка",
+      "submit": "Привязать",
+      "success": "Карта •• {{last4}} привязана"
+    },
+    "exchange": {
+      "title": "Обмен валют",
+      "subtitle": "Между своими счетами по текущему курсу",
+      "submit": "Обменять",
+      "success": "Получено {{amount}}"
+    },
+    "trade": {
+      "buyTitle": "Купить {{symbol}}",
+      "sellTitle": "Продать {{symbol}}",
+      "subtitle": "По рыночному курсу, комиссия 1%",
+      "buy": "Купить",
+      "sell": "Продать"
+    },
+    "earn": {
+      "title": "Earn: {{symbol}}",
+      "subtitle": "{{apy}} годовых · {{term}}",
+      "submit": "Подключить",
+      "success": "Подключено: {{amount}}"
+    },
+    "issueCard": {
+      "success": "Карта •• {{last4}} выпущена",
+      "error": "Не удалось выпустить карту"
+    },
+    "withdraw": {
+      "title": "Вывод",
+      "subtitle": "На карту другого банка",
+      "card": "На карту",
+      "submit": "Вывести",
+      "success": "Выведено {{amount}}"
+    },
+    "pay": {
+      "title": "Оплата по QR",
+      "subtitle": "Эмулятор терминала магазина: деньги списываются с карты, начисляется кэшбэк",
+      "card": "Карта",
+      "merchant": "Магазин",
+      "merchantPlaceholder": "Coffee Lab",
+      "category": "Категория",
+      "submit": "Оплатить",
+      "success": "Оплачено: {{merchant}}",
+      "cashback": "Кэшбэк {{amount}}"
+    },
+    "categories": {
+      "shopping": "Покупки",
+      "cafe": "Кафе и рестораны",
+      "transport": "Транспорт",
+      "subscription": "Подписки",
+      "other": "Другое"
+    },
+    "errors": {
+      "generic": "Не удалось выполнить операцию. Попробуйте ещё раз",
+      "amountRequired": "Введите сумму",
+      "phoneRequired": "Введите номер получателя",
+      "INSUFFICIENT_FUNDS": "Недостаточно средств",
+      "RECIPIENT_NOT_FOUND": "Клиент Flex с таким номером не найден",
+      "RECIPIENT_NO_ACCOUNT": "У получателя нет счёта в этой валюте",
+      "SELF_TRANSFER": "Нельзя перевести самому себе — используйте обмен",
+      "SAME_CURRENCY": "Выберите разные валюты",
+      "AMOUNT_TOO_SMALL": "Слишком маленькая сумма",
+      "LIMIT_EXCEEDED": "Превышен лимит операции",
+      "CARD_DECLINED": "Банк отклонил операцию по карте",
+      "ISSUER_INSUFFICIENT_FUNDS": "На карте другого банка недостаточно средств",
+      "TEST_CARDS_ONLY": "Подходят только тестовые карты, например 4111 1111 1111 1111",
+      "PAN_INVALID": "Неверный номер карты",
+      "CARD_EXPIRED": "Срок действия карты истёк",
+      "CARD_BRAND_NOT_SUPPORTED": "Поддерживаются только Visa и Mastercard",
+      "CARD_ALREADY_LINKED": "Эта карта уже привязана",
+      "card_limit_reached": "Достигнут лимит карт",
+      "card_frozen": "Карта заморожена",
+      "ACCOUNT_LOCKED": "Средства на этом счёте заблокированы",
+      "KYC_REQUIRED": "Нужна проверка личности (KYC)",
+      "CRYPTO_AUTH_REQUIRED": "Войдите в раздел Crypto и повторите",
+      "RATE_UNAVAILABLE": "Курс временно недоступен",
+      "CURRENCY_NOT_SUPPORTED": "Эта валюта не поддерживается для операции",
+      "WALLET_NOT_FOUND": "Нет кошелька этой монеты",
+      "PHONE_INVALID": "Номер в формате +375 XX XXX-XX-XX"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Вход",
+      "subtitle": "Войдите по телефону или email",
+      "identifier": "Телефон или email",
+      "identifierPlaceholder": "+375 29 000-00-00 или name@mail.by",
+      "password": "Пароль",
+      "passwordPlaceholder": "Ваш пароль",
+      "submit": "Войти",
+      "submitting": "Входим…",
+      "noAccount": "Нет аккаунта?",
+      "register": "Зарегистрироваться",
+      "registered": "Аккаунт создан и подтверждён. Войдите, чтобы продолжить",
+      "demoTitle": "Демо-доступ (mock)",
+      "demoHint": "Пароль для обоих: {{password}}"
+    },
+    "reason": {
+      "revoked": "Сессия завершена из соображений безопасности. Войдите снова",
+      "expired": "Сессия истекла. Войдите снова"
+    },
+    "register": {
+      "title": "Регистрация",
+      "subtitle": "Откройте счёт во Flex за пару минут",
+      "phone": "Телефон",
+      "phonePlaceholder": "+375 29 000-00-00",
+      "email": "Email",
+      "emailPlaceholder": "name@mail.by",
+      "password": "Пароль",
+      "passwordHint": "Не короче {{min}} символов",
+      "confirm": "Повторите пароль",
+      "submit": "Продолжить",
+      "haveAccount": "Уже есть аккаунт?",
+      "login": "Войти"
+    },
+    "verify": {
+      "title": "Подтверждение",
+      "step": "Шаг {{current}} из {{total}}",
+      "phone": "Код из SMS",
+      "email": "Код из письма",
+      "phoneHint": "Мы отправили код на ваш номер телефона",
+      "emailHint": "Мы отправили код на вашу почту",
+      "code": "Код",
+      "submit": "Подтвердить",
+      "resend": "Отправить код ещё раз",
+      "resendIn": "Повторная отправка через {{time}}",
+      "resent": "Код отправлен",
+      "mockHint": "Тестовый код: {{code}}"
+    },
+    "errors": {
+      "phoneFormat": "Номер в формате +375 XX XXX-XX-XX",
+      "emailFormat": "Проверьте адрес почты",
+      "passwordShort": "Пароль должен быть не короче 12 символов",
+      "passwordMismatch": "Пароли не совпадают",
+      "required": "Заполните поле",
+      "INVALID_CREDENTIALS": "Неверный логин или пароль",
+      "TOO_MANY_ATTEMPTS": "Слишком много попыток. Повторите через {{time}}",
+      "PHONE_TAKEN": "Этот номер уже зарегистрирован",
+      "EMAIL_TAKEN": "Этот email уже зарегистрирован",
+      "PHONE_INVALID": "Номер в формате +375 XX XXX-XX-XX",
+      "EMAIL_INVALID": "Проверьте адрес почты",
+      "PASSWORD_WEAK": "Пароль должен быть не короче 12 символов",
+      "PASSWORD_LEAKED": "Этот пароль встречался в утечках, выберите другой",
+      "OTP_INVALID": "Неверный код",
+      "VERIFICATION_NOT_FOUND": "Код устарел. Войдите, чтобы получить новый",
+      "FACTOR_INVALID": "Неверный PIN. Осталось попыток: {{count}}",
+      "FACTOR_INVALID_BIO": "Не удалось войти по биометрии. Введите PIN",
+      "ACCOUNT_BLOCKED": "Аккаунт заблокирован. Обратитесь в поддержку",
+      "CRYPTO_LOCKED": "Вход в Crypto заблокирован. Обратитесь в поддержку",
+      "KYC_REQUIRED": "Сначала пройдите проверку личности",
+      "generic": "Что-то пошло не так. Попробуйте ещё раз"
+    },
+    "biometry": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "biometrics": "биометрии"
+    },
+    "crypto": {
+      "unlockTitle": "Вход в Crypto",
+      "unlockSubtitle": "Введите крипто-PIN",
+      "biometricPrompt": "Вход в Flex Crypto",
+      "useBiometric": "Войти по {{kind}}",
+      "lockReason": {
+        "idle": "Раздел закрылся после бездействия",
+        "expired": "Время криптосессии истекло",
+        "background": "Раздел закрылся, пока приложение было свёрнуто",
+        "server": "Подтвердите вход ещё раз",
+        "manual": "Раздел закрыт"
+      },
+      "lockedTitle": "Слишком много попыток",
+      "lockedUntil": "Повторить можно через {{time}}",
+      "blockedTitle": "Криптораздел заблокирован",
+      "blockedText": "После 10 неверных попыток вход закрыт. Обратитесь в поддержку, чтобы подтвердить личность.",
+      "setupTitle": "Придумайте крипто-PIN",
+      "setupSubtitle": "6 цифр. Не используйте пароль и код от телефона",
+      "confirmTitle": "Повторите PIN",
+      "confirmSubtitle": "Введите тот же PIN ещё раз",
+      "mismatch": "PIN-коды не совпали, попробуйте снова",
+      "bioOfferTitle": "Входить по {{kind}}?",
+      "bioOfferText": "PIN останется запасным способом входа",
+      "enable": "Включить",
+      "notNow": "Не сейчас",
+      "kycTitle": "Crypto откроется после проверки личности",
+      "kycText": "Пройдите KYC, чтобы покупать, продавать и хранить криптовалюту во Flex. Фиатные счета доступны уже сейчас.",
+      "kycSubmit": "Отправить заявку",
+      "kycPendingTitle": "Заявка на проверке",
+      "kycPendingText": "Обычно это занимает несколько минут. Раздел откроется сразу после одобрения.",
+      "kycRejectedTitle": "Заявка отклонена",
+      "kycRetry": "Подать заново"
+    },
+    "account": {
+      "biometric": "Вход в Crypto по {{kind}}",
+      "biometricHint": "PIN останется запасным способом",
+      "biometricHintLocked": "Откройте Crypto, чтобы изменить",
+      "lockCrypto": "Закрыть Crypto",
+      "lockCryptoHint": "Следующий вход — по PIN"
+    },
+    "pin": {
+      "delete": "Стереть",
+      "digit": "Цифра {{digit}}",
+      "entered": "Введено {{count}} из {{total}}"
+    },
+    "debug": {
+      "title": "Отладка авторизации (mock)",
+      "role": "Роль",
+      "session": "Сессия",
+      "access": "Access истекает через",
+      "crypto": "Crypto",
+      "cryptoClosed": "закрыт",
+      "cryptoOpen": "закроется через {{time}}",
+      "expireAccess": "Истечь access",
+      "stealRefresh": "Украсть refresh",
+      "revokeSession": "Отозвать сессию",
+      "resetDb": "Сбросить mock-БД",
+      "events": "Журнал событий",
+      "noEvents": "Событий пока нет",
+      "notified": "уведомление клиенту"
+    }
   }
 }

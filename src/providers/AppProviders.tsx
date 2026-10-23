@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createQueryClient } from '@/api';
 import { ThemeProvider } from '@/theme';
 
+import { AuthProvider } from './AuthProvider';
 import { BalancePrivacyProvider } from './BalancePrivacyProvider';
 import { DisplayCurrencyProvider } from './DisplayCurrencyProvider';
 
@@ -14,7 +15,7 @@ import '@/i18n';
 
 /**
  * единое место, где собираются все провайдеры приложения, чтобы файлы
- * маршрутов оставались тонкими, а новые провайдеры (auth, notifications)
+ * маршрутов оставались тонкими, а новые провайдеры (notifications)
  * легко добавлялись.
  */
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -24,11 +25,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <BalancePrivacyProvider>
-              <DisplayCurrencyProvider>{children}</DisplayCurrencyProvider>
-            </BalancePrivacyProvider>
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <BalancePrivacyProvider>
+                <DisplayCurrencyProvider>{children}</DisplayCurrencyProvider>
+              </BalancePrivacyProvider>
+            </ThemeProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

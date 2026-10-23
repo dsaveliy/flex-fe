@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -8,7 +9,7 @@ import { formatPercent } from '@/utils/format';
 
 import { SectionState } from './SectionState';
 
-/** Earn: продукты стейкинга с доходностью и сроком; подключение пока заглушка */
+/** Earn: продукты стейкинга с доходностью и сроком; «Подключить» открывает шторку суммы */
 export function EarnSection() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -55,7 +56,12 @@ export function EarnSection() {
             <Text variant="caption" color="textMuted">
               {t('crypto.earn.min', { amount: product.minAmount, symbol: product.symbol })}
             </Text>
-            <GlassButton label={t('crypto.earn.subscribe')} onPress={() => {}} />
+            <GlassButton
+              label={t('crypto.earn.subscribe')}
+              onPress={() =>
+                router.push({ pathname: '/earn-subscribe', params: { product: product.id } })
+              }
+            />
           </View>
         </GlassCard>
       ))}

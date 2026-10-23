@@ -33,7 +33,13 @@ export type ScreenProps = {
   scrollLock?: SharedValue<boolean>;
 } & Pick<
   ScrollViewProps,
-  'stickyHeaderIndices' | 'onScroll' | 'scrollEventThrottle' | 'onScrollBeginDrag' | 'scrollEnabled'
+  | 'stickyHeaderIndices'
+  | 'onScroll'
+  | 'scrollEventThrottle'
+  | 'onScrollBeginDrag'
+  | 'scrollEnabled'
+  | 'keyboardShouldPersistTaps'
+  | 'automaticallyAdjustKeyboardInsets'
 >;
 
 /**
