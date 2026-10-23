@@ -132,6 +132,24 @@
         }
       }
 
+      /*
+        iPhone (Safari и Chrome — оба на WebKit): страница во весь экран, под нижней панелью адреса,
+        как у сайтов с обычной прокруткой. сколько её закрывает панель, приложение считает само
+        (useBrowserBarInset.web.ts) и добавляет отступ внизу прокрутки
+      */
+      @supports (-webkit-touch-callout: none) {
+        @media (max-width: 599px) {
+          html,
+          body,
+          #root {
+            height: 100lvh;
+          }
+          html {
+            overflow: hidden;
+          }
+        }
+      }
+
       /* компьютер: колонка ширины телефона по центру (ширина — APP_MAX_WIDTH в useAppDimensions.web.ts) */
       @media (min-width: 600px) {
         html,

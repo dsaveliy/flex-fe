@@ -6,7 +6,7 @@ import { Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
-import { GlassButton, Icon, Screen, Text, Touchable } from '@/ui';
+import { GlassButton, Icon, Screen, Text, Touchable, useBrowserBarInset } from '@/ui';
 
 export type OperationSuccess = {
   title: string;
@@ -45,6 +45,7 @@ export function OperationSheet({
   const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const browserBar = useBrowserBarInset();
 
   useEffect(() => {
     if (success) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -153,7 +154,7 @@ export function OperationSheet({
 
   // в браузере шторка открывается отдельной страницей: фон и отступы под чёлку — как у экранов
   return Platform.OS === 'web' ? (
-    <Screen scrollable={false} contentBottomInset={insets.bottom}>
+    <Screen scrollable={false} contentBottomInset={insets.bottom + browserBar}>
       {sheet}
     </Screen>
   ) : (
