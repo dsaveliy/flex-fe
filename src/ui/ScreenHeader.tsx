@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
 
 import { AvatarButton } from './AvatarButton';
+import { SectionChevron, SectionSwitch } from './SectionSwitch';
 import { Text } from './Text';
 
 export type ScreenHeaderProps = {
@@ -40,15 +41,21 @@ export function ScreenHeader({
 
   return (
     <View style={[styles.row, { gap: theme.spacing.md }]}>
-      <View style={styles.titles}>
+      <SectionSwitch style={styles.titles}>
         {eyebrow ? (
           <Text variant={large ? 'greeting' : 'body'} color="textMuted">
             {eyebrow}
           </Text>
         ) : null}
         {titleNode ? (
-          <View accessible accessibilityRole="header" accessibilityLabel={title}>
+          <View
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel={title}
+            style={Platform.OS === 'web' ? [styles.row, { gap: theme.spacing.sm }] : undefined}
+          >
             {titleNode}
+            <SectionChevron />
           </View>
         ) : (
           <View style={[styles.row, { gap: theme.spacing.sm }]}>
@@ -56,6 +63,7 @@ export function ScreenHeader({
               {title}
             </Text>
             {titleAccessory}
+            <SectionChevron />
           </View>
         )}
         {subtitle ? (
@@ -63,7 +71,7 @@ export function ScreenHeader({
             {subtitle}
           </Text>
         ) : null}
-      </View>
+      </SectionSwitch>
       <View style={[styles.row, { gap: theme.spacing.sm }]}>
         {actions}
         {hideAvatar ? null : (

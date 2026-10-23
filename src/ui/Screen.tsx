@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
 
+import { useTabBarShown } from './hooks/useTabBarShown';
 import { ScreenBackdrop } from './ScreenBackdrop';
 
 export type ScreenProps = {
@@ -63,6 +64,7 @@ export function Screen({
   const insets = useSafeAreaInsets();
   // высота шапки стека (профиль, регистрация); 0 — экран без шапки
   const headerHeight = useContext(HeaderHeightContext) ?? 0;
+  const tabBarShown = useTabBarShown();
   const lockProps = useAnimatedProps(() => ({ scrollEnabled: !scrollLock?.value }));
 
   /**
@@ -80,7 +82,9 @@ export function Screen({
   const bottomInset =
     contentBottomInset ??
     (isWeb
-      ? insets.bottom + theme.sizes.tabBarHeight + theme.sizes.tabBarInset + theme.spacing.xxl
+      ? insets.bottom +
+        (tabBarShown ? theme.sizes.tabBarHeight + theme.sizes.tabBarInset : 0) +
+        theme.spacing.xxl
       : theme.spacing.xxl);
 
   const content = scrollable ? (

@@ -14,6 +14,12 @@
     "crypto": "Крипто",
     "cards": "Карты"
   },
+  "nav": {
+    "title": "Разделы",
+    "open": "Сменить раздел",
+    "cryptoHint": "Курсы, обмен и портфель",
+    "cardsCount": "Карт: {{count}}"
+  },
   "greeting": {
     "morning": "Доброе утро,",
     "afternoon": "Добрый день,",

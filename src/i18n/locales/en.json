@@ -14,6 +14,12 @@
     "crypto": "Crypto",
     "cards": "Cards"
   },
+  "nav": {
+    "title": "Sections",
+    "open": "Switch section",
+    "cryptoHint": "Rates, exchange and portfolio",
+    "cardsCount": "Cards: {{count}}"
+  },
   "greeting": {
     "morning": "Good morning,",
     "afternoon": "Good afternoon,",
