@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 
 import { type Theme, type ThemeName, themes } from './tokens';
 
@@ -30,6 +30,12 @@ export function ThemeProvider({ children, initialTheme = 'dark' }: ThemeProvider
     // на web метода может не быть
     if (typeof Appearance.setColorScheme === 'function') {
       Appearance.setColorScheme(themeName);
+    }
+    // web: панель браузера и строка состояния на экране «Домой» — в цвет темы
+    if (Platform.OS === 'web') {
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute('content', themes[themeName].colors.backgroundTop);
     }
   }, [themeName]);
 

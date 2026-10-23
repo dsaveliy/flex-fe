@@ -1,7 +1,10 @@
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useId } from 'react';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
 
 import { useTheme } from '@/theme';
+
+import { useAppDimensions } from './hooks/useAppDimensions';
 
 type Blob = {
   id: string;
@@ -33,7 +36,10 @@ const BLOBS: Blob[] = [
  */
 export function ScreenBackdrop() {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
+  const { width, height } = useAppDimensions();
+  // id градиентов уникальны для экрана: в браузере url(#id) берёт первый градиент
+  // в документе, а он может быть на скрытом экране под текущим
+  const prefix = `backdrop-${useId().replace(/:/g, '')}`;
 
   const blobColors: Record<Blob['color'], string> = {
     mint: theme.colors.blobMint,
@@ -47,9 +53,13 @@ export function ScreenBackdrop() {
       <Svg width={width} height={height}>
         <Defs>
           {BLOBS.map((blob) => (
-            <RadialGradient key={blob.id} id={blob.id} cx="50%" cy="50%" r="50%">
+            <RadialGradient key={blob.id} id={`${prefix}-${blob.id}`} cx="50%" cy="50%" r="50%">
               <Stop offset="0%" stopColor={blobColors[blob.color]} stopOpacity={blob.opacity} />
-              <Stop offset="55%" stopColor={blobColors[blob.color]} stopOpacity={blob.opacity * 0.45} />
+              <Stop
+                offset="55%"
+                stopColor={blobColors[blob.color]}
+                stopOpacity={blob.opacity * 0.45}
+              />
               <Stop offset="100%" stopColor={blobColors[blob.color]} stopOpacity={0} />
             </RadialGradient>
           ))}
@@ -61,7 +71,7 @@ export function ScreenBackdrop() {
             cy={blob.cy * height}
             rx={blob.r * width}
             ry={blob.r * width}
-            fill={`url(#${blob.id})`}
+            fill={`url(#${prefix}-${blob.id})`}
           />
         ))}
       </Svg>

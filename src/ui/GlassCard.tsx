@@ -14,6 +14,8 @@ export type GlassCardProps = {
   /** правый слот шапки (например, действие "See all ›") */
   headerRight?: ReactNode;
   variant?: GlassVariant;
+  /** только web: размывать фон — для карточек над контентом (меню, шторки) */
+  blur?: boolean;
   radius?: number;
   padding?: number;
   style?: ViewStyle;
@@ -27,6 +29,7 @@ export function GlassCard({
   title,
   headerRight,
   variant = 'regular',
+  blur,
   radius,
   padding,
   style,
@@ -39,6 +42,7 @@ export function GlassCard({
   return (
     <Glass
       variant={variant}
+      blur={blur}
       radius={radius ?? theme.radii.widget}
       style={style}
       testID={testID}

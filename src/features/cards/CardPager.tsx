@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useIsFocused } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   type SharedValue,
   scrollTo,
@@ -18,7 +18,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import type { BankCard } from '@/api';
 import { useTheme } from '@/theme';
-import { PageDots, Touchable, useAccessibilityFlags, useTilt } from '@/ui';
+import { PageDots, Touchable, useAccessibilityFlags, useAppDimensions, useTilt } from '@/ui';
 
 import { BankCardBack } from './BankCardBack';
 import { BankCardView } from './BankCardView';
@@ -59,7 +59,7 @@ export function CardPager({
   onDragStart,
 }: CardPagerProps) {
   const theme = useTheme();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth } = useAppDimensions();
   const { reduceMotion } = useAccessibilityFlags();
   const { tiltStyle, tiltX, tiltY } = useTilt({ maxDeg: 5, enabled: useIsFocused() });
 

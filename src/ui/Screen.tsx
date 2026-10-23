@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import type { ReactNode } from 'react';
+import { HeaderHeightContext } from 'expo-router/build/react-navigation/elements';
+import { type ReactNode, useContext } from 'react';
 import {
   Platform,
   RefreshControl,
@@ -60,6 +61,8 @@ export function Screen({
 }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // высота шапки стека (профиль, регистрация); 0 — экран без шапки
+  const headerHeight = useContext(HeaderHeightContext) ?? 0;
   const lockProps = useAnimatedProps(() => ({ scrollEnabled: !scrollLock?.value }));
 
   /**
@@ -71,7 +74,9 @@ export function Screen({
   const isWeb = Platform.OS === 'web';
   const isIOS = Platform.OS === 'ios';
 
-  const topInset = (isIOS ? 0 : insets.top) + theme.spacing.sm;
+  // на web прозрачная шапка лежит поверх контента: он начинается под ней (она уже включает чёлку)
+  const topInset =
+    (isIOS ? 0 : isWeb && headerHeight > 0 ? headerHeight : insets.top) + theme.spacing.sm;
   const bottomInset =
     contentBottomInset ??
     (isWeb

@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -35,6 +35,7 @@ import {
   Text,
   Touchable,
   useAccessibilityFlags,
+  useAppDimensions,
 } from '@/ui';
 
 /**
@@ -115,7 +116,7 @@ function GalleryItem({ definition, expanded, onToggle, onLayoutY }: GalleryItemP
   const { t } = useTranslation();
   const theme = useTheme();
   const { reduceMotion } = useAccessibilityFlags();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth } = useAppDimensions();
   const layout = useCryptoLayout();
   const save = useSaveCryptoLayout();
   const [params, setParams] = useState<CryptoWidgetParams>(definition.defaultParams ?? {});

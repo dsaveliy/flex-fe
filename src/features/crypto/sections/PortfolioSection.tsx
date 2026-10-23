@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { useWindowDimensions, View } from 'react-native';
+import { View } from 'react-native';
 
 import { usePortfolio } from '@/api';
 import { useTheme } from '@/theme';
-import { AreaChart, DeltaBadge, GlassCard, PrivateAmount, Text } from '@/ui';
+import { AreaChart, DeltaBadge, GlassCard, PrivateAmount, Text, useAppDimensions } from '@/ui';
 import { formatMoney } from '@/utils/money';
 
 import { AllocationBar } from '../AllocationBar';
@@ -13,7 +13,7 @@ import { SectionState } from './SectionState';
 export function PortfolioSection() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { width } = useWindowDimensions();
+  const { width } = useAppDimensions();
   const portfolio = usePortfolio();
   const data = portfolio.data;
 

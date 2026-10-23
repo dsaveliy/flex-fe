@@ -1,4 +1,4 @@
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
@@ -51,6 +51,8 @@ export function MenuSheet({ visible, onClose, title, cancelLabel, items }: MenuS
         pointerEvents="box-none"
         style={[
           styles.bottom,
+          // на компьютере меню не шире колонки приложения
+          Platform.OS === 'web' ? { width: '100%', maxWidth: 440, alignSelf: 'center' } : null,
           {
             paddingHorizontal: theme.spacing.lg,
             paddingBottom: insets.bottom + theme.spacing.lg,
@@ -58,7 +60,7 @@ export function MenuSheet({ visible, onClose, title, cancelLabel, items }: MenuS
           },
         ]}
       >
-        <GlassCard variant="regular" padding={theme.spacing.sm} style={{ maxHeight: '70%' }}>
+        <GlassCard variant="regular" blur padding={theme.spacing.sm} style={{ maxHeight: '70%' }}>
           {title ? (
             <Text
               variant="caption"
@@ -94,7 +96,7 @@ export function MenuSheet({ visible, onClose, title, cancelLabel, items }: MenuS
             ))}
           </ScrollView>
         </GlassCard>
-        <GlassCard variant="regular" padding={0}>
+        <GlassCard variant="regular" blur padding={0}>
           <Touchable
             accessibilityRole="button"
             onPress={onClose}

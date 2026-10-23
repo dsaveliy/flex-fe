@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWindowDimensions, View } from 'react-native';
+import { View } from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -21,6 +21,7 @@ import {
   ScreenHeader,
   SearchField,
   Skeleton,
+  useAppDimensions,
 } from '@/ui';
 
 /**
@@ -34,7 +35,7 @@ const CARD_STYLES: CardStyle[] = ['mint', 'dark', 'grey', 'purple'];
 export default function CardsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth } = useAppDimensions();
   const queryClient = useQueryClient();
 
   const cards = useCards();

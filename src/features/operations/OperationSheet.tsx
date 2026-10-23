@@ -3,9 +3,10 @@ import { router } from 'expo-router';
 import { type ReactNode, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme';
-import { GlassButton, Icon, Text, Touchable } from '@/ui';
+import { GlassButton, Icon, Screen, Text, Touchable } from '@/ui';
 
 export type OperationSuccess = {
   title: string;
@@ -29,7 +30,7 @@ type OperationSheetProps = {
 /**
  * шторка денежной операции (перевод, пополнение, обмен): заголовок, поля,
  * ошибка и кнопка внизу; после успеха — галочка и итог. на iOS фон даёт
- * системная шторка, на web и Android — фон темы
+ * системная шторка, на Android — фон темы, на web — градиент страниц приложения
  */
 export function OperationSheet({
   title,
@@ -43,16 +44,19 @@ export function OperationSheet({
 }: OperationSheetProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (success) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [success]);
 
-  return (
+  const sheet = (
     <ScrollView
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets
-      style={Platform.OS === 'ios' ? undefined : { backgroundColor: theme.colors.backgroundTop }}
+      style={
+        Platform.OS === 'android' ? { backgroundColor: theme.colors.backgroundTop } : undefined
+      }
       contentContainerStyle={{
         flexGrow: 1,
         paddingHorizontal: theme.spacing.xl,
@@ -145,5 +149,14 @@ export function OperationSheet({
         </>
       )}
     </ScrollView>
+  );
+
+  // в браузере шторка открывается отдельной страницей: фон и отступы под чёлку — как у экранов
+  return Platform.OS === 'web' ? (
+    <Screen scrollable={false} contentBottomInset={insets.bottom}>
+      {sheet}
+    </Screen>
+  ) : (
+    sheet
   );
 }

@@ -37,9 +37,7 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
     const target = state.index * tabWidth;
     return {
       width: tabWidth,
-      transform: [
-        { translateX: reduceMotion ? target : withSpring(target, theme.springs.pill) },
-      ],
+      transform: [{ translateX: reduceMotion ? target : withSpring(target, theme.springs.pill) }],
     };
   }, [reduceMotion, state.index, tabWidth, theme.springs.pill]);
 
@@ -57,6 +55,7 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
         <Glass
           variant="regular"
           interactive
+          blur
           radius={theme.radii.pill}
           style={{ height: theme.sizes.tabBarHeight }}
           onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width - 12)}

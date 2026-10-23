@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, TextInput, View, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -56,6 +56,8 @@ export function SearchField({
             styles.input,
             small ? theme.typography.body : theme.typography.bodyStrong,
             { color: theme.colors.textPrimary },
+            // Safari на iPhone увеличивает страницу при фокусе на поле со шрифтом меньше 16px
+            Platform.OS === 'web' ? { fontSize: 16 } : null,
           ]}
         />
       </View>

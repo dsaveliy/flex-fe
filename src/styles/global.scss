@@ -62,3 +62,23 @@ body {
     border-radius: 4px;
   }
 }
+
+// ----- телефон в браузере -----
+#root {
+  // подсказка в поле — обычным начертанием, чтобы не читалась как уже введённый текст
+  input::placeholder,
+  textarea::placeholder {
+    font-family: 'Inter_400Regular', sans-serif;
+  }
+
+  // элементы управления не выделяются долгим нажатием и не показывают меню ссылки
+  [role='button'],
+  [role='switch'],
+  [role='tab'] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    // без задержки на двойное касание
+    touch-action: manipulation;
+  }
+}

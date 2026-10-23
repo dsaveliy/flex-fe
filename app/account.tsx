@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 
 import { USE_MOCK_API, useUser } from '@/api';
 import { useLogout } from '@/auth';
@@ -20,6 +20,7 @@ import {
   Screen,
   Skeleton,
   Text,
+  Toggle,
 } from '@/ui';
 
 /**
@@ -97,13 +98,7 @@ export default function AccountScreen() {
             title={t('account.rows.hideBalance')}
             subtitle={t('account.hideBalanceHint')}
             left={<Icon name="eyeOff" color={theme.colors.accent} />}
-            right={
-              <Switch
-                value={hidden}
-                onValueChange={setHidden}
-                trackColor={{ true: theme.colors.accent }}
-              />
-            }
+            right={<Toggle value={hidden} onValueChange={setHidden} />}
             showDivider
           />
           <ListRow

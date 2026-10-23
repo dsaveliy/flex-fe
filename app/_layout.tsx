@@ -1,10 +1,3 @@
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -12,6 +5,7 @@ import { View } from 'react-native';
 import { useSession } from '@/auth';
 import { AppProviders } from '@/providers/AppProviders';
 import { darkTheme, palette } from '@/theme';
+import { useAppFonts } from '@/theme/useAppFonts';
 
 // Глобальные веб-стили (SASS/SCSS). Expo Router требует импортировать
 // глобальный CSS именно в корневом layout; на native-платформах этот
@@ -19,12 +13,7 @@ import { darkTheme, palette } from '@/theme';
 import '@/styles/global.scss';
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
+  const [fontsLoaded, fontError] = useAppFonts();
 
   if (!fontsLoaded && !fontError) {
     return <View style={{ flex: 1, backgroundColor: darkTheme.colors.backgroundTop }} />;

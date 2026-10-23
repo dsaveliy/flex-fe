@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover: с экрана «Домой» приложение рисуется под чёлкой, отступы — через safe-area -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <title>Flex</title>
+    <meta name="description" content="Flex — банк и криптовалюта в одном приложении" />
+    <meta name="theme-color" content="#0B1512" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- «На экран Домой»: открывается без адресной строки, как приложение -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Flex" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png" />
+
+    <!--
+      Inter: латиница, кириллица и знаки интерфейса в WOFF2 (~40 КБ на начертание вместо ~170 КБ TTF).
+      имена семейств совпадают с fontFamily из src/theme/tokens.ts, поэтому useFonts на web не нужен
+    -->
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-400-v1.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-500-v1.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-600-v1.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/inter-700-v1.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- рекомендованный react-native-web сброс: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+    <style id="flex-web">
+      @font-face {
+        font-family: 'Inter_400Regular';
+        src: url('/assets/fonts/inter-400-v1.woff2') format('woff2');
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter_500Medium';
+        src: url('/assets/fonts/inter-500-v1.woff2') format('woff2');
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter_600SemiBold';
+        src: url('/assets/fonts/inter-600-v1.woff2') format('woff2');
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter_700Bold';
+        src: url('/assets/fonts/inter-700-v1.woff2') format('woff2');
+        font-display: swap;
+      }
+
+      /* фон темы с первого кадра: без белой вспышки до загрузки JS */
+      html,
+      body {
+        background: #0b1512;
+      }
+      body {
+        overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+      /* заставка до первого рендера React: знак Flex на фоне приложения */
+      .flex-splash {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(70, 207, 160, 0.28), rgba(70, 207, 160, 0) 45%),
+          radial-gradient(circle at 95% 30%, rgba(111, 168, 240, 0.16), rgba(111, 168, 240, 0) 40%),
+          #0b1512;
+      }
+      .flex-splash svg {
+        width: 72px;
+        height: 72px;
+        animation: flex-splash-pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes flex-splash-pulse {
+        50% {
+          opacity: 0.55;
+          transform: scale(0.94);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flex-splash svg {
+          animation: none;
+        }
+      }
+
+      /* компьютер: колонка ширины телефона по центру (ширина — APP_MAX_WIDTH в useAppDimensions.web.ts) */
+      @media (min-width: 600px) {
+        html,
+        body {
+          background:
+            radial-gradient(circle at 20% 15%, rgba(70, 207, 160, 0.16), rgba(70, 207, 160, 0) 40%),
+            radial-gradient(
+              circle at 85% 80%,
+              rgba(111, 168, 240, 0.12),
+              rgba(111, 168, 240, 0) 40%
+            ),
+            #070d0b;
+        }
+        #root {
+          width: 100%;
+          max-width: 440px;
+          height: calc(100% - 48px);
+          margin: 24px auto;
+          border-radius: 36px;
+          overflow: hidden;
+          box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.08),
+            0 40px 100px rgba(0, 0, 0, 0.55);
+          /* position: fixed у потомков остаётся внутри колонки */
+          transform: translateZ(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Для работы Flex включите JavaScript.</noscript>
+    <div id="root">
+      <div class="flex-splash" aria-hidden="true">
+        <svg viewBox="3 7 25 23">
+          <path d="M16 29c0-7.2 4.4-13 11.5-14.4C27 22 22.6 27.3 16 29z" fill="#8CD1AD" />
+          <path d="M16 29C16 18.6 10.2 10.3 3 8c0 11 5.6 18.7 13 21z" fill="#3BA57E" />
+        </svg>
+      </div>
+    </div>
+  </body>
+</html>

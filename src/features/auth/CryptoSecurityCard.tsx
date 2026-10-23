@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { Switch } from 'react-native';
 
 import {
   useBiometryKind,
@@ -9,7 +8,7 @@ import {
   useSetBiometric,
 } from '@/auth';
 import { useTheme } from '@/theme';
-import { GlassCard, Icon, ListRow } from '@/ui';
+import { GlassCard, Icon, ListRow, Toggle } from '@/ui';
 
 /**
  * настройки входа в Crypto в профиле: Face ID (менять можно только при
@@ -38,11 +37,10 @@ export function CryptoSecurityCard() {
           subtitle={t(unlocked ? 'auth.account.biometricHint' : 'auth.account.biometricHintLocked')}
           left={<Icon name="faceId" color={theme.colors.accent} />}
           right={
-            <Switch
+            <Toggle
               value={status.biometricEnabled}
               disabled={!unlocked || setBiometric.isPending}
               onValueChange={(enabled) => setBiometric.mutate(enabled)}
-              trackColor={{ true: theme.colors.accent }}
             />
           }
           showDivider={unlocked}

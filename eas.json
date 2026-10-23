@@ -14,13 +14,13 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://flex.example.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://flexbank.online/api/v1"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://flex.example.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://flexbank.online/api/v1"
       }
     }
   },

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWindowDimensions, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useMarkets } from '@/api';
 import { useTheme } from '@/theme';
@@ -14,6 +14,7 @@ import {
   GlassCard,
   GlassGroup,
   Text,
+  useAppDimensions,
 } from '@/ui';
 import { formatPrice } from '@/utils/money';
 
@@ -26,7 +27,7 @@ const TRADE_PAIRS = ['btc', 'eth', 'sol'];
 export function TradeSection() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { width } = useWindowDimensions();
+  const { width } = useAppDimensions();
   const markets = useMarkets('crypto');
   const [pair, setPair] = useState(TRADE_PAIRS[0]);
   const asset = markets.data?.find((item) => item.id === pair);
@@ -39,7 +40,10 @@ export function TradeSection() {
 
   return (
     <View style={{ gap: theme.spacing.lg }}>
-      <GlassGroup spacing={theme.spacing.sm} style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+      <GlassGroup
+        spacing={theme.spacing.sm}
+        style={{ flexDirection: 'row', gap: theme.spacing.sm }}
+      >
         {TRADE_PAIRS.map((id) => {
           const item = markets.data?.find((entry) => entry.id === id);
           return item ? (
@@ -65,7 +69,11 @@ export function TradeSection() {
           <DeltaBadge value={asset.trend.changePercent} caption={t('crypto.today')} />
           {asset.trend.series ? (
             <View style={{ marginTop: theme.spacing.lg }}>
-              <AreaChart data={asset.trend.series} width={width - theme.spacing.xl * 4} height={150} />
+              <AreaChart
+                data={asset.trend.series}
+                width={width - theme.spacing.xl * 4}
+                height={150}
+              />
             </View>
           ) : null}
         </GlassCard>
