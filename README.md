@@ -2,7 +2,7 @@
 
 Клиентская часть **Flex** — мобильного криптобанка, который объединяет классический банкинг и операции с криптовалютой в одном приложении. Написано на React (React Native + Expo) и работает на iOS, Android и в браузере из одной кодовой базы.
 
-Серверная часть — репозиторий [flex-be](https://github.com/dsaveliy/flex-be): FastAPI + PostgreSQL. API описан в `flex-be/docs/api.md`, развёртывание — в `flex-be/docs/deploy.md`.
+Серверная часть — репозиторий [flex-be](https://github.com/dsaveliy/flex-be): FastAPI + PostgreSQL. API описан в [flex-be/docs/api.md](https://github.com/dsaveliy/flex-be/blob/main/docs/api.md), развёртывание — в [flex-be/docs/deploy.md](https://github.com/dsaveliy/flex-be/blob/main/docs/deploy.md).
 
 **Рабочая версия:** [https://flexbank.online](https://flexbank.online) · документация API (Swagger): [https://flexbank.online/api/v1/docs](https://flexbank.online/api/v1/docs)
 
@@ -75,7 +75,7 @@ npx expo start            # i — iOS, a — Android, w — браузер
 - **веб** — `npx expo export --platform web`; на сервере собирается автоматически (`Dockerfile`);
 - **Android APK** — `npx eas-cli build -p android --profile preview` (профили в `eas.json`).
 
-Подробнее — `flex-be/docs/deploy.md`, §6.
+Подробнее — [flex-be/docs/deploy.md](https://github.com/dsaveliy/flex-be/blob/main/docs/deploy.md), §6.
 
 Проверки: `npm run typecheck`.
 
@@ -128,7 +128,7 @@ npx expo start            # i — iOS, a — Android, w — браузер
 
 ### 5.3. Как подключиться к серверу
 
-1. Сервер разворачивается по инструкции `flex-be/docs/deploy.md`. Проверка, что он отвечает:
+1. Сервер разворачивается по инструкции [flex-be/docs/deploy.md](https://github.com/dsaveliy/flex-be/blob/main/docs/deploy.md) (конфигурация — в [flex-be/deploy/](https://github.com/dsaveliy/flex-be/blob/main/deploy)). Проверка, что он отвечает:
    ```bash
    curl https://flexbank.online/health          # {"status":"ok"}
    ```
