@@ -16,7 +16,7 @@ import { useTheme } from '@/theme';
 import { ActionMenu, Icon, Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
 
-import { avatarColor, ChatAvatar } from './ChatAvatar';
+import { avatarColor, BotLabel, ChatAvatar } from './ChatAvatar';
 import { DeliveryMark } from './DeliveryMark';
 
 /** насколько потянуть пузырь влево, чтобы ответить на него */
@@ -136,7 +136,11 @@ export const MessageBubble = memo(function MessageBubble({
               onLongPress={handleLongPress}
               accessibilityRole="text"
               accessibilityLabel={t('chat.a11y.message', {
-                name: own ? t('chat.you') : authorName,
+                name: own
+                  ? t('chat.you')
+                  : message.author?.isBot
+                    ? `${authorName}, ${t('chat.bot')}`
+                    : authorName,
                 time,
                 text: message.text,
               })}
@@ -164,13 +168,16 @@ export const MessageBubble = memo(function MessageBubble({
               ]}
             >
               {!own && startsGroup && authorName ? (
-                <Text
-                  variant="bodyStrong"
-                  numberOfLines={1}
-                  style={{ color: avatarColor(message.author?.id ?? ''), marginBottom: 2 }}
-                >
-                  {authorName}
-                </Text>
+                <View style={[styles.author, { gap: theme.spacing.xs }]}>
+                  <Text
+                    variant="bodyStrong"
+                    numberOfLines={1}
+                    style={[styles.authorName, { color: avatarColor(message.author?.id ?? '') }]}
+                  >
+                    {authorName}
+                  </Text>
+                  {message.author?.isBot ? <BotLabel /> : null}
+                </View>
               ) : null}
 
               {message.replyTo ? (
@@ -315,6 +322,14 @@ const styles = StyleSheet.create({
   },
   bubble: {
     minWidth: 64,
+  },
+  author: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  authorName: {
+    flexShrink: 1,
   },
   quote: {
     borderLeftWidth: 3,

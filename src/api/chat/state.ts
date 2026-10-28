@@ -47,14 +47,17 @@ export function resetChatState(): void {
 
 export const IDLE_HISTORY: RoomHistory = { status: 'idle', exhausted: false, loadingMore: false };
 
+/** время сервера (микросекунды) и своих пузырей (миллисекунды) сравнивается как даты, не как строки */
+const timeOf = (iso: string | undefined) => (iso ? Date.parse(iso) : 0);
+
 const byNewest = (a: ChatMessage, b: ChatMessage) =>
-  b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id);
+  timeOf(b.createdAt) - timeOf(a.createdAt) || b.id.localeCompare(a.id);
 
 function sortRooms(rooms: ChatRoom[]): ChatRoom[] {
   return [...rooms].sort((a, b) => {
     if (a.kind === 'support' && b.kind !== 'support') return -1;
     if (b.kind === 'support' && a.kind !== 'support') return 1;
-    return (b.lastMessage?.createdAt ?? '').localeCompare(a.lastMessage?.createdAt ?? '');
+    return timeOf(b.lastMessage?.createdAt) - timeOf(a.lastMessage?.createdAt);
   });
 }
 

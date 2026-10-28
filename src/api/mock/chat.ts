@@ -37,6 +37,7 @@ const member = (id: string, name: string, initials: string): ChatMember => ({
   name,
   initials,
   isStaff: false,
+  isBot: true,
 });
 
 const BOTS = [
@@ -142,6 +143,7 @@ function toMember(user: Pick<User, 'id' | 'firstName' | 'lastName'>): ChatMember
     name: `${user.firstName} ${user.lastName.charAt(0)}.`,
     initials: `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`,
     isStaff: false,
+    isBot: false,
   };
 }
 

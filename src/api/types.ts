@@ -513,6 +513,8 @@ export type ChatMember = {
   initials: string;
   /** сотрудник поддержки — значок «Проверенный Flex» (только в support) */
   isStaff: boolean;
+  /** собеседник-бот Flex Lobby — подпись «бот» рядом с именем */
+  isBot: boolean;
 };
 
 export type ChatEmoji = '👍' | '❤️' | '😂' | '🔥' | '🚀' | '🙏';

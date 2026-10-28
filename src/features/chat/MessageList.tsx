@@ -52,10 +52,10 @@ export function MessageList({
   const items = useMemo(() => buildFeed(feed.messages, meId), [feed.messages, meId]);
 
   /** время прочтения собеседником: всё своё не позже него — ✓✓ */
-  const readUntil = useMemo(
-    () => feed.messages.find((message) => message.id === peerLastReadMessageId)?.createdAt ?? null,
-    [feed.messages, peerLastReadMessageId],
-  );
+  const readUntil = useMemo(() => {
+    const read = feed.messages.find((message) => message.id === peerLastReadMessageId);
+    return read ? Date.parse(read.createdAt) : null;
+  }, [feed.messages, peerLastReadMessageId]);
 
   const scrollTo = useCallback(
     (messageId: string) => {
@@ -104,7 +104,7 @@ export function MessageList({
           startsGroup={item.startsGroup}
           endsGroup={item.endsGroup}
           meId={meId}
-          read={Boolean(readUntil && item.message.createdAt <= readUntil)}
+          read={readUntil !== null && Date.parse(item.message.createdAt) <= readUntil}
           highlighted={highlighted === item.message.id}
           onLongPress={onLongPress}
           onReply={onReply}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import type { ChatMember } from '@/api';
@@ -79,6 +80,26 @@ export function ChatAvatar({ member, size = 32, online = false }: ChatAvatarProp
           }}
         />
       ) : null}
+    </View>
+  );
+}
+
+/** подпись «бот» у собеседников Lobby: в общем чате не должно быть сомнений, кто человек */
+export function BotLabel() {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  return (
+    <View
+      style={{
+        paddingHorizontal: theme.spacing.xs + 2,
+        borderRadius: theme.radii.pill,
+        backgroundColor: theme.colors.accentMuted,
+      }}
+    >
+      <Text variant="micro" color="accent">
+        {t('chat.bot')}
+      </Text>
     </View>
   );
 }

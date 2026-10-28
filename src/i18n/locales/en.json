@@ -555,6 +555,7 @@
   "chat": {
     "title": "Messages",
     "you": "You",
+    "bot": "bot",
     "online": "{{count}} online",
     "list": {
       "noMessages": "No messages yet"
