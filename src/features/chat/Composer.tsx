@@ -124,6 +124,8 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend }: ComposerPro
             style={[
               styles.fill,
               theme.typography.message,
+              // Safari на iPhone приближает страницу при фокусе в поле со шрифтом меньше 16px
+              Platform.OS === 'web' ? styles.webFont : null,
               {
                 color: theme.colors.textPrimary,
                 maxHeight: lineHeight * MAX_LINES + theme.spacing.md,
@@ -161,6 +163,9 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend }: ComposerPro
 }
 
 const styles = StyleSheet.create({
+  webFont: {
+    fontSize: 16,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
