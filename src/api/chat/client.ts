@@ -28,7 +28,9 @@ import {
 } from './state';
 
 /** пульс и переподключение — docs/chat.md §3.2 */
-const PING_MS = 25_000;
+const PING_MS = 15_000;
+/** после возврата на экран живой сокет отвечает на ping быстрее этого, иначе он «зомби» */
+const PROBE_TIMEOUT_MS = 4_000;
 const MAX_MISSED_PONGS = 2;
 const BACKOFF_MS = [1_000, 2_000, 4_000, 8_000, 15_000];
 /** сколько показывать «печатает» без новых кадров */
@@ -45,6 +47,7 @@ let pingTimer: ReturnType<typeof setInterval> | null = null;
 let missedPongs = 0;
 let lastErrorCode: string | null = null;
 let activeRoomId: string | null = null;
+let probeTimer: ReturnType<typeof setTimeout> | null = null;
 /** вошли и приложение на экране: только тогда держим соединение */
 let wanted = false;
 const typingTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -165,6 +168,33 @@ function startPing(): void {
 function stopPing(): void {
   if (pingTimer) clearInterval(pingTimer);
   pingTimer = null;
+  clearProbe();
+}
+
+function clearProbe(): void {
+  if (probeTimer) clearTimeout(probeTimer);
+  probeTimer = null;
+}
+
+/**
+ * приложение снова на экране или вернулась сеть. мобильный браузер в фоне молча убивает
+ * сокет, а он ещё выглядит открытым: проверяем ping-ом и сразу догружаем пропущенное
+ */
+function probe(): void {
+  if (!wanted) return;
+  if (activeRoomId) void loadLatest(activeRoomId);
+  if (!link) {
+    attempt = 0;
+    connect();
+    return;
+  }
+  if (!isOnline() || probeTimer) return;
+  link.send({ type: 'ping' });
+  probeTimer = setTimeout(() => {
+    probeTimer = null;
+    attempt = 0;
+    drop();
+  }, PROBE_TIMEOUT_MS);
 }
 
 /** переподключиться сейчас, не дожидаясь паузы (кнопка «Повторить») */
@@ -220,6 +250,7 @@ function handleFrame(frame: ChatServerFrame): void {
       return;
     case 'pong':
       missedPongs = 0;
+      clearProbe();
       return;
   }
 }
@@ -255,8 +286,19 @@ function sendFrame(message: LocalChatMessage): void {
   armSendTimer(message.clientId ?? '');
 }
 
-/** после переподключения — те же `clientId`, сервер не создаст дубль (docs/chat.md §4.2) */
+/**
+ * после переподключения — те же `clientId`, сервер не создаст дубль (docs/chat.md §4.2).
+ * «не отправлено» по таймауту — обычно ушедшее в мёртвый сокет: отправляем заново сами
+ */
 function flushPending(): void {
+  const { messages } = chatStore.get();
+  for (const feed of Object.values(messages)) {
+    for (const message of feed) {
+      if (message.delivery === 'failed' && message.errorCode === 'TIMEOUT' && message.clientId) {
+        update((state) => setDelivery(state, message.clientId ?? '', 'sending'));
+      }
+    }
+  }
   for (const message of pendingMessages(chatStore.get())) sendFrame(message);
 }
 
@@ -471,11 +513,28 @@ export function startChatClient(): () => void {
     if (Platform.OS === 'web') return;
     foreground = state === 'active' || (state !== 'background' && foreground);
     syncWanted(foreground);
+    if (state === 'active') probe();
   });
+
+  // web: вернулись на вкладку или в сеть — сокет мог умереть, пока страница спала
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') probe();
+  };
+  const webEvents = Platform.OS === 'web' && typeof window !== 'undefined';
+  if (webEvents) {
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', probe);
+    window.addEventListener('pageshow', probe);
+  }
 
   return () => {
     offSession();
     appState.remove();
+    if (webEvents) {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', probe);
+      window.removeEventListener('pageshow', probe);
+    }
     wanted = false;
     disconnect();
   };
