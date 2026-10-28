@@ -8,3 +8,4 @@ export { api } from './api';
 export { API_AUTH_SCOPE } from './services';
 export type { FlexApi } from './services';
 export type * from './types';
+export * from './chat';

@@ -29,6 +29,7 @@ import { mockMarkets } from './markets.fixtures';
 import { requireAccess, requireCrypto } from './auth/guards';
 import { mockAuthApi } from './auth';
 import { mockOperationsApi, mockOperationsState } from './operations';
+import { mockChatApi } from './chat';
 
 /**
  * имитация настроек пользователя на сервере: раскладка живёт в памяти до
@@ -44,6 +45,7 @@ let cryptoLayout: CryptoLayout = defaultCryptoLayout();
 export const mockApi = {
   ...mockAuthApi,
   ...mockOperationsApi,
+  ...mockChatApi,
 
   // приватные данные проверяются так же, как на бэкенде: access или crypto-токен (guards.ts)
   getUser: async (): Promise<User> => {

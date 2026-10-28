@@ -6,6 +6,8 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  ChatMessage,
+  ChatRoom,
   CryptoAccessStatus,
   CryptoBiometricRequest,
   CryptoBiometricResponse,
@@ -94,6 +96,12 @@ export type FlexApi = {
   exchange(body: ExchangeRequest, idempotencyKey: string): Promise<ExchangeResult>;
   convert(body: ExchangeRequest, idempotencyKey: string): Promise<ExchangeResult>;
   subscribeEarn(body: EarnSubscribeRequest): Promise<EarnPosition>;
+  // чат (docs/chat.md): живые сообщения — по WebSocket (`src/api/chat`), история — по REST
+  getChatRooms(): Promise<ChatRoom[]>;
+  getChatMessages(
+    roomId: string,
+    params?: { before?: string; limit?: number },
+  ): Promise<ChatMessage[]>;
 };
 
 /**
@@ -144,6 +152,8 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   exchange: 'access',
   convert: 'crypto',
   subscribeEarn: 'crypto',
+  getChatRooms: 'access',
+  getChatMessages: 'access',
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -245,6 +255,18 @@ function createHttpApi(baseUrl: string): FlexApi {
       transport.post<ExchangeResult>('/convert', body, { ...as('convert'), init: idempotent(key) }),
     subscribeEarn: (body) =>
       transport.post<EarnPosition>('/earn/positions', body, as('subscribeEarn')),
+
+    getChatRooms: () => transport.get<ChatRoom[]>('/chat/rooms', as('getChatRooms')),
+    getChatMessages: (roomId, params) => {
+      const query = new URLSearchParams();
+      if (params?.before) query.set('before', params.before);
+      if (params?.limit) query.set('limit', String(params.limit));
+      const suffix = query.size > 0 ? `?${query.toString()}` : '';
+      return transport.get<ChatMessage[]>(
+        `/chat/rooms/${encodeURIComponent(roomId)}/messages${suffix}`,
+        as('getChatMessages'),
+      );
+    },
   };
 }
 

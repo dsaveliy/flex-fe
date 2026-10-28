@@ -48,7 +48,10 @@ export type IconName =
   | 'coins'
   | 'star'
   | 'backspace'
-  | 'faceId';
+  | 'faceId'
+  | 'chat'
+  | 'reply'
+  | 'close';
 
 export type IconProps = {
   name: IconName;
@@ -335,6 +338,19 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
           <Path d="M10 12h10l-3.5-3.5M20 12l-3.5 3.5" {...common} />
         </>
       )}
+      {name === 'chat' && (
+        <Path
+          d="M12 4.5c4.7 0 8.5 3.1 8.5 7s-3.8 7-8.5 7c-1 0-2-.1-2.9-.4L4.5 19.5l1.3-3.6C4.4 14.7 3.5 13.2 3.5 11.5c0-3.9 3.8-7 8.5-7z"
+          {...common}
+        />
+      )}
+      {name === 'reply' && (
+        <>
+          <Path d="M9.5 6 4 11.5 9.5 17" {...common} />
+          <Path d="M4.5 11.5H14a6 6 0 0 1 6 6V19" {...common} />
+        </>
+      )}
+      {name === 'close' && <Path d="M6.5 6.5l11 11M17.5 6.5l-11 11" {...common} />}
     </Svg>
   );
 }

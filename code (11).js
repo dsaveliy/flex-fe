@@ -1,4 +1,5 @@
-// плагин Figma: Flex UI Generator v13
+// плагин Figma: Flex UI Generator v14
+// второй ряд: экраны чата Flex Lobby (спринт 5) — лента, состояния, удержание, список, компоненты и токены.
 // экран Crypto — без изменений (зафиксировано).
 // экран Home: круглые кнопки действий увеличены и лучше сбалансированы с виджетом баланса.
 // экран Cards: все карты (главная + мини) теперь строго держат реальное соотношение сторон банковской карты
@@ -785,6 +786,401 @@ async function buildCryptoDesktop(offsetX) {
   return frame;
 }
 
+// ============ чат: Flex Lobby (спринт 5, docs/chat.md) ============
+// второй ряд кадров под основными экранами. размеры и цвета повторяют src/features/chat:
+// пузырь 20 с «хвостиком» 4, ширина до 78%, текст 15/20, аватар 30, поле ввода — капсула 24, отправка 36
+
+const CHAT_ROW_Y = 912;
+const CHAT_AVATAR_COLORS = [COLORS.leafDark, COLORS.coinC, COLORS.cardPurpleB, COLORS.mastercardOrange, COLORS.coinB];
+
+function chatRect(parent, { x, y, w, h, color, opacity = 1, radius = 0, name = "Rect", stroke }) {
+  const rect = figma.createRectangle();
+  rect.name = name;
+  rect.resize(w, h);
+  rect.x = x;
+  rect.y = y;
+  if (typeof radius === "number") rect.cornerRadius = radius;
+  else {
+    rect.topLeftRadius = radius.tl;
+    rect.topRightRadius = radius.tr;
+    rect.bottomLeftRadius = radius.bl;
+    rect.bottomRightRadius = radius.br;
+  }
+  rect.fills = [{ type: "SOLID", color, opacity }];
+  if (stroke) {
+    rect.strokes = [{ type: "SOLID", color: COLORS.white, opacity: stroke }];
+    rect.strokeWeight = 1;
+  }
+  parent.appendChild(rect);
+  return rect;
+}
+
+// текст с переносом: сначала естественная ширина, если шире maxWidth — фиксируем ширину
+function chatText(parent, { text, x, y, size = 15, line = 20, weight = "Regular", color = COLORS.textPrimary, opacity = 1, maxWidth, align = "LEFT" }) {
+  const t = figma.createText();
+  t.fontName = { family: "Inter", style: weight };
+  t.characters = text;
+  t.fontSize = size;
+  t.lineHeight = { value: line, unit: "PIXELS" };
+  t.fills = [{ type: "SOLID", color, opacity }];
+  t.textAlignHorizontal = align;
+  t.textAutoResize = "WIDTH_AND_HEIGHT";
+  if (maxWidth && t.width > maxWidth) {
+    t.textAutoResize = "HEIGHT";
+    t.resize(maxWidth, t.height);
+  }
+  t.x = x;
+  t.y = y;
+  parent.appendChild(t);
+  return t;
+}
+
+function chatAvatar(parent, x, y, size, initials, colorIndex) {
+  const circle = figma.createEllipse();
+  circle.name = "Chat Avatar";
+  circle.resize(size, size);
+  circle.x = x;
+  circle.y = y;
+  circle.fills = [{ type: "SOLID", color: CHAT_AVATAR_COLORS[colorIndex % CHAT_AVATAR_COLORS.length] }];
+  parent.appendChild(circle);
+  const label = chatText(parent, { text: initials, x, y: 0, size: size >= 40 ? 15 : 10, line: size >= 40 ? 20 : 13, weight: "Medium", color: COLORS.white });
+  label.x = x + (size - label.width) / 2;
+  label.y = y + (size - label.height) / 2;
+  return circle;
+}
+
+// пузырь сообщения; возвращает нижнюю границу (с реакциями и строкой ошибки)
+function chatBubble(frame, W, y, m) {
+  const maxText = Math.round((W - 32 - 38) * 0.78) - 24;
+  const ink = m.own ? COLORS.white : COLORS.textPrimary;
+  const parts = [];
+  const g = figma.createFrame();
+  g.name = m.own ? "Bubble — outgoing" : "Bubble — incoming";
+  g.fills = [];
+  g.clipsContent = false;
+  frame.appendChild(g);
+
+  let innerY = 8;
+  let contentW = 0;
+  if (!m.own && m.author) {
+    const name = chatText(g, { text: m.author, x: 12, y: innerY, size: 13, line: 18, weight: "Medium", color: CHAT_AVATAR_COLORS[m.color % CHAT_AVATAR_COLORS.length] });
+    parts.push(name); innerY += 20; contentW = Math.max(contentW, name.width);
+  }
+  if (m.reply) {
+    const qName = chatText(g, { text: m.reply.name, x: 23, y: innerY + 4, size: 13, line: 18, weight: "Medium", color: ink, maxWidth: maxText - 16 });
+    const qText = chatText(g, { text: m.reply.text, x: 23, y: innerY + 22, size: 11, line: 15, color: ink, opacity: 0.8, maxWidth: maxText - 16 });
+    const qW = Math.max(qName.width, qText.width) + 19;
+    const quote = chatRect(g, { x: 12, y: innerY, w: qW, h: 44, color: m.own ? COLORS.white : COLORS.accent, opacity: m.own ? 0.18 : 0.12, radius: 8, name: "Reply quote" });
+    const bar = chatRect(g, { x: 12, y: innerY, w: 3, h: 44, color: m.own ? COLORS.white : COLORS.accent, radius: 2, name: "Quote bar" });
+    g.insertChild(0, quote); g.insertChild(1, bar);
+    innerY += 48; contentW = Math.max(contentW, qW);
+  }
+  const body = chatText(g, { text: m.text, x: 12, y: innerY, color: ink, maxWidth: maxText });
+  innerY += body.height + 2; contentW = Math.max(contentW, body.width);
+  const meta = chatText(g, { text: m.time + (m.status ? "  " + m.status : ""), x: 0, y: innerY, size: 10, line: 13, weight: "Medium", color: ink, opacity: 0.7 });
+  contentW = Math.max(contentW, meta.width + 8);
+  const bw = Math.max(64, contentW + 24);
+  const bh = innerY + 13 + 6;
+  meta.x = bw - 12 - meta.width;
+
+  const tail = m.endsGroup === false ? 20 : 4;
+  const bubble = chatRect(g, {
+    x: 0, y: 0, w: bw, h: bh,
+    color: m.own ? COLORS.accent : COLORS.white,
+    opacity: m.own ? (m.failed ? 0.7 : 1) : 0.55,
+    radius: { tl: 20, tr: 20, bl: m.own ? 20 : tail, br: m.own ? tail : 20 },
+    name: "Bubble",
+    stroke: m.own ? undefined : 0.6,
+  });
+  if (m.highlight) {
+    bubble.strokes = [{ type: "SOLID", color: COLORS.accent }];
+    bubble.strokeWeight = 2;
+  }
+  g.insertChild(0, bubble);
+  g.resize(bw, bh);
+  g.x = m.own ? W - 16 - bw : 16 + 30 + 8;
+  g.y = y;
+
+  if (!m.own && m.endsGroup !== false && m.initials) chatAvatar(frame, 16, y + bh - 30, 30, m.initials, m.color);
+
+  let bottom = y + bh;
+  if (m.reactions) {
+    let rx = g.x;
+    m.reactions.forEach((r) => {
+      const label = chatText(frame, { text: r.emoji + " " + r.count, x: 0, y: 0, size: 12, line: 16, weight: "Medium", color: r.mine ? COLORS.accent : COLORS.textMuted });
+      const chip = chatRect(frame, { x: rx, y: bottom + 4, w: label.width + 16, h: 26, color: r.mine ? COLORS.accent : COLORS.white, opacity: r.mine ? 0.22 : 0.4, radius: 13, name: "Reaction chip", stroke: 0.6 });
+      if (r.mine) { chip.strokes = [{ type: "SOLID", color: COLORS.accent }]; }
+      frame.insertChild(frame.children.indexOf(label), chip);
+      label.x = rx + 8; label.y = bottom + 9;
+      rx += label.width + 20;
+    });
+    bottom += 30;
+  }
+  if (m.failed) {
+    const err = chatText(frame, { text: "ⓘ Сервер не ответил · Отправить ещё раз", x: 0, y: bottom + 4, size: 11, line: 15, color: COLORS.red });
+    err.x = W - 16 - err.width;
+    bottom += 20;
+  }
+  return bottom;
+}
+
+function chatDatePill(frame, W, y, text) {
+  const label = chatText(frame, { text, x: 0, y: y + 4, size: 10, line: 13, weight: "Medium", color: COLORS.textMuted });
+  const pill = chatRect(frame, { x: (W - label.width) / 2 - 12, y, w: label.width + 24, h: 21, color: COLORS.white, opacity: 0.35, radius: 11, name: "Date pill" });
+  frame.insertChild(frame.children.indexOf(label), pill);
+  label.x = (W - label.width) / 2;
+  return y + 21 + 12;
+}
+
+function chatHeader(frame, W, title, subtitle) {
+  createText(frame, { text: "‹", x: 18, y: 50, size: 30, weight: "Medium", color: COLORS.accent });
+  createText(frame, { text: title, x: 0, y: 54, size: 17, weight: "Bold", width: W, align: "CENTER" });
+  if (subtitle) createText(frame, { text: subtitle, x: 0, y: 76, size: 11, weight: "Medium", color: COLORS.accent, width: W, align: "CENTER" });
+  createText(frame, { text: "⌕", x: W - 42, y: 52, size: 22, weight: "Bold", color: COLORS.accent });
+}
+
+function chatComposer(frame, W, H, { text = "", reply } = {}) {
+  const y = H - 34 - 52;
+  if (reply) {
+    createGlassCard(frame, 12, y - 56, W - 24, 50, { radius: 12, fillOpacity: 0.55, blur: 16 });
+    createText(frame, { text: "↩", x: 24, y: y - 44, size: 16, weight: "Bold", color: COLORS.accent });
+    chatRect(frame, { x: 46, y: y - 46, w: 2, h: 34, color: COLORS.accent, radius: 1, name: "Reply bar" });
+    createText(frame, { text: "Ответ " + reply.name, x: 56, y: y - 48, size: 13, weight: "Medium", color: COLORS.accent });
+    createText(frame, { text: reply.text, x: 56, y: y - 30, size: 11, color: COLORS.textMuted });
+    createText(frame, { text: "✕", x: W - 44, y: y - 40, size: 14, weight: "Medium", color: COLORS.textMuted });
+  }
+  createGlassCard(frame, 12, y, W - 24, 48, { radius: 24, fillOpacity: 0.55, blur: 18 });
+  createText(frame, { text: text || "Сообщение…", x: 30, y: y + 14, size: 15, color: text ? COLORS.textPrimary : COLORS.textMuted });
+  const active = Boolean(text);
+  const send = figma.createEllipse();
+  send.name = "Send button";
+  send.resize(36, 36);
+  send.x = W - 12 - 6 - 36;
+  send.y = y + 6;
+  send.fills = [{ type: "SOLID", color: active ? COLORS.accent : COLORS.white, opacity: active ? 1 : 0.4 }];
+  frame.appendChild(send);
+  createText(frame, { text: "↑", x: send.x, y: send.y + 7, size: 18, weight: "Bold", color: active ? COLORS.white : COLORS.textMuted, width: 36, align: "CENTER" });
+}
+
+function chatTyping(frame, y, text) {
+  [0, 1, 2].forEach((i) => {
+    const dot = figma.createEllipse();
+    dot.resize(6, 6);
+    dot.x = 20 + i * 9;
+    dot.y = y + 5;
+    dot.fills = [{ type: "SOLID", color: COLORS.textMuted, opacity: 0.4 + i * 0.25 }];
+    frame.appendChild(dot);
+  });
+  createText(frame, { text, x: 50, y, size: 11, color: COLORS.textMuted });
+}
+
+function chatBanner(frame, W, y) {
+  createGlassCard(frame, 40, y, W - 80, 30, { radius: 15, fillOpacity: 0.6, blur: 16 });
+  createText(frame, { text: "◌  Нет соединения · переподключаемся…", x: 54, y: y + 8, size: 12, weight: "Medium", color: COLORS.red });
+  createText(frame, { text: "Повторить", x: W - 40 - 72, y: y + 8, size: 12, weight: "Medium", color: COLORS.accent });
+}
+
+const LOBBY_SCRIPT = [
+  { date: "Вчера" },
+  { author: "Анна К.", initials: "АК", color: 0, text: "Кто уже пробовал Earn на ETH? Какая доходность выходит за месяц?", time: "18:20" },
+  { author: "Ольга М.", initials: "ОМ", color: 2, text: "У меня 4,5% годовых, начисляется каждый день", time: "18:23", reply: { name: "Анна К.", text: "Кто уже пробовал Earn на ETH?…" }, reactions: [{ emoji: "🔥", count: 2 }] },
+  { date: "Сегодня" },
+  { own: true, text: "BTC опять у 98k 🚀", time: "10:41", status: "✓✓", endsGroup: false },
+  { own: true, text: "Кто держит USDT в Earn — выплаты каждый день?", time: "10:41", status: "✓✓", reactions: [{ emoji: "🚀", count: 3, mine: true }], gap: 2 },
+  { author: "Дмитрий С.", initials: "ДС", color: 1, text: "Да, каждый день, видно в портфеле", time: "10:42" },
+];
+
+function drawLobbyFeed(frame, W, startY, script) {
+  let y = startY;
+  script.forEach((m) => {
+    if (m.date) { y = chatDatePill(frame, W, y, m.date); return; }
+    y = chatBubble(frame, W, y, m) + (m.gap !== undefined ? m.gap : 12);
+    if (m.endsGroup === false) y -= 10;
+  });
+  return y;
+}
+
+async function buildChatLobbyMobile(offsetX) {
+  const W = 375, H = 812;
+  const frame = baseScreen("Mobile — Chat · Flex Lobby", W, H, offsetX);
+  chatHeader(frame, W, "Flex Lobby", "12 онлайн");
+  const y = drawLobbyFeed(frame, W, 112, LOBBY_SCRIPT);
+  chatTyping(frame, Math.max(y + 4, H - 34 - 52 - 26), "Катя Л. печатает…");
+  chatComposer(frame, W, H);
+  return frame;
+}
+
+async function buildChatStatesMobile(offsetX) {
+  const W = 375, H = 812;
+  const frame = baseScreen("Mobile — Chat · Отправка, ошибка, нет связи", W, H, offsetX);
+  chatHeader(frame, W, "Flex Lobby", "12 онлайн");
+  chatBanner(frame, W, 104);
+  let y = 152;
+  y = chatDatePill(frame, W, y, "Сегодня");
+  y = chatBubble(frame, W, y, { author: "Анна К.", initials: "АК", color: 0, text: "Доброе утро, Lobby ☕️", time: "09:12" }) + 12;
+  y = chatBubble(frame, W, y, { own: true, text: "Привет! Пишу без сети — отправится, когда связь вернётся", time: "09:14", status: "🕓" }) + 12;
+  y = chatBubble(frame, W, y, { own: true, text: "А это сообщение сервер не принял", time: "09:15", status: "ⓘ", failed: true }) + 12;
+  chatComposer(frame, W, H, { text: "Ответ про Earn", reply: { name: "Анна К.", text: "Доброе утро, Lobby ☕️" } });
+  return frame;
+}
+
+async function buildChatEmptyMobile(offsetX) {
+  const W = 375, H = 812;
+  const frame = baseScreen("Mobile — Chat · Пусто и загрузка", W, H, offsetX);
+  chatHeader(frame, W, "Flex Lobby", "Подключаемся…");
+  // скелет ленты при загрузке истории
+  [[0.62, false], [0.44, false], [0.52, true]].forEach(([k, own], i) => {
+    const w = (W - 32) * k;
+    chatRect(frame, { x: own ? W - 16 - w : 16, y: 120 + i * 52, w, h: 40, color: COLORS.white, opacity: 0.35, radius: 20, name: "Skeleton" });
+  });
+  createText(frame, { text: "Здесь пока тихо", x: 0, y: 380, size: 17, weight: "Bold", width: W, align: "CENTER" });
+  createText(frame, { text: "Напишите первым — сообщение\nувидят все клиенты онлайн", x: 0, y: 408, size: 13, color: COLORS.textMuted, width: W, align: "CENTER" });
+  chatComposer(frame, W, H, { text: "Всем привет!" });
+  return frame;
+}
+
+async function buildChatActionsMobile(offsetX) {
+  const W = 375, H = 812;
+  const frame = baseScreen("Mobile — Chat · Реакции и ответ (удержание)", W, H, offsetX);
+  chatHeader(frame, W, "Flex Lobby", "12 онлайн");
+  drawLobbyFeed(frame, W, 112, LOBBY_SCRIPT.slice(0, 3));
+  chatComposer(frame, W, H);
+  chatRect(frame, { x: 0, y: 0, w: W, h: H, color: COLORS.shadow, opacity: 0.32, name: "Overlay" });
+  const barW = 6 * 44 + 16;
+  createGlassCard(frame, (W - barW) / 2, 300, barW, 52, { radius: 26, fillOpacity: 0.75, blur: 24 });
+  ["👍", "❤️", "😂", "🔥", "🚀", "🙏"].forEach((e, i) => {
+    if (e === "🔥") chatRect(frame, { x: (W - barW) / 2 + 8 + i * 44, y: 304, w: 44, h: 44, color: COLORS.accent, opacity: 0.22, radius: 22, name: "Selected reaction" });
+    createText(frame, { text: e, x: (W - barW) / 2 + 8 + i * 44, y: 312, size: 24, width: 44, align: "CENTER" });
+  });
+  chatRect(frame, { x: 40, y: 366, w: W - 80, h: 70, color: COLORS.white, opacity: 0.85, radius: 20, name: "Message preview" });
+  createText(frame, { text: "Ольга М.", x: 56, y: 376, size: 13, weight: "Medium", color: COLORS.textMuted });
+  chatText(frame, { text: "У меня 4,5% годовых, начисляется каждый день", x: 56, y: 394, maxWidth: W - 112 });
+  createGlassCard(frame, (W - 220) / 2, 450, 220, 48, { radius: 20, fillOpacity: 0.75, blur: 24 });
+  createText(frame, { text: "↩   Ответить", x: (W - 220) / 2 + 18, y: 465, size: 13, weight: "Medium" });
+  return frame;
+}
+
+async function buildMessagesListMobile(offsetX) {
+  const W = 375, H = 812;
+  const frame = baseScreen("Mobile — Сообщения (из профиля)", W, H, offsetX);
+  createText(frame, { text: "‹", x: 18, y: 50, size: 30, weight: "Medium", color: COLORS.accent });
+  createText(frame, { text: "Сообщения", x: 0, y: 56, size: 17, weight: "Bold", width: W, align: "CENTER" });
+  createGlassCard(frame, 20, 110, W - 40, 92, { radius: 20 });
+  const lobby = createRoundAvatar(frame, 36, 126, 48);
+  lobby.fills = [{ type: "SOLID", color: COLORS.accent, opacity: 0.16 }];
+  createText(frame, { text: "💬", x: 36, y: 138, size: 20, width: 48, align: "CENTER" });
+  createText(frame, { text: "Flex Lobby", x: 96, y: 122, size: 17, weight: "Bold" });
+  createText(frame, { text: "18:23", x: W - 76, y: 126, size: 11, color: COLORS.accent });
+  createText(frame, { text: "12 онлайн", x: 96, y: 144, size: 11, color: COLORS.accent });
+  createText(frame, { text: "Ольга М.: У меня 4,5% годовых…", x: 96, y: 162, size: 13, color: COLORS.textMuted });
+  chatRect(frame, { x: W - 58, y: 160, w: 22, h: 22, color: COLORS.accent, radius: 11, name: "Unread badge" });
+  createText(frame, { text: "3", x: W - 58, y: 164, size: 10, weight: "Medium", color: COLORS.white, width: 22, align: "CENTER" });
+  createText(frame, { text: "Flex Lobby — общий чат клиентов", x: 0, y: 218, size: 11, color: COLORS.textMuted, width: W, align: "CENTER" });
+
+  // вход: первая карточка профиля и точка на аватаре
+  createText(frame, { text: "Вход из профиля", x: 20, y: 300, size: 11, weight: "Medium", color: COLORS.textMuted, spacing: 1 });
+  createGlassCard(frame, 20, 322, W - 40, 64, { radius: 20 });
+  createText(frame, { text: "💬", x: 38, y: 342, size: 18 });
+  createText(frame, { text: "Сообщения", x: 72, y: 334, size: 13, weight: "Medium" });
+  createText(frame, { text: "Flex Lobby — общий чат клиентов", x: 72, y: 354, size: 11, color: COLORS.textMuted });
+  chatRect(frame, { x: W - 84, y: 343, w: 22, h: 22, color: COLORS.accent, radius: 11, name: "Unread badge" });
+  createText(frame, { text: "3", x: W - 84, y: 347, size: 10, weight: "Medium", color: COLORS.white, width: 22, align: "CENTER" });
+  createText(frame, { text: "›", x: W - 50, y: 340, size: 18, color: COLORS.textMuted });
+  createText(frame, { text: "Точка на аватаре — есть непрочитанные", x: 20, y: 420, size: 11, weight: "Medium", color: COLORS.textMuted, spacing: 1 });
+  createRoundAvatar(frame, 20, 446, 44);
+  createText(frame, { text: "СД", x: 20, y: 459, size: 15, weight: "Bold", color: COLORS.accent, width: 44, align: "CENTER" });
+  chatRect(frame, { x: 52, y: 446, w: 12, h: 12, color: COLORS.accent, radius: 6, name: "Unread dot", stroke: 1 });
+  return frame;
+}
+
+// компоненты и токены для вёрстки (FE-006): пузыри, поле ввода, реакции, цвета, шрифты, отступы
+async function buildChatComponents(offsetX) {
+  const W = 900, H = 812;
+  const frame = baseScreen("Chat — компоненты и токены", W, H, offsetX);
+  const section = (text, x, y) => createText(frame, { text, x, y, size: 11, weight: "Medium", color: COLORS.textMuted, spacing: 1 });
+
+  section("ПУЗЫРИ · входящие: начало группы, середина, конец", 24, 24);
+  const colW = 420;
+  let y = 48;
+  y = chatBubble(frame, colW, y, { author: "Анна К.", initials: "АК", color: 0, text: "Начало группы — имя автора", time: "10:00", endsGroup: false }) + 2;
+  y = chatBubble(frame, colW, y, { text: "Середина группы", time: "10:00", endsGroup: false }) + 2;
+  y = chatBubble(frame, colW, y, { initials: "АК", color: 0, text: "Конец группы — аватар и хвостик", time: "10:01" }) + 16;
+  section("ИСХОДЯЩИЕ · статусы: 🕓 отправляется · ✓ доставлено · ✓✓ прочитано", 24, y); y += 24;
+  y = chatBubble(frame, colW, y, { own: true, text: "Отправляется", time: "10:02", status: "🕓", endsGroup: false }) + 2;
+  y = chatBubble(frame, colW, y, { own: true, text: "Доставлено", time: "10:02", status: "✓", endsGroup: false }) + 2;
+  y = chatBubble(frame, colW, y, { own: true, text: "Прочитано", time: "10:02", status: "✓✓", reactions: [{ emoji: "👍", count: 1 }, { emoji: "🚀", count: 2, mine: true }] }) + 8;
+  y = chatBubble(frame, colW, y, { own: true, text: "С цитатой", time: "10:03", status: "✓", reply: { name: "Анна К.", text: "Начало группы — имя автора" } }) + 8;
+  y = chatBubble(frame, colW, y, { own: true, text: "Не отправлено", time: "10:03", status: "ⓘ", failed: true }) + 16;
+
+  const cx = 470;
+  section("ПОЛЕ ВВОДА И ОТПРАВКА", cx, 24);
+  const inputFrame = figma.createFrame();
+  inputFrame.name = "Composer states";
+  inputFrame.resize(400, 100);
+  inputFrame.x = cx; inputFrame.y = 40;
+  inputFrame.fills = [];
+  frame.appendChild(inputFrame);
+  chatComposer(inputFrame, 400, 100);
+  const filled = figma.createFrame();
+  filled.name = "Composer — reply + text";
+  filled.resize(400, 160);
+  filled.x = cx; filled.y = 150;
+  filled.fills = [];
+  frame.appendChild(filled);
+  chatComposer(filled, 400, 160, { text: "Текст сообщения", reply: { name: "Анна К.", text: "Начало группы — имя автора" } });
+
+  section("ДАТА · ПЕЧАТАЕТ · СВЯЗЬ", cx, 330);
+  // ширина «экрана» подобрана так, чтобы капсула встала по центру колонки (cx + 60)
+  chatDatePill(frame, (cx + 60) * 2, 352, "Сегодня");
+  chatTyping(frame, 390, "Анна К. печатает…");
+  const banner = figma.createFrame();
+  banner.name = "Connection banner";
+  banner.resize(400, 40); banner.x = cx; banner.y = 412; banner.fills = [];
+  frame.appendChild(banner);
+  chatBanner(banner, 400, 0);
+
+  section("ТОКЕНЫ (src/theme)", cx, 470);
+  const tokens = [
+    [COLORS.accent, "accent #248C66 — свой пузырь, отправка, реакция «моя»"],
+    [COLORS.white, "glassFillStrong — чужой пузырь (белый 34% + кромка)"],
+    [COLORS.textPrimary, "textPrimary — текст; textMuted — время, подсказки"],
+    [COLORS.red, "negative #D1474D — «Не отправлено», «Нет соединения»"],
+  ];
+  tokens.forEach(([color, label], i) => {
+    chatRect(frame, { x: cx, y: 492 + i * 26, w: 18, h: 18, color, radius: 9, name: "Swatch", stroke: 0.8 });
+    createText(frame, { text: label, x: cx + 28, y: 494 + i * 26, size: 11 });
+  });
+  const type = [
+    "message — Inter Regular 15/20 · текст сообщения",
+    "bodyStrong — Inter Medium 13/18 · имя автора, цитата",
+    "micro — Inter Medium 10/13 · время, счётчик реакции",
+    "headline — Inter SemiBold 17/22 · заголовок чата",
+  ];
+  type.forEach((line, i) => createText(frame, { text: line, x: cx, y: 604 + i * 20, size: 11 }));
+  const sizes = [
+    "пузырь: радиус 20, хвостик 4, отступы 12 × 8/6, ширина до 78%",
+    "группа: 2 между пузырями, 12 между группами (окно 5 мин)",
+    "аватар 30 · поле ввода — капсула 24, до 5 строк · отправка 36",
+    "реакция: высота 26, отступы 8 · свайп влево на 56 — ответить",
+  ];
+  sizes.forEach((line, i) => createText(frame, { text: line, x: cx, y: 698 + i * 20, size: 11 }));
+  return frame;
+}
+
+async function buildChatRow() {
+  const gap = 100;
+  let x = 0;
+  const frames = [];
+  frames.push(await buildChatLobbyMobile(x)); x += 375 + gap;
+  frames.push(await buildChatStatesMobile(x)); x += 375 + gap;
+  frames.push(await buildChatEmptyMobile(x)); x += 375 + gap;
+  frames.push(await buildChatActionsMobile(x)); x += 375 + gap;
+  frames.push(await buildMessagesListMobile(x)); x += 375 + gap;
+  frames.push(await buildChatComponents(x));
+  frames.forEach((f) => { f.y = CHAT_ROW_Y; });
+  return frames;
+}
+
 async function main() {
   await loadFonts();
   const gap = 100;
@@ -802,10 +1198,12 @@ async function main() {
   const cd = await buildCardsDesktop(x); x += 1440 + gap;
   const crd = await buildCryptoDesktop(x);
 
-  const all = [hm, cm, crm, ht, ct, crt, hd, cd, crd];
+  const chat = await buildChatRow();
+
+  const all = [hm, cm, crm, ht, ct, crt, hd, cd, crd, ...chat];
   figma.currentPage.selection = all;
   figma.viewport.scrollAndZoomIntoView(all);
-  figma.closePlugin("Flex UI: кнопки на Home увеличены, карты на Cards — реальные пропорции 1.586:1 ✅");
+  figma.closePlugin("Flex UI: основные экраны + чат Flex Lobby (лента, состояния, компоненты) ✅");
 }
 
 main();

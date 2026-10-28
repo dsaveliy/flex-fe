@@ -90,6 +90,7 @@ export type TypographyToken =
   | 'sectionTitle'
   | 'button'
   | 'bodyStrong'
+  | 'message'
   | 'body'
   | 'caption'
   | 'label'
@@ -115,6 +116,8 @@ const typography: Typography = {
   /** подпись крупной капсулы («Готово» в шапке) */
   button: { fontFamily: fonts.semibold, fontSize: 14, lineHeight: 18 },
   bodyStrong: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 18 },
+  /** текст сообщения в чате — крупнее основного, чтобы переписку было легко читать */
+  message: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 20 },
   body: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: fonts.regular, fontSize: 11, lineHeight: 15 },
   label: { fontFamily: fonts.medium, fontSize: 11, lineHeight: 14, letterSpacing: 1 },

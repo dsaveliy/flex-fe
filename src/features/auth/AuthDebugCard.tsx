@@ -11,6 +11,7 @@ import {
   revokeCurrentSession,
   stealRefreshToken,
 } from '@/api/mock/auth/devTools';
+import { dropMockChatConnections } from '@/api/mock/chat';
 import { useCryptoSession, useSession } from '@/auth';
 import { clearBiometricCredential } from '@/auth/biometrics';
 import { refreshSession, signOutLocal } from '@/auth/sessionActions';
@@ -66,6 +67,11 @@ export function AuthDebugCard() {
         await revokeCurrentSession();
         await queryClient.invalidateQueries();
       },
+    },
+    {
+      label: t('auth.debug.dropChat'),
+      // как пропажа сети: плашка «Нет соединения», очередь и переподключение
+      run: async () => dropMockChatConnections(),
     },
     {
       label: t('auth.debug.resetDb'),

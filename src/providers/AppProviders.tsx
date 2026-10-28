@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/theme';
 
 import { AuthProvider } from './AuthProvider';
 import { BalancePrivacyProvider } from './BalancePrivacyProvider';
+import { ChatProvider } from './ChatProvider';
 import { DisplayCurrencyProvider } from './DisplayCurrencyProvider';
 
 import '@/i18n';
@@ -26,11 +27,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <ThemeProvider>
-              <BalancePrivacyProvider>
-                <DisplayCurrencyProvider>{children}</DisplayCurrencyProvider>
-              </BalancePrivacyProvider>
-            </ThemeProvider>
+            <ChatProvider>
+              <ThemeProvider>
+                <BalancePrivacyProvider>
+                  <DisplayCurrencyProvider>{children}</DisplayCurrencyProvider>
+                </BalancePrivacyProvider>
+              </ThemeProvider>
+            </ChatProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

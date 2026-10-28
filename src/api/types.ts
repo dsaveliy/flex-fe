@@ -499,3 +499,120 @@ export type PaymentResult = OperationResult & {
   rate?: number | null;
   cashback: Money;
 };
+
+/* ───────────── чат (docs/chat.md) ───────────── */
+
+/** `lobby` — общий чат всех клиентов, `direct` — личный, `support` — с поддержкой Flex */
+export type ChatRoomKind = 'lobby' | 'direct' | 'support';
+
+/** участник: хватает на аватар-инициалы и подпись */
+export type ChatMember = {
+  id: string;
+  /** «Анна К.» — как `recipientName` у перевода */
+  name: string;
+  initials: string;
+  /** сотрудник поддержки — значок «Проверенный Flex» (только в support) */
+  isStaff: boolean;
+};
+
+export type ChatEmoji = '👍' | '❤️' | '😂' | '🔥' | '🚀' | '🙏';
+
+export type ChatReaction = { emoji: ChatEmoji; userIds: string[] };
+
+export type ChatAttachment = {
+  id: string;
+  kind: 'image' | 'file';
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  width: number | null;
+  height: number | null;
+  /** подписанная ссылка: `Image` не умеет слать заголовок Authorization */
+  url: string;
+  thumbnailUrl: string | null;
+};
+
+export type ChatMoney =
+  | { type: 'transfer'; transactionId: string; amount: Money; status: 'completed' }
+  | {
+      type: 'request';
+      requestId: string;
+      amount: Money;
+      status: 'pending' | 'paid' | 'declined';
+      paidTransactionId: string | null;
+    }
+  | {
+      type: 'gift';
+      giftId: string;
+      asset: 'BTC' | 'USDT';
+      /** у получателя `null`, пока конверт не открыт */
+      amount: Money | null;
+      status: 'sealed' | 'opened';
+      openedAt: string | null;
+    };
+
+export type ChatMessageKind = 'text' | 'system' | 'transfer' | 'request' | 'gift';
+
+export type ChatMessage = {
+  id: string;
+  roomId: string;
+  /** UUID отправителя: по нему свой пузырь «с часиками» заменяется сохранённым */
+  clientId: string | null;
+  kind: ChatMessageKind;
+  /** `null` у системных сообщений */
+  author: ChatMember | null;
+  text: string;
+  replyTo: { id: string; authorName: string; text: string } | null;
+  reactions: ChatReaction[];
+  attachments: ChatAttachment[];
+  money: ChatMoney | null;
+  /** ISO 8601, ставит сервер */
+  createdAt: string;
+};
+
+export type ChatRoom = {
+  id: string;
+  kind: ChatRoomKind;
+  title: string;
+  /** собеседник в direct/support */
+  peer: ChatMember | null;
+  /** lobby — сколько клиентов онлайн; direct — 1, если собеседник онлайн */
+  onlineCount: number;
+  unreadCount: number;
+  lastMessage: ChatMessage | null;
+  /** до какого сообщения прочитал собеседник — для ✓✓ */
+  peerLastReadMessageId: string | null;
+};
+
+/** кадры клиента → сервера */
+export type ChatClientFrame =
+  | { type: 'auth'; token: string }
+  | {
+      type: 'send';
+      clientId: string;
+      roomId: string;
+      text: string;
+      replyToId?: string;
+      attachmentIds?: string[];
+    }
+  | { type: 'react'; messageId: string; emoji: ChatEmoji }
+  | { type: 'typing'; roomId: string }
+  | { type: 'read'; roomId: string; messageId: string }
+  | { type: 'ping' };
+
+/** кадры сервера → клиента */
+export type ChatServerFrame =
+  | { type: 'ready'; me: ChatMember; rooms: ChatRoom[] }
+  | { type: 'message'; message: ChatMessage }
+  | { type: 'message_update'; message: ChatMessage }
+  | { type: 'reaction'; roomId: string; messageId: string; reactions: ChatReaction[] }
+  | { type: 'typing'; roomId: string; user: ChatMember }
+  | { type: 'presence'; roomId: string; onlineCount: number }
+  | { type: 'read'; roomId: string; userId: string; messageId: string }
+  | { type: 'room'; room: ChatRoom }
+  | { type: 'error'; code: string; message?: string; clientId?: string; retryAfter?: number }
+  | { type: 'pong' };
+
+export type ChatMoneyRequestBody = { amountMinor: number; currency: string; comment?: string };
+
+export type ChatGiftBody = { fromAccountId: string; amountMinor: number; comment?: string };

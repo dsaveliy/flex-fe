@@ -1,8 +1,8 @@
-import { Image } from 'react-native';
+import { Image, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { useUser } from '@/api';
+import { useChatUnreadCount, useUser } from '@/api';
 import { useTheme } from '@/theme';
 
 import { Glass, isNativeGlassAvailable } from './Glass';
@@ -24,6 +24,7 @@ export function AvatarButton({ size }: AvatarButtonProps) {
   const { t } = useTranslation();
   const { reduceTransparency } = useAccessibilityFlags();
   const user = useUser();
+  const unread = useChatUnreadCount();
 
   const diameter = size ?? theme.sizes.iconButton;
   const initials = user.data
@@ -34,6 +35,7 @@ export function AvatarButton({ size }: AvatarButtonProps) {
     <Touchable
       accessibilityRole="button"
       accessibilityLabel={t('a11y.openProfile')}
+      accessibilityHint={unread > 0 ? t('a11y.unreadMessages') : undefined}
       pressedScale={isNativeGlassAvailable && !reduceTransparency ? 1 : 0.94}
       onPress={() => router.push('/account')}
     >
@@ -63,6 +65,23 @@ export function AvatarButton({ size }: AvatarButtonProps) {
           </Text>
         )}
       </Glass>
+      {/* точка: есть непрочитанные сообщения (вход в чаты — из профиля) */}
+      {unread > 0 ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: theme.spacing.md,
+            height: theme.spacing.md,
+            borderRadius: theme.spacing.md / 2,
+            borderWidth: 2,
+            borderColor: theme.colors.backgroundMid,
+            backgroundColor: theme.colors.accent,
+          }}
+        />
+      ) : null}
     </Touchable>
   );
 }

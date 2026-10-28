@@ -268,12 +268,14 @@
       "theme": "Тема",
       "logOut": "Выйти",
       "hideBalance": "Скрыть баланс",
-      "displayCurrency": "Валюта баланса"
+      "displayCurrency": "Валюта баланса",
+      "messages": "Сообщения"
     },
     "themeLight": "Светлая",
     "hideBalanceHint": "Суммы заменятся точками",
     "themeDark": "Тёмная",
-    "displayCurrencyHint": "В ней показывается общий баланс"
+    "displayCurrencyHint": "В ней показывается общий баланс",
+    "messagesHint": "Flex Lobby — общий чат клиентов"
   },
   "a11y": {
     "avatarPlaceholder": "Заглушка фото профиля",
@@ -282,7 +284,8 @@
     "openProfile": "Открыть профиль",
     "toggleBalance": "Скрыть или показать баланс",
     "balanceChart": "График баланса, проведите пальцем для деталей",
-    "changeCurrency": "Сменить валюту баланса"
+    "changeCurrency": "Сменить валюту баланса",
+    "unreadMessages": "Есть непрочитанные сообщения"
   },
   "currencies": {
     "BYN": "Белорусский рубль",
@@ -545,7 +548,68 @@
       "resetDb": "Сбросить mock-БД",
       "events": "Журнал событий",
       "noEvents": "Событий пока нет",
-      "notified": "уведомление клиенту"
+      "notified": "уведомление клиенту",
+      "dropChat": "Оборвать чат"
+    }
+  },
+  "chat": {
+    "title": "Сообщения",
+    "you": "Вы",
+    "online": "{{count}} онлайн",
+    "list": {
+      "noMessages": "Сообщений пока нет"
+    },
+    "placeholder": "Сообщение…",
+    "today": "Сегодня",
+    "yesterday": "Вчера",
+    "typingOne": "{{name}} печатает…",
+    "typingTwo": "{{first}} и {{second}} печатают…",
+    "typingMany": "Несколько человек печатают…",
+    "empty": {
+      "title": "Здесь пока тихо",
+      "subtitle": "Напишите первым — сообщение увидят все клиенты онлайн"
+    },
+    "connection": {
+      "connecting": "Подключаемся…",
+      "offline": "Нет соединения · переподключаемся…",
+      "retry": "Повторить"
+    },
+    "delivery": {
+      "sending": "Отправляется",
+      "sent": "Доставлено",
+      "read": "Прочитано",
+      "failed": "Не отправлено"
+    },
+    "failed": {
+      "title": "Сообщение не отправлено",
+      "retry": "Отправить ещё раз",
+      "discard": "Удалить"
+    },
+    "errors": {
+      "RATE_LIMITED": "Слишком часто — подождите пару секунд",
+      "MESSAGE_TOO_LONG": "Сообщение длиннее 2000 символов",
+      "MESSAGE_EMPTY": "Пустое сообщение",
+      "TIMEOUT": "Сервер не ответил",
+      "default": "Не удалось отправить"
+    },
+    "actions": {
+      "reply": "Ответить",
+      "cancelReply": "Отменить ответ"
+    },
+    "reply": {
+      "to": "Ответ {{name}}"
+    },
+    "search": {
+      "open": "Поиск по сообщениям",
+      "placeholder": "Поиск по сообщениям",
+      "empty": "Ничего не нашлось",
+      "close": "Закрыть поиск"
+    },
+    "a11y": {
+      "message": "{{name}}, {{time}}: {{text}}",
+      "reaction": "{{emoji}}: {{count}}",
+      "send": "Отправить",
+      "messageActions": "Удерживайте, чтобы ответить или поставить реакцию"
     }
   }
 }

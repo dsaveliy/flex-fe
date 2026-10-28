@@ -268,12 +268,14 @@
       "theme": "Theme",
       "logOut": "Log out",
       "hideBalance": "Hide balance",
-      "displayCurrency": "Balance currency"
+      "displayCurrency": "Balance currency",
+      "messages": "Messages"
     },
     "themeLight": "Light",
     "hideBalanceHint": "Amounts are replaced with dots",
     "themeDark": "Dark",
-    "displayCurrencyHint": "Used to show your total balance"
+    "displayCurrencyHint": "Used to show your total balance",
+    "messagesHint": "Flex Lobby — chat for all Flex clients"
   },
   "a11y": {
     "avatarPlaceholder": "Profile picture placeholder",
@@ -282,7 +284,8 @@
     "openProfile": "Open profile",
     "toggleBalance": "Hide or show balance",
     "balanceChart": "Balance chart, drag to explore",
-    "changeCurrency": "Change balance currency"
+    "changeCurrency": "Change balance currency",
+    "unreadMessages": "You have unread messages"
   },
   "currencies": {
     "BYN": "Belarusian ruble",
@@ -545,7 +548,68 @@
       "resetDb": "Reset mock DB",
       "events": "Event log",
       "noEvents": "No events yet",
-      "notified": "client notified"
+      "notified": "client notified",
+      "dropChat": "Drop chat connection"
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "you": "You",
+    "online": "{{count}} online",
+    "list": {
+      "noMessages": "No messages yet"
+    },
+    "placeholder": "Message…",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "typingOne": "{{name}} is typing…",
+    "typingTwo": "{{first}} and {{second}} are typing…",
+    "typingMany": "Several people are typing…",
+    "empty": {
+      "title": "It's quiet here",
+      "subtitle": "Be the first to write — everyone online will see it"
+    },
+    "connection": {
+      "connecting": "Connecting…",
+      "offline": "No connection · reconnecting…",
+      "retry": "Retry"
+    },
+    "delivery": {
+      "sending": "Sending",
+      "sent": "Delivered",
+      "read": "Read",
+      "failed": "Not sent"
+    },
+    "failed": {
+      "title": "Message not sent",
+      "retry": "Send again",
+      "discard": "Delete"
+    },
+    "errors": {
+      "RATE_LIMITED": "Too fast — wait a couple of seconds",
+      "MESSAGE_TOO_LONG": "Message is longer than 2000 characters",
+      "MESSAGE_EMPTY": "Empty message",
+      "TIMEOUT": "The server didn't respond",
+      "default": "Couldn't send"
+    },
+    "actions": {
+      "reply": "Reply",
+      "cancelReply": "Cancel reply"
+    },
+    "reply": {
+      "to": "Reply to {{name}}"
+    },
+    "search": {
+      "open": "Search messages",
+      "placeholder": "Search messages",
+      "empty": "Nothing found",
+      "close": "Close search"
+    },
+    "a11y": {
+      "message": "{{name}}, {{time}}: {{text}}",
+      "reaction": "{{emoji}}: {{count}}",
+      "send": "Send",
+      "messageActions": "Hold to reply or react"
     }
   }
 }

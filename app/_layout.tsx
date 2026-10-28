@@ -28,6 +28,14 @@ export default function RootLayout() {
   );
 }
 
+/** экраны поверх табов: прозрачная системная шапка со стеклянной кнопкой «назад» */
+const PUSH_SCREEN_OPTIONS = {
+  headerShown: true,
+  headerTransparent: true,
+  headerBackButtonDisplayMode: 'minimal' as const,
+  headerTintColor: palette.accent,
+};
+
 const OPERATION_SHEETS = [
   'transfer',
   'top-up',
@@ -63,15 +71,10 @@ function RootStack() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="account"
-          options={{
-            headerShown: true,
-            headerTransparent: true,
-            headerBackButtonDisplayMode: 'minimal',
-            headerTintColor: palette.accent,
-          }}
-        />
+        <Stack.Screen name="account" options={PUSH_SCREEN_OPTIONS} />
+        {/* сообщения: список из профиля и экран чата (docs/chat.md) */}
+        <Stack.Screen name="messages/index" options={PUSH_SCREEN_OPTIONS} />
+        <Stack.Screen name="messages/[roomId]" options={PUSH_SCREEN_OPTIONS} />
         {/* шторки денежных операций: перевод, пополнение, обмен, оплата, Earn */}
         {OPERATION_SHEETS.map((name) => (
           <Stack.Screen key={name} name={name} options={OPERATION_SHEET_OPTIONS} />

@@ -1,11 +1,12 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { USE_MOCK_API, useUser } from '@/api';
+import { USE_MOCK_API, useChatUnreadCount, useUser } from '@/api';
 import { useLogout } from '@/auth';
 import { AuthDebugCard } from '@/features/auth/AuthDebugCard';
 import { CryptoSecurityCard } from '@/features/auth/CryptoSecurityCard';
+import { UnreadBadge } from '@/features/chat/ChatListRow';
 import { type AppLanguage, changeLanguage, getCurrentLanguage } from '@/i18n';
 import { useBalancePrivacy } from '@/providers/BalancePrivacyProvider';
 import { useTheme, useThemeContext } from '@/theme';
@@ -33,6 +34,8 @@ export default function AccountScreen() {
   const { themeName, setThemeName } = useThemeContext();
   const { hidden, setHidden } = useBalancePrivacy();
   const user = useUser();
+  const router = useRouter();
+  const unread = useChatUnreadCount();
   const logout = useLogout();
   const currentLanguage = getCurrentLanguage();
 
@@ -74,6 +77,21 @@ export default function AccountScreen() {
             {t('common.tagline')}
           </Text>
         </View>
+
+        <GlassCard contentStyle={rowPadding}>
+          <ListRow
+            title={t('account.rows.messages')}
+            subtitle={t('account.messagesHint')}
+            left={<Icon name="chat" color={theme.colors.accent} />}
+            right={
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+                {unread > 0 ? <UnreadBadge count={unread} /> : null}
+                <Icon name="chevronRight" size={16} color={theme.colors.textMuted} />
+              </View>
+            }
+            onPress={() => router.push('/messages')}
+          />
+        </GlassCard>
 
         <GlassCard contentStyle={rowPadding}>
           <ListRow
