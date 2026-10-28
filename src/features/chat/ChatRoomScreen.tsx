@@ -14,7 +14,15 @@ import {
   useChatRoomInfo,
 } from '@/api';
 import { useTheme } from '@/theme';
-import { Icon, Screen, SearchField, Text, Touchable, useBrowserBarInset } from '@/ui';
+import {
+  Icon,
+  Screen,
+  SearchField,
+  Text,
+  Touchable,
+  useBrowserBarInset,
+  useKeyboardInset,
+} from '@/ui';
 import { formatTime } from '@/utils/format';
 
 import { ChatAvatar } from './ChatAvatar';
@@ -41,6 +49,8 @@ export function ChatRoomScreen() {
   const [searching, setSearching] = useState(false);
   const [focusMessageId, setFocusMessageId] = useState<string | null>(null);
   const keyboardShown = useKeyboardShown();
+  // в браузере клавиатуру считаем по видимой области: KeyboardAvoidingView там не работает
+  const webKeyboard = useKeyboardInset();
 
   const title = room?.title ?? t('chat.title');
   const subtitle =
@@ -113,7 +123,11 @@ export function ChatRoomScreen() {
         )}
         <View
           style={{
-            height: keyboardShown ? theme.spacing.sm : insets.bottom + browserBar + theme.spacing.sm,
+            height: webKeyboard
+              ? webKeyboard + theme.spacing.sm
+              : keyboardShown
+                ? theme.spacing.sm
+                : insets.bottom + browserBar + theme.spacing.sm,
           }}
         />
       </KeyboardAvoidingView>

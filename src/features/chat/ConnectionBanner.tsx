@@ -22,7 +22,7 @@ export function ConnectionBanner() {
       accessibilityLiveRegion="polite"
       style={[styles.center, { paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm }]}
     >
-      <Glass variant="regular" radius={theme.radii.pill} blur>
+      <Glass variant="regular" radius={theme.radii.pill}>
         <View
           style={[
             styles.row,

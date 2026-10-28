@@ -62,7 +62,7 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend }: ComposerPro
   return (
     <View style={{ paddingHorizontal: theme.spacing.md, gap: theme.spacing.xs }}>
       {replyTo ? (
-        <Glass variant="regular" radius={theme.radii.md} blur>
+        <Glass variant="regular" radius={theme.radii.md}>
           <View
             style={[
               styles.row,
@@ -96,7 +96,7 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend }: ComposerPro
         </Glass>
       ) : null}
 
-      <Glass variant="regular" radius={theme.radii.cardLg} blur>
+      <Glass variant="regular" radius={theme.radii.cardLg}>
         <View
           style={[
             styles.row,

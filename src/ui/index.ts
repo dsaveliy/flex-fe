@@ -18,6 +18,7 @@ export { GlassTabBar } from './GlassTabBar';
 export { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 export { useAppDimensions } from './hooks/useAppDimensions';
 export { useBrowserBarInset } from './hooks/useBrowserBarInset';
+export { useKeyboardInset } from './hooks/useKeyboardInset';
 export { useTabBarShown } from './hooks/useTabBarShown';
 export { useTilt } from './hooks/useTilt';
 export { FlexLogo } from './icons/FlexLogo';

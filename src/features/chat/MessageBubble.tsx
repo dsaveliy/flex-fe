@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { memo } from 'react';
+import { type ComponentProps, memo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -90,7 +90,12 @@ export const MessageBubble = memo(function MessageBubble({
       offset.value = withSpring(0, theme.springs.press);
     });
 
-  const bubbleStyle = useAnimatedStyle(() => ({ transform: [{ translateX: offset.value }] }));
+  const bubbleStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset.value }],
+  }));
+  // в браузере жест на каждом пузыре перехватывает касания и тормозит прокрутку:
+  // ответ там — из меню по удержанию
+  const swipeEnabled = Platform.OS !== 'web';
   const hintStyle = useAnimatedStyle(() => ({
     opacity: interpolate(-offset.value, [0, REPLY_THRESHOLD], [0, 1]),
     transform: [{ scale: interpolate(-offset.value, [0, REPLY_THRESHOLD], [0.6, 1]) }],
@@ -127,112 +132,115 @@ export const MessageBubble = memo(function MessageBubble({
       ) : null}
 
       <View style={[styles.column, { alignItems: own ? 'flex-end' : 'flex-start' }]}>
-        <GestureDetector gesture={swipe}>
-          <Animated.View style={[styles.swipeArea, bubbleStyle]}>
-            <Touchable
-              haptic={false}
-              pressedScale={0.98}
-              delayLongPress={320}
-              onLongPress={handleLongPress}
-              accessibilityRole="text"
-              accessibilityLabel={t('chat.a11y.message', {
-                name: own
-                  ? t('chat.you')
-                  : message.author?.isBot
-                    ? `${authorName}, ${t('chat.bot')}`
-                    : authorName,
-                time,
-                text: message.text,
-              })}
-              accessibilityHint={canInteract ? t('chat.a11y.messageActions') : undefined}
-              hitSlop={0}
-              style={[
-                styles.bubble,
-                {
-                  paddingHorizontal: theme.spacing.md,
-                  paddingTop: theme.spacing.sm,
-                  paddingBottom: theme.spacing.xs + 2,
-                  borderTopLeftRadius: radius,
-                  borderTopRightRadius: radius,
-                  borderBottomLeftRadius: !own && endsGroup ? tail : radius,
-                  borderBottomRightRadius: own && endsGroup ? tail : radius,
-                  backgroundColor: own ? theme.colors.accent : theme.colors.glassFillStrong,
-                  borderWidth: own ? 0 : StyleSheet.hairlineWidth,
-                  borderColor: theme.colors.glassBorder,
-                  opacity: message.delivery === 'failed' ? 0.7 : 1,
-                },
-                highlighted && {
-                  borderWidth: 2,
-                  borderColor: own ? theme.colors.textInverse : theme.colors.accent,
-                },
-              ]}
-            >
-              {!own && startsGroup && authorName ? (
-                <View style={[styles.author, { gap: theme.spacing.xs }]}>
-                  <Text
-                    variant="bodyStrong"
-                    numberOfLines={1}
-                    style={[styles.authorName, { color: avatarColor(message.author?.id ?? '') }]}
-                  >
-                    {authorName}
-                  </Text>
-                  {message.author?.isBot ? <BotLabel /> : null}
-                </View>
-              ) : null}
-
-              {message.replyTo ? (
-                <Touchable
-                  haptic={false}
-                  pressedScale={1}
-                  onPress={() => onQuotePress(message.replyTo?.id ?? '')}
-                  accessibilityLabel={t('chat.reply.to', { name: message.replyTo.authorName })}
-                  style={[
-                    styles.quote,
-                    {
-                      borderLeftColor: own ? theme.colors.textInverse : theme.colors.accent,
-                      backgroundColor: own ? theme.colors.glassFill : theme.colors.accentMuted,
-                      borderRadius: theme.radii.sm,
-                      paddingHorizontal: theme.spacing.sm,
-                      paddingVertical: theme.spacing.xs,
-                      marginBottom: theme.spacing.xs,
-                    },
-                  ]}
+        <SwipeArea enabled={swipeEnabled} gesture={swipe} style={bubbleStyle}>
+          <Touchable
+            haptic={false}
+            pressedScale={0.98}
+            delayLongPress={320}
+            onLongPress={handleLongPress}
+            accessibilityRole="text"
+            accessibilityLabel={t('chat.a11y.message', {
+              name: own
+                ? t('chat.you')
+                : message.author?.isBot
+                  ? `${authorName}, ${t('chat.bot')}`
+                  : authorName,
+              time,
+              text: message.text,
+            })}
+            accessibilityHint={canInteract ? t('chat.a11y.messageActions') : undefined}
+            hitSlop={0}
+            style={[
+              styles.bubble,
+              styles.noSelect,
+              {
+                paddingHorizontal: theme.spacing.md,
+                paddingTop: theme.spacing.sm,
+                paddingBottom: theme.spacing.xs + 2,
+                borderTopLeftRadius: radius,
+                borderTopRightRadius: radius,
+                borderBottomLeftRadius: !own && endsGroup ? tail : radius,
+                borderBottomRightRadius: own && endsGroup ? tail : radius,
+                backgroundColor: own ? theme.colors.accent : theme.colors.glassFillStrong,
+                borderWidth: own ? 0 : StyleSheet.hairlineWidth,
+                borderColor: theme.colors.glassBorder,
+                opacity: message.delivery === 'failed' ? 0.7 : 1,
+              },
+              highlighted && {
+                borderWidth: 2,
+                borderColor: own ? theme.colors.textInverse : theme.colors.accent,
+              },
+            ]}
+          >
+            {!own && startsGroup && authorName ? (
+              <View style={[styles.author, { gap: theme.spacing.xs }]}>
+                <Text
+                  variant="bodyStrong"
+                  numberOfLines={1}
+                  style={[styles.authorName, { color: avatarColor(message.author?.id ?? '') }]}
                 >
-                  <Text variant="bodyStrong" numberOfLines={1} style={{ color: ink }}>
-                    {message.replyTo.authorName}
-                  </Text>
-                  <Text variant="caption" numberOfLines={2} style={{ color: ink, opacity: 0.8 }}>
-                    {message.replyTo.text}
-                  </Text>
-                </Touchable>
-              ) : null}
-
-              <Text variant="message" style={{ color: ink }} selectable={Platform.OS === 'web'}>
-                {message.text}
-              </Text>
-
-              <View style={[styles.meta, { gap: theme.spacing.xs }]}>
-                <Text variant="micro" style={{ color: ink, opacity: 0.7 }}>
-                  {time}
+                  {authorName}
                 </Text>
-                {own ? (
-                  <DeliveryMark
-                    state={message.delivery === 'sent' && read ? 'read' : message.delivery}
-                    color={ink}
-                  />
-                ) : null}
+                {message.author?.isBot ? <BotLabel /> : null}
               </View>
-            </Touchable>
-          </Animated.View>
-        </GestureDetector>
+            ) : null}
+
+            {message.replyTo ? (
+              <Touchable
+                haptic={false}
+                pressedScale={1}
+                onPress={() => onQuotePress(message.replyTo?.id ?? '')}
+                accessibilityLabel={t('chat.reply.to', {
+                  name: message.replyTo.authorName,
+                })}
+                style={[
+                  styles.quote,
+                  {
+                    borderLeftColor: own ? theme.colors.textInverse : theme.colors.accent,
+                    backgroundColor: own ? theme.colors.glassFill : theme.colors.accentMuted,
+                    borderRadius: theme.radii.sm,
+                    paddingHorizontal: theme.spacing.sm,
+                    paddingVertical: theme.spacing.xs,
+                    marginBottom: theme.spacing.xs,
+                  },
+                ]}
+              >
+                <Text variant="bodyStrong" numberOfLines={1} style={{ color: ink }}>
+                  {message.replyTo.authorName}
+                </Text>
+                <Text variant="caption" numberOfLines={2} style={{ color: ink, opacity: 0.8 }}>
+                  {message.replyTo.text}
+                </Text>
+              </Touchable>
+            ) : null}
+
+            <Text variant="message" style={[{ color: ink }, styles.noSelect]}>
+              {message.text}
+            </Text>
+
+            <View style={[styles.meta, { gap: theme.spacing.xs }]}>
+              <Text variant="micro" style={{ color: ink, opacity: 0.7 }}>
+                {time}
+              </Text>
+              {own ? (
+                <DeliveryMark
+                  state={message.delivery === 'sent' && read ? 'read' : message.delivery}
+                  color={ink}
+                />
+              ) : null}
+            </View>
+          </Touchable>
+        </SwipeArea>
 
         {/* значок «ответить» проявляется на месте, которое освобождает пузырь */}
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.replyHint, { right: theme.spacing.md }, hintStyle]}
-        >
-          <Icon name="reply" size={18} color={theme.colors.textMuted} />
-        </Animated.View>
+        {swipeEnabled ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.replyHint, { right: theme.spacing.md }, hintStyle]}
+          >
+            <Icon name="reply" size={18} color={theme.colors.textMuted} />
+          </Animated.View>
+        ) : null}
 
         {message.reactions.length > 0 ? (
           <View style={[styles.reactions, { gap: theme.spacing.xs, marginTop: theme.spacing.xs }]}>
@@ -255,7 +263,9 @@ export const MessageBubble = memo(function MessageBubble({
                       paddingHorizontal: theme.spacing.sm,
                       height: 26,
                       borderRadius: theme.radii.pill,
-                      backgroundColor: mine ? theme.colors.pillSelectedFill : theme.colors.glassFill,
+                      backgroundColor: mine
+                        ? theme.colors.pillSelectedFill
+                        : theme.colors.glassFill,
                       borderColor: mine ? theme.colors.accent : theme.colors.glassBorder,
                     },
                   ]}
@@ -309,7 +319,31 @@ export const MessageBubble = memo(function MessageBubble({
   );
 });
 
+/** свайп для ответа: на web только обёртка без жеста */
+function SwipeArea({
+  enabled,
+  gesture,
+  style,
+  children,
+}: {
+  enabled: boolean;
+  gesture: ReturnType<typeof Gesture.Pan>;
+  style: ComponentProps<typeof Animated.View>['style'];
+  children: ReactNode;
+}) {
+  if (!enabled) return <View style={styles.swipeArea}>{children}</View>;
+  return (
+    <GestureDetector gesture={gesture}>
+      <Animated.View style={[styles.swipeArea, style]}>{children}</Animated.View>
+    </GestureDetector>
+  );
+}
+
 const styles = StyleSheet.create({
+  // долгое нажатие открывает меню реакций, а не выделение текста Safari
+  noSelect: {
+    userSelect: 'none',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'flex-end',
