@@ -1,6 +1,7 @@
-import { API_BASE_URL, USE_MOCK_API } from './config';
+import { API_BASE_URL, USE_MOCK_API, USE_MOCK_CHAT } from './config';
 import { type AuthScope, createHttpTransport, idempotent } from './client';
 import { mockApi } from './mock';
+import { mockChatApi } from './mock/chat';
 import type {
   AssetKind,
   BalanceSummary,
@@ -275,4 +276,8 @@ function createHttpApi(baseUrl: string): FlexApi {
  * (обёртка `withAuth`); напрямую `baseApi` нужен только ядру сессии
  * (`src/auth/sessionActions.ts`), чтобы обновление токенов не зацикливалось
  */
-export const baseApi: FlexApi = USE_MOCK_API ? mockApi : createHttpApi(API_BASE_URL);
+export const baseApi: FlexApi = USE_MOCK_API
+  ? mockApi
+  : USE_MOCK_CHAT
+    ? { ...createHttpApi(API_BASE_URL), ...mockChatApi }
+    : createHttpApi(API_BASE_URL);

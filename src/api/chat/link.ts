@@ -1,4 +1,4 @@
-import { API_BASE_URL, USE_MOCK_API } from '../config';
+import { API_BASE_URL, USE_MOCK_CHAT } from '../config';
 import { connectMockChat } from '../mock/chat';
 import type { ChatClientFrame, ChatServerFrame } from '../types';
 
@@ -59,5 +59,5 @@ function connectWebSocket(handlers: ChatLinkHandlers): ChatLink {
 }
 
 export function openChatLink(handlers: ChatLinkHandlers): ChatLink {
-  return USE_MOCK_API ? connectMockChat(handlers) : connectWebSocket(handlers);
+  return USE_MOCK_CHAT ? connectMockChat(handlers) : connectWebSocket(handlers);
 }

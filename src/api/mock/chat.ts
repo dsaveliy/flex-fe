@@ -1,6 +1,9 @@
 import { randomUUID } from 'expo-crypto';
 
-import { isApiError } from '../client';
+import { getAccessToken } from '@/auth/session';
+
+import { ApiError, isApiError } from '../client';
+import { API_BASE_URL, USE_MOCK_API } from '../config';
 import type { ChatLink, ChatLinkHandlers } from '../chat/link';
 import type {
   ChatClientFrame,
@@ -9,10 +12,10 @@ import type {
   ChatMessage,
   ChatRoom,
   ChatServerFrame,
+  User,
 } from '../types';
 import { delay, respond } from './delay';
 import { requireAccess } from './auth/guards';
-import type { MockUser } from './auth/db';
 import { fail } from './auth/tokens';
 
 /**
@@ -133,13 +136,41 @@ const db: MockChatDb = {
 
 const connections = new Set<MockConnection>();
 
-function toMember(user: MockUser): ChatMember {
+function toMember(user: Pick<User, 'id' | 'firstName' | 'lastName'>): ChatMember {
   return {
     id: user.id,
     name: `${user.firstName} ${user.lastName.charAt(0)}.`,
     initials: `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`,
     isStaff: false,
   };
+}
+
+let realMember: { token: string; member: ChatMember } | null = null;
+
+/**
+ * кто подключается. весь mock — токен проверяет mock-авторизация, как `require_access`.
+ * чат на mock при настоящем API (`EXPO_PUBLIC_CHAT_MOCK`) — токен настоящий, его
+ * проверяет сервер через `GET /me`; 401 → TOKEN_EXPIRED, клиент обновит токен
+ */
+async function authorize(): Promise<ChatMember> {
+  if (USE_MOCK_API) return toMember((await requireAccess()).user);
+
+  const token = getAccessToken();
+  if (!token) throw new ApiError({ status: 401, code: 'TOKEN_INVALID', message: 'No token' });
+  if (realMember?.token === token) return realMember.member;
+
+  const response = await fetch(`${API_BASE_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status === 401) {
+    throw new ApiError({ status: 401, code: 'TOKEN_EXPIRED', message: 'Unauthorized' });
+  }
+  if (!response.ok) {
+    throw new ApiError({ status: response.status, code: 'http_error', message: 'GET /me failed' });
+  }
+  const member = toMember((await response.json()) as User);
+  realMember = { token, member };
+  return member;
 }
 
 function onlineCount(): number {
@@ -392,10 +423,10 @@ class MockConnection implements ChatLink {
   /** проверка access как у `require_access`; ошибки — кадр `error` и close code (docs/chat.md §3.1) */
   private async authenticate(): Promise<void> {
     try {
-      const { user } = await requireAccess();
+      const me = await authorize();
       if (this.closed) return;
       clearTimeout(this.authTimer);
-      this.me = toMember(user);
+      this.me = me;
       connections.add(this);
       broadcast({ type: 'presence', roomId: LOBBY_ID, onlineCount: onlineCount() });
       this.push({ type: 'ready', me: this.me, rooms: [lobbyFor(this.me.id)] });
@@ -418,15 +449,15 @@ export function dropMockChatConnections(): void {
 
 export const mockChatApi = {
   getChatRooms: async (): Promise<ChatRoom[]> => {
-    const { user } = await requireAccess();
-    return respond([lobbyFor(user.id)]);
+    const me = await authorize();
+    return respond([lobbyFor(me.id)]);
   },
 
   getChatMessages: async (
     roomId: string,
     params?: { before?: string; limit?: number },
   ): Promise<ChatMessage[]> => {
-    await requireAccess();
+    await authorize();
     const all = db.messages[roomId];
     if (!all) fail(404, 'ROOM_NOT_FOUND');
     const limit = Math.min(Math.max(params?.limit ?? 50, 1), 100);

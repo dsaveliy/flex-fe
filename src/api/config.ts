@@ -11,6 +11,12 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
  */
 export const USE_MOCK_API = !API_BASE_URL || process.env.EXPO_PUBLIC_USE_MOCK === '1';
 
+/**
+ * чат на mock-сервере, даже когда остальное API настоящее: пока на бэкенде нет
+ * WebSocket чата (docs/chat.md), `EXPO_PUBLIC_CHAT_MOCK=1` позволяет смотреть чат со своим аккаунтом
+ */
+export const USE_MOCK_CHAT = USE_MOCK_API || process.env.EXPO_PUBLIC_CHAT_MOCK === '1';
+
 /** диапазон имитируемой сетевой задержки для mock-данных (мс) */
 export const MOCK_LATENCY = { min: 300, max: 700 } as const;
 
