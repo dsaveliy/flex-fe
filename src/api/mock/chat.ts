@@ -9,6 +9,10 @@ import type {
   ChatAttachment,
   ChatClientFrame,
   ChatDirectBody,
+  ChatGiftBody,
+  ChatMoney,
+  ChatMoneyRequestBody,
+  ChatTransferBody,
   ChatEmoji,
   ChatMember,
   ChatMessage,
@@ -16,12 +20,14 @@ import type {
   ChatServerFrame,
   ChatUploadFile,
   SupportRatingBody,
+  TransferResult,
   User,
 } from '../types';
 import { delay, respond } from './delay';
 import { getDb } from './auth/db';
-import { requireAccess } from './auth/guards';
+import { requireAccess, requireCrypto } from './auth/guards';
 import { fail } from './auth/tokens';
+import { mockOperationsApi } from './operations';
 
 /**
  * «сервер» чата в памяти: Flex Lobby с тестовыми клиентами, которые пишут,
@@ -151,8 +157,12 @@ type MockDirect = { id: string; members: [ChatMember, ChatMember]; createdBy: st
 /** обращение клиента в поддержку: одна комната на клиента */
 type MockSupport = { id: string; ownerId: string; closedAt: string | null; rated: boolean };
 
+/** запрос денег: кто просит, кто платит, карточка в ленте */
+type MockRequest = { messageId: string; roomId: string; requesterId: string; payerId: string };
+
 type MockChatDb = {
   supports: Record<string, MockSupport>;
+  requests: Record<string, MockRequest>;
   /** сообщения комнаты в порядке отправки */
   messages: Record<string, ChatMessage[]>;
   /** загруженные, но ещё не отправленные вложения: id → (владелец, файл) */
@@ -170,6 +180,7 @@ const db: MockChatDb = {
   uploads: {},
   directs: {},
   supports: {},
+  requests: {},
   // три последних сообщения Lobby — «непрочитанные»
   lastRead: {},
   byClientId: {},
@@ -304,6 +315,29 @@ function postSystem(roomId: string, text: string): void {
   };
   db.messages[roomId] = [...(db.messages[roomId] ?? []), message];
   deliver(roomId, { type: 'message', message });
+}
+
+/** денежная карточка в личном чате; `clientId` = id операции — повтор не создаёт вторую */
+function postMoney(author: ChatMember, roomId: string, text: string, value: ChatMoney, clientId: string): ChatMessage {
+  const existing = db.messages[roomId]?.find((message) => message.clientId === clientId);
+  if (existing) return existing;
+  return post(author, text, { roomId, clientId, kind: value.type, money: value });
+}
+
+function updateMoney(message: ChatMessage, patch: Partial<ChatMoney>): ChatMessage {
+  message.money = { ...message.money, ...patch } as ChatMoney;
+  deliver(message.roomId, { type: 'message_update', message });
+  return message;
+}
+
+/** собеседник личного чата и его номер — перевод в mock идёт обычным `transfer` по номеру */
+async function directPeer(me: ChatMember, roomId: string): Promise<{ peer: ChatMember; phone: string }> {
+  const direct = db.directs[roomId];
+  if (!direct || !isMember(roomId, me.id)) fail(422, 'MONEY_DIRECT_ONLY');
+  const peer = direct.members.find((item) => item.id !== me.id) ?? direct.members[0];
+  const phone = (await getDb()).users[peer.id]?.phone;
+  if (!phone) fail(404, 'RECIPIENT_NOT_FOUND');
+  return { peer, phone };
 }
 
 /** клиент написал в поддержку: автоответ, затем ответ «сотрудника»; на «спасибо» обращение закрывается */
@@ -717,5 +751,86 @@ export const mockChatApi = {
     support.rated = true;
     deliver(roomId, { type: 'room', room: supportFor(me.id) });
     return respond(undefined);
+  },
+
+  transferInChat: async (roomId: string, body: ChatTransferBody, key: string): Promise<TransferResult> => {
+    const me = await authorize();
+    const { phone } = await directPeer(me, roomId);
+    const result = await mockOperationsApi.transfer({ ...body, recipientPhone: phone }, key);
+    postMoney(me, roomId, body.comment ?? '', {
+      type: 'transfer',
+      transactionId: result.transactionId,
+      amount: result.amount,
+      status: 'completed',
+    }, result.transactionId);
+    return result;
+  },
+
+  requestMoney: async (roomId: string, body: ChatMoneyRequestBody): Promise<ChatMessage> => {
+    const me = await authorize();
+    const { peer } = await directPeer(me, roomId);
+    const requestId = randomUUID();
+    const message = postMoney(me, roomId, body.comment ?? '', {
+      type: 'request',
+      requestId,
+      amount: { amountMinor: body.amountMinor, currency: body.currency },
+      status: 'pending',
+      paidTransactionId: null,
+    }, requestId);
+    db.requests[requestId] = { messageId: message.id, roomId, requesterId: me.id, payerId: peer.id };
+    return respond(message);
+  },
+
+  payMoneyRequest: async (
+    requestId: string,
+    body: { fromAccountId: string },
+    key: string,
+  ): Promise<TransferResult> => {
+    const me = await authorize();
+    const request = db.requests[requestId];
+    const message = request && db.messages[request.roomId].find((item) => item.id === request.messageId);
+    if (!request || !message || request.payerId !== me.id) fail(404, 'REQUEST_NOT_FOUND');
+    if (message.money?.type !== 'request' || message.money.status !== 'pending') fail(409, 'REQUEST_NOT_PENDING');
+    const phone = (await getDb()).users[request.requesterId]?.phone ?? '';
+    const result = await mockOperationsApi.transfer(
+      { fromAccountId: body.fromAccountId, recipientPhone: phone, amountMinor: message.money.amount.amountMinor },
+      key,
+    );
+    updateMoney(message, { status: 'paid', paidTransactionId: result.transactionId });
+    return result;
+  },
+
+  declineMoneyRequest: async (requestId: string): Promise<void> => {
+    const me = await authorize();
+    const request = db.requests[requestId];
+    const message = request && db.messages[request.roomId].find((item) => item.id === request.messageId);
+    if (!request || !message || ![request.payerId, request.requesterId].includes(me.id)) {
+      fail(404, 'REQUEST_NOT_FOUND');
+    }
+    if (message.money?.type !== 'request' || message.money.status !== 'pending') fail(409, 'REQUEST_NOT_PENDING');
+    updateMoney(message, { status: 'declined' });
+    return respond(undefined);
+  },
+
+  /** в mock конверт только рисуется: балансы крипты не меняются */
+  sendGift: async (roomId: string, body: ChatGiftBody, key: string): Promise<ChatMessage> => {
+    if (USE_MOCK_API) await requireCrypto();
+    const me = await authorize();
+    await directPeer(me, roomId);
+    const message = postMoney(me, roomId, body.comment ?? '', {
+      type: 'gift',
+      giftId: randomUUID(),
+      asset: 'BTC',
+      amount: { amountMinor: body.amountMinor, currency: 'BTC' },
+      status: 'sealed',
+      openedAt: null,
+    }, key);
+    return respond(message);
+  },
+
+  /** в mock конверты присылаете только вы — открыть свой нельзя, как и на сервере */
+  openGift: async (_giftId: string): Promise<ChatMessage> => {
+    await authorize();
+    fail(404, 'GIFT_NOT_FOUND');
   },
 };

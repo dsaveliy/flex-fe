@@ -411,7 +411,15 @@
       "CURRENCY_NOT_SUPPORTED": "This currency isn't supported for the operation",
       "WALLET_NOT_FOUND": "You have no wallet for this coin",
       "PHONE_INVALID": "Use the format +375 XX XXX-XX-XX",
-      "SELF_CHAT": "That's your own number"
+      "SELF_CHAT": "That's your own number",
+      "MONEY_DIRECT_ONLY": "Money can be sent in private chats only",
+      "REQUEST_NOT_PENDING": "The request is already paid or declined",
+      "REQUEST_NOT_FOUND": "Request not found",
+      "CURRENCY_MISMATCH": "Pay from an account in the requested currency",
+      "NO_ACCOUNT_IN_CURRENCY": "Open an account in this currency first",
+      "GIFT_ASSET_NOT_SUPPORTED": "Envelopes are BTC or USDT only",
+      "GIFT_ALREADY_OPENED": "The envelope is already opened",
+      "GIFT_NOT_FOUND": "Envelope not found"
     }
   },
   "auth": {
@@ -675,6 +683,60 @@
         "submit": "Send rating",
         "thanks": "Thanks for your rating!",
         "error": "Couldn't send the rating"
+      }
+    },
+    "money": {
+      "menu": "Files and money",
+      "transfer": "Send money",
+      "request": "Request money",
+      "gift": "Crypto envelope",
+      "card": {
+        "transferOut": "You sent",
+        "transferIn": "Money for you",
+        "requestOut": "You requested",
+        "requestIn": "Money request",
+        "giftOut": "Envelope sent",
+        "giftIn": "An envelope for you",
+        "giftOpened": "Envelope opened",
+        "completed": "Delivered",
+        "pending": "Awaiting payment",
+        "paid": "Paid",
+        "declined": "Declined",
+        "sealedOut": "Waiting to be opened",
+        "sealedIn": "The amount is inside",
+        "pay": "Pay",
+        "decline": "Decline",
+        "cancel": "Cancel",
+        "open": "Open the envelope"
+      },
+      "sheet": {
+        "transferTitle": "Send in chat",
+        "transferSubtitle": "{{name}} receives the money on their main account",
+        "requestTitle": "Request money",
+        "requestSubtitle": "{{name}} will see a request with a “Pay” button",
+        "payTitle": "Pay the request",
+        "paySubtitle": "{{amount}}",
+        "giftTitle": "Crypto envelope",
+        "giftSubtitle": "{{name}} sees the amount only after opening it",
+        "to": "Receive to",
+        "from": "From",
+        "comment": "Comment",
+        "commentPlaceholder": "Optional",
+        "submitTransfer": "Send",
+        "submitRequest": "Request",
+        "submitPay": "Pay",
+        "submitGift": "Send envelope",
+        "noAccounts": "No suitable account",
+        "noCrypto": "An envelope needs a BTC or USDT wallet — it appears after KYC in Crypto",
+        "successTransfer": "Sent: {{name}}",
+        "successRequest": "Request sent",
+        "successPay": "Paid",
+        "successGift": "Envelope sent"
+      },
+      "preview": {
+        "transfer": "💸 Transfer",
+        "request": "💸 Money request",
+        "gift": "🎁 Crypto envelope"
       }
     }
   }

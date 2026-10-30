@@ -637,4 +637,7 @@ export type ChatDirectBody = { phone: string } | { userId: string };
 
 export type ChatMoneyRequestBody = { amountMinor: number; currency: string; comment?: string };
 
+/** «Перевести» из личного чата: получатель — собеседник, номер подставляет сервер */
+export type ChatTransferBody = { fromAccountId: string; amountMinor: number; comment?: string };
+
 export type ChatGiftBody = { fromAccountId: string; amountMinor: number; comment?: string };

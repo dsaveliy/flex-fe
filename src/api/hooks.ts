@@ -16,6 +16,10 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  ChatGiftBody,
+  ChatMessage,
+  ChatMoneyRequestBody,
+  ChatTransferBody,
   CryptoLayout,
   CryptoWidget,
   EarnProduct,
@@ -36,6 +40,7 @@ import type {
   TopUpRequest,
   Transaction,
   TransferRequest,
+  TransferResult,
   User,
   WithdrawalRequest,
 } from './types';
@@ -258,6 +263,46 @@ export function useTransfer() {
     mutationFn: ({ body, key }: { body: TransferRequest; key: string }) => api.transfer(body, key),
     onSuccess: refresh,
   });
+}
+
+/** деньги в личном чате: карточка придёт в ленту кадром, здесь — только операция и обновление балансов */
+export type ChatMoneyOperation =
+  | { mode: 'transfer'; roomId: string; body: ChatTransferBody; key: string }
+  | { mode: 'request'; roomId: string; body: ChatMoneyRequestBody }
+  | { mode: 'pay'; requestId: string; fromAccountId: string; key: string }
+  | { mode: 'gift'; roomId: string; body: ChatGiftBody; key: string };
+
+export function useChatMoney() {
+  const refresh = useRefreshMoney();
+  return useMutation({
+    mutationFn: (operation: ChatMoneyOperation): Promise<TransferResult | ChatMessage> => {
+      switch (operation.mode) {
+        case 'transfer':
+          return api.transferInChat(operation.roomId, operation.body, operation.key);
+        case 'request':
+          return api.requestMoney(operation.roomId, operation.body);
+        case 'pay':
+          return api.payMoneyRequest(
+            operation.requestId,
+            { fromAccountId: operation.fromAccountId },
+            operation.key,
+          );
+        case 'gift':
+          return api.sendGift(operation.roomId, operation.body, operation.key);
+      }
+    },
+    onSuccess: refresh,
+  });
+}
+
+/** открыть конверт: деньги зачисляются на кошелёк — балансы обновляются */
+export function useOpenGift() {
+  const refresh = useRefreshMoney();
+  return useMutation({ mutationFn: (giftId: string) => api.openGift(giftId), onSuccess: refresh });
+}
+
+export function useDeclineMoneyRequest() {
+  return useMutation({ mutationFn: (requestId: string) => api.declineMoneyRequest(requestId) });
 }
 
 /**

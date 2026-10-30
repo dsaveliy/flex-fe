@@ -9,8 +9,11 @@ import type {
   BankCardDetails,
   ChatAttachment,
   ChatDirectBody,
+  ChatGiftBody,
   ChatMessage,
+  ChatMoneyRequestBody,
   ChatRoom,
+  ChatTransferBody,
   ChatUploadFile,
   SupportRatingBody,
   CryptoAccessStatus,
@@ -114,6 +117,18 @@ export type FlexApi = {
   /** сотрудник (is_admin) закрывает обращение клиента */
   closeSupportChat(roomId: string): Promise<void>;
   rateSupportChat(roomId: string, body: SupportRatingBody): Promise<void>;
+  // деньги в личном чате: карточки приходят в ленту кадрами message / message_update
+  transferInChat(roomId: string, body: ChatTransferBody, idempotencyKey: string): Promise<TransferResult>;
+  requestMoney(roomId: string, body: ChatMoneyRequestBody): Promise<ChatMessage>;
+  payMoneyRequest(
+    requestId: string,
+    body: { fromAccountId: string },
+    idempotencyKey: string,
+  ): Promise<TransferResult>;
+  declineMoneyRequest(requestId: string): Promise<void>;
+  /** крипто-конверт: Уровень 2, сумма скрыта от получателя до открытия */
+  sendGift(roomId: string, body: ChatGiftBody, idempotencyKey: string): Promise<ChatMessage>;
+  openGift(giftId: string): Promise<ChatMessage>;
 };
 
 /**
@@ -170,6 +185,12 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   uploadChatAttachment: 'access',
   closeSupportChat: 'access',
   rateSupportChat: 'access',
+  transferInChat: 'access',
+  requestMoney: 'access',
+  payMoneyRequest: 'access',
+  declineMoneyRequest: 'access',
+  sendGift: 'crypto',
+  openGift: 'access',
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -303,6 +324,35 @@ function createHttpApi(baseUrl: string): FlexApi {
         body,
         as('rateSupportChat'),
       ),
+    transferInChat: (roomId, body, key) =>
+      transport.post<TransferResult>(`/chat/rooms/${encodeURIComponent(roomId)}/transfers`, body, {
+        ...as('transferInChat'),
+        init: idempotent(key),
+      }),
+    requestMoney: (roomId, body) =>
+      transport.post<ChatMessage>(
+        `/chat/rooms/${encodeURIComponent(roomId)}/requests`,
+        body,
+        as('requestMoney'),
+      ),
+    payMoneyRequest: (requestId, body, key) =>
+      transport.post<TransferResult>(`/chat/requests/${encodeURIComponent(requestId)}/pay`, body, {
+        ...as('payMoneyRequest'),
+        init: idempotent(key),
+      }),
+    declineMoneyRequest: (requestId) =>
+      transport.post<void>(
+        `/chat/requests/${encodeURIComponent(requestId)}/decline`,
+        {},
+        as('declineMoneyRequest'),
+      ),
+    sendGift: (roomId, body, key) =>
+      transport.post<ChatMessage>(`/chat/rooms/${encodeURIComponent(roomId)}/gifts`, body, {
+        ...as('sendGift'),
+        init: idempotent(key),
+      }),
+    openGift: (giftId) =>
+      transport.post<ChatMessage>(`/chat/gifts/${encodeURIComponent(giftId)}/open`, {}, as('openGift')),
   };
 }
 

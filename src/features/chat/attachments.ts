@@ -14,7 +14,14 @@ export function formatFileSize(bytes: number, t: TFunction): string {
 }
 
 /** подпись сообщения без текста: в списке чатов, в цитате и для экранного диктора */
-export function attachmentSummary(message: Pick<ChatMessage, 'text' | 'attachments'>, t: TFunction): string {
+export function attachmentSummary(
+  message: Pick<ChatMessage, 'text' | 'attachments'> & { money?: ChatMessage['money'] },
+  t: TFunction,
+): string {
+  if (message.money) {
+    const kind = t(`chat.money.preview.${message.money.type}`);
+    return message.text ? `${kind} · ${message.text}` : kind;
+  }
   if (message.text) return message.text;
   const images = message.attachments.filter((item) => item.kind === 'image');
   const file = message.attachments.find((item) => item.kind === 'file');

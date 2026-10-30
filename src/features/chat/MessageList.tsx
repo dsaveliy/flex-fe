@@ -38,6 +38,9 @@ export type MessageListProps = {
   emptySubtitle?: string;
   onAuthorPress?(author: ChatMember): void;
   onOpenImage(attachment: ChatAttachment): void;
+  onPayRequest(message: LocalChatMessage): void;
+  onDeclineRequest(requestId: string): void;
+  onOpenGift(giftId: string): void;
   onLongPress(message: LocalChatMessage): void;
   onReply(message: LocalChatMessage): void;
 };
@@ -54,6 +57,9 @@ export function MessageList({
   emptySubtitle,
   onAuthorPress,
   onOpenImage,
+  onPayRequest,
+  onDeclineRequest,
+  onOpenGift,
   onLongPress,
   onReply,
 }: MessageListProps) {
@@ -127,6 +133,9 @@ export function MessageList({
           onDiscard={discard}
           onQuotePress={scrollTo}
           onOpenImage={onOpenImage}
+          onPayRequest={onPayRequest}
+          onDeclineRequest={onDeclineRequest}
+          onOpenGift={onOpenGift}
         />
       );
     },
@@ -135,8 +144,11 @@ export function MessageList({
       highlighted,
       meId,
       onAuthorPress,
+      onDeclineRequest,
       onLongPress,
+      onOpenGift,
       onOpenImage,
+      onPayRequest,
       onReply,
       react,
       readUntil,

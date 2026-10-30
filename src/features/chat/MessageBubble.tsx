@@ -20,6 +20,7 @@ import { attachmentSummary } from './attachments';
 import { avatarColor, BotLabel, ChatAvatar, StaffBadge } from './ChatAvatar';
 import { DeliveryMark } from './DeliveryMark';
 import { MessageAttachments } from './MessageAttachments';
+import { MoneyCard } from './MoneyCard';
 
 /** насколько потянуть пузырь влево, чтобы ответить на него */
 const REPLY_THRESHOLD = 56;
@@ -47,6 +48,10 @@ export type MessageBubbleProps = {
   onDiscard(message: LocalChatMessage): void;
   onQuotePress(messageId: string): void;
   onOpenImage(attachment: ChatAttachment): void;
+  /** карточки денег: оплатить или отклонить запрос, открыть конверт */
+  onPayRequest(message: LocalChatMessage): void;
+  onDeclineRequest(requestId: string): void;
+  onOpenGift(giftId: string): void;
 };
 
 /**
@@ -70,6 +75,9 @@ export const MessageBubble = memo(function MessageBubble({
   onDiscard,
   onQuotePress,
   onOpenImage,
+  onPayRequest,
+  onDeclineRequest,
+  onOpenGift,
 }: MessageBubbleProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -225,6 +233,17 @@ export const MessageBubble = memo(function MessageBubble({
                   {message.replyTo.text || t('chat.attachment.generic')}
                 </Text>
               </Touchable>
+            ) : null}
+
+            {message.money ? (
+              <MoneyCard
+                message={message}
+                money={message.money}
+                own={own}
+                onPay={onPayRequest}
+                onDecline={onDeclineRequest}
+                onOpenGift={onOpenGift}
+              />
             ) : null}
 
             {message.attachments.length > 0 ? (

@@ -31,10 +31,12 @@ export type ComposerProps = {
   onSend(text: string): void;
   /** вложения следующего сообщения; нет — кнопки «скрепка» нет (Lobby — только текст) */
   attachments?: AttachmentDraftState;
+  /** деньги в личном чате: в том же меню, кнопка тогда — «＋» */
+  money?: { onTransfer(): void; onRequest(): void; onGift(): void };
 };
 
 /** многострочный ввод с подсказкой, полоса «Ответ …», выбранные файлы и круглая кнопка отправки */
-export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments }: ComposerProps) {
+export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments, money }: ComposerProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const input = useRef<TextInput>(null);
@@ -149,9 +151,9 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments }
         >
           {attachments ? (
             <ActionMenu
-              title={t('chat.attachment.pick')}
+              title={t(money ? 'chat.money.menu' : 'chat.attachment.pick')}
               cancelLabel={t('common.cancel')}
-              accessibilityLabel={t('chat.attachment.pick')}
+              accessibilityLabel={t(money ? 'chat.money.menu' : 'chat.attachment.pick')}
               triggerSize={{ width: SEND_SIZE, height: SEND_SIZE }}
               items={[
                 {
@@ -166,10 +168,36 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments }
                   systemImage: 'doc',
                   onPress: () => void attachments.pickFiles(),
                 },
+                ...(money
+                  ? [
+                      {
+                        id: 'transfer',
+                        label: t('chat.money.transfer'),
+                        systemImage: 'arrow.up.right' as const,
+                        onPress: money.onTransfer,
+                      },
+                      {
+                        id: 'request',
+                        label: t('chat.money.request'),
+                        systemImage: 'arrow.down.left' as const,
+                        onPress: money.onRequest,
+                      },
+                      {
+                        id: 'gift',
+                        label: t('chat.money.gift'),
+                        systemImage: 'gift' as const,
+                        onPress: money.onGift,
+                      },
+                    ]
+                  : []),
               ]}
             >
               <View style={[styles.center, { width: SEND_SIZE, height: SEND_SIZE }]}>
-                <Icon name="paperclip" size={22} color={theme.colors.textMuted} />
+                <Icon
+                  name={money ? 'plus' : 'paperclip'}
+                  size={22}
+                  color={money ? theme.colors.accent : theme.colors.textMuted}
+                />
               </View>
             </ActionMenu>
           ) : null}

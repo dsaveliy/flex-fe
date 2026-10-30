@@ -3,12 +3,12 @@
 > Статус: спринт 5 готов на фронтенде и бэкенде (`flex-be/app/api/routers/chat.py`, тесты `tests/test_chat.py`).
 > Спринт 6: готовы личные чаты, доставка тем, кто был офлайн (`migrations/0006_chat_direct.sql`), фото и PDF
 > в личных чатах (`0007_chat_attachments.sql`, `app/services/chat_files.py`), поддержка с оценкой
-> (`0008_chat_support.sql`); деньги в переписке — в работе. Mock для разработки без сервера — `src/api/mock/chat.ts`.
+> (`0008_chat_support.sql`), деньги в переписке (`0009_chat_money.sql`, `app/services/chat_money.py`). Mock для разработки без сервера — `src/api/mock/chat.ts`.
 > Чат разрабатывается два спринта:
 > - **Спринт 5** — групповой чат «Flex Lobby»: простые текстовые сообщения с рассылкой всем онлайн (BE-003, FLEX-184).
 > - **Спринт 6** — личные сообщения, доставка тем, кто был офлайн, вложения, деньги в переписке, поддержка.
 >
-> Разделы, помеченные **[С6]**, в спринте 5 не нужны, но модель данных лучше сразу заложить под них
+> Разделы, помеченные «спринт 6», в спринте 5 не были нужны, но модель данных сразу заложена под них
 > (комнаты, хранение сообщений, отметки прочтения), чтобы потом не переделывать схему.
 
 Источник правды по типам — `src/api/types.ts` (раздел «Чат»), по REST-маршрутам — `src/api/services.ts`,
@@ -73,7 +73,7 @@ type ChatMessage = {
   replyTo: { id: string; authorName: string; text: string } | null;  // text — первые 140 символов
   reactions: ChatReaction[];
   attachments: ChatAttachment[];  // фото и PDF — только в direct; в Lobby всегда []
-  money: ChatMoney | null;        // [С6] только у transfer / request / gift
+  money: ChatMoney | null;        // только у transfer / request / gift
   createdAt: string;     // ISO 8601 UTC, ставит сервер
 };
 
@@ -194,7 +194,7 @@ Access живёт 15 минут. Сервер **может** закрыть со
 // собеседник прочитал до messageId — у своих сообщений ✓ → ✓✓; userId = свой — прочитано с другого устройства
 { "type": "read", "roomId": "…", "userId": "…", "messageId": "…" }
 
-// [С6] сообщение изменилось: запрос оплачен, конверт открыт
+// сообщение изменилось: запрос оплачен или отклонён, конверт открыт — у каждого своя версия (см. «Деньги»)
 { "type": "message_update", "message": ChatMessage }
 
 // появилась новая комната: собеседник прислал первое сообщение — приходит до кадра message
@@ -276,7 +276,10 @@ type ChatAttachment = {
 - Загруженный, но не отправленный файл удаляется через сутки (фоновая очистка). Файлы лежат в volume `chat_files`
   и в бэкап базы не входят.
 
-### Деньги в переписке · [С6]
+### Деньги в переписке · спринт 6
+
+Только в **direct** (иначе `422 MONEY_DIRECT_ONLY`). Карточки — обычные сообщения `kind: transfer | request | gift`
+с полем `money`; создаёт их сервер, клиент получает кадр `message`, а при изменении — `message_update`.
 
 ```ts
 type ChatMoney =
@@ -286,16 +289,23 @@ type ChatMoney =
       status: 'sealed' | 'opened'; openedAt: string | null };
 ```
 
-- **Перевод.** После каждого успешного `POST /transfers` между двумя клиентами сервер сам кладёт в их direct-комнату
-  (создаёт при необходимости) сообщение `kind: "transfer"`, `text` = комментарий перевода, и рассылает `message`.
-  Отдельного эндпоинта нет: перевод из шторки и из чата — один и тот же `POST /transfers`.
-- **Запрос денег.** `POST /chat/rooms/{roomId}/requests {amountMinor, currency, comment?}` → `ChatMessage` (`kind: "request"`).
-  Плательщик платит обычным `POST /transfers` с новым полем `requestId`; сервер переводит запрос в `paid` и шлёт
-  `message_update`. `POST /chat/requests/{requestId}/decline` → `declined`.
+- **Перевод.** После каждого успешного `POST /transfers` между двумя клиентами сервер кладёт в их direct-комнату
+  (создаёт при необходимости) карточку `transfer`, `text` = комментарий. `clientId` карточки = id операции, поэтому
+  повтор перевода с тем же `Idempotency-Key` второй карточки не создаёт. Сбой чата перевод не отменяет — он уже проведён.
+  Из чата: `POST /chat/rooms/{roomId}/transfers {fromAccountId, amountMinor, comment?}` + `Idempotency-Key` · access →
+  `TransferResult`. Это тот же перевод, но номер собеседника подставляет сервер — клиенту он не раскрывается.
+- **Запрос денег.** `POST /chat/rooms/{roomId}/requests {amountMinor, currency, comment?}` · access → `ChatMessage`
+  (`kind: "request"`, `pending`). Валюта — фиат, у просящего должен быть основной счёт в ней (`422 NO_ACCOUNT_IN_CURRENCY`).
+  Плательщик: `POST /chat/requests/{requestId}/pay {fromAccountId}` + `Idempotency-Key` → `TransferResult`; внутри —
+  обычный перевод на сумму запроса со счёта той же валюты (`422 CURRENCY_MISMATCH`), затем `message_update` с `paid`.
+  Повтор с тем же ключом возвращает тот же перевод. `POST /chat/requests/{requestId}/decline` → 204: плательщик
+  отклоняет, просящий отменяет. Не `pending` — `409 REQUEST_NOT_PENDING`.
 - **Крипто-конверт.** `POST /chat/rooms/{roomId}/gifts {fromAccountId, amountMinor, comment?}` + `Idempotency-Key` ·
-  **crypto** (Уровень 2). Деньги сразу списываются на системный счёт-«конверт». Получатель видит `amount: null`, пока не
-  вызовет `POST /chat/gifts/{giftId}/open` · access → зачисление на его счёт этой валюты (создать, если нет),
-  `message_update` обоим. Ошибки: `INSUFFICIENT_FUNDS`, `GIFT_ALREADY_OPENED`, `GIFT_NOT_FOUND`.
+  **crypto** (Уровень 2) → `ChatMessage`. Счёт — BTC или USDT (`422 GIFT_ASSET_NOT_SUPPORTED`), у получателя должен быть
+  кошелёк этой валюты (`422 RECIPIENT_NO_ACCOUNT`). Деньги сразу уходят проводкой `gift` на системный счёт `gifts:<валюта>`.
+  **Сумму видит только отправитель**: сервер собирает сообщение для каждого зрителя отдельно, у остальных
+  `money.amount = null` — в истории, в `lastMessage`, в кадрах. `POST /chat/gifts/{giftId}/open` · access, только получатель →
+  зачисление на его кошелёк, `message_update` обоим (`opened`, сумма видна). Повторно — `409 GIFT_ALREADY_OPENED`.
 
 ### Поддержка · спринт 6
 

@@ -9,11 +9,14 @@ import {
   type ChatAttachment,
   type ChatMember,
   closeSupportChat,
+  isApiError,
   type LocalChatMessage,
   openDirectChat,
   sendChatMessage,
   toggleChatReaction,
   useChatMe,
+  useDeclineMoneyRequest,
+  useOpenGift,
   useChatRoom,
   useChatRoomInfo,
 } from '@/api';
@@ -131,6 +134,47 @@ export function ChatRoomScreen() {
   const closeTicket = () => {
     closeSupportChat(roomId).catch(() => setActionError(t('chat.support.closeError')));
   };
+
+  // деньги в личном чате: шторка суммы, ответы сервера придут в ленту кадрами
+  const openGift = useOpenGift();
+  const declineRequest = useDeclineMoneyRequest();
+  const moneyError = useCallback(
+    (failure: unknown) =>
+      setActionError(
+        isApiError(failure)
+          ? t(`operations.errors.${failure.code}`, { defaultValue: t('operations.errors.generic') })
+          : t('operations.errors.generic'),
+      ),
+    [t],
+  );
+  const openMoney = (mode: 'transfer' | 'request' | 'gift') =>
+    router.push({ pathname: '/messages/money', params: { roomId, mode } });
+  const payRequest = useCallback(
+    (message: LocalChatMessage) => {
+      if (message.money?.type !== 'request') return;
+      router.push({
+        pathname: '/messages/money',
+        params: {
+          roomId,
+          mode: 'pay',
+          requestId: message.money.requestId,
+          amount: String(message.money.amount.amountMinor),
+          currency: message.money.amount.currency,
+        },
+      });
+    },
+    [roomId, router],
+  );
+  const { mutate: decline } = declineRequest;
+  const { mutate: open } = openGift;
+  const onDecline = useCallback(
+    (requestId: string) => decline(requestId, { onError: moneyError }),
+    [decline, moneyError],
+  );
+  const onOpenGift = useCallback(
+    (giftId: string) => open(giftId, { onError: moneyError }),
+    [open, moneyError],
+  );
   const clearFocus = useCallback(() => setFocusMessageId(null), []);
 
   return (
@@ -205,6 +249,9 @@ export function ChatRoomScreen() {
             }
             onAuthorPress={room?.kind === 'lobby' ? writeDirect : undefined}
             onOpenImage={setViewing}
+            onPayRequest={payRequest}
+            onDeclineRequest={onDecline}
+            onOpenGift={onOpenGift}
             onLongPress={setActionsFor}
             onReply={setReplyTo}
           />
@@ -241,6 +288,15 @@ export function ChatRoomScreen() {
               onCancelReply={() => setReplyTo(null)}
               onSend={send}
               attachments={filesAllowed ? attachments : undefined}
+              money={
+                direct
+                  ? {
+                      onTransfer: () => openMoney('transfer'),
+                      onRequest: () => openMoney('request'),
+                      onGift: () => openMoney('gift'),
+                    }
+                  : undefined
+              }
             />
           </>
         )}

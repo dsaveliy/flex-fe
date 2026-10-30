@@ -411,7 +411,15 @@
       "CURRENCY_NOT_SUPPORTED": "Эта валюта не поддерживается для операции",
       "WALLET_NOT_FOUND": "Нет кошелька этой монеты",
       "PHONE_INVALID": "Номер в формате +375 XX XXX-XX-XX",
-      "SELF_CHAT": "Это ваш номер"
+      "SELF_CHAT": "Это ваш номер",
+      "MONEY_DIRECT_ONLY": "Деньги — только в личном чате",
+      "REQUEST_NOT_PENDING": "Запрос уже оплачен или отклонён",
+      "REQUEST_NOT_FOUND": "Запрос не найден",
+      "CURRENCY_MISMATCH": "Оплатите со счёта в валюте запроса",
+      "NO_ACCOUNT_IN_CURRENCY": "Сначала откройте счёт в этой валюте",
+      "GIFT_ASSET_NOT_SUPPORTED": "Конверт — только BTC или USDT",
+      "GIFT_ALREADY_OPENED": "Конверт уже открыт",
+      "GIFT_NOT_FOUND": "Конверт не найден"
     }
   },
   "auth": {
@@ -675,6 +683,60 @@
         "submit": "Отправить оценку",
         "thanks": "Спасибо за оценку!",
         "error": "Не удалось отправить оценку"
+      }
+    },
+    "money": {
+      "menu": "Файлы и деньги",
+      "transfer": "Перевести",
+      "request": "Запросить деньги",
+      "gift": "Крипто-конверт",
+      "card": {
+        "transferOut": "Вы перевели",
+        "transferIn": "Перевод вам",
+        "requestOut": "Вы запросили",
+        "requestIn": "Запрос денег",
+        "giftOut": "Конверт отправлен",
+        "giftIn": "Вам конверт",
+        "giftOpened": "Конверт открыт",
+        "completed": "Зачислено",
+        "pending": "Ожидает оплаты",
+        "paid": "Оплачено",
+        "declined": "Отклонено",
+        "sealedOut": "Ждёт, когда откроют",
+        "sealedIn": "Сумма — внутри",
+        "pay": "Оплатить",
+        "decline": "Отклонить",
+        "cancel": "Отменить",
+        "open": "Открыть конверт"
+      },
+      "sheet": {
+        "transferTitle": "Перевод в чате",
+        "transferSubtitle": "{{name}} получит деньги на основной счёт",
+        "requestTitle": "Запросить деньги",
+        "requestSubtitle": "{{name}} увидит запрос с кнопкой «Оплатить»",
+        "payTitle": "Оплатить запрос",
+        "paySubtitle": "{{amount}}",
+        "giftTitle": "Крипто-конверт",
+        "giftSubtitle": "{{name}} увидит сумму, только когда откроет конверт",
+        "to": "Зачислить на",
+        "from": "Со счёта",
+        "comment": "Комментарий",
+        "commentPlaceholder": "Необязательно",
+        "submitTransfer": "Перевести",
+        "submitRequest": "Запросить",
+        "submitPay": "Оплатить",
+        "submitGift": "Отправить конверт",
+        "noAccounts": "Нет подходящего счёта",
+        "noCrypto": "Для конверта нужен кошелёк BTC или USDT — он появится после KYC в разделе Crypto",
+        "successTransfer": "Отправлено: {{name}}",
+        "successRequest": "Запрос отправлен",
+        "successPay": "Оплачено",
+        "successGift": "Конверт отправлен"
+      },
+      "preview": {
+        "transfer": "💸 Перевод",
+        "request": "💸 Запрос денег",
+        "gift": "🎁 Крипто-конверт"
       }
     }
   }

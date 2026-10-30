@@ -76,6 +76,7 @@ function RootStack() {
         <Stack.Screen name="messages/index" options={PUSH_SCREEN_OPTIONS} />
         <Stack.Screen name="messages/[roomId]" options={PUSH_SCREEN_OPTIONS} />
         <Stack.Screen name="messages/new" options={OPERATION_SHEET_OPTIONS} />
+        <Stack.Screen name="messages/money" options={OPERATION_SHEET_OPTIONS} />
         {/* шторки денежных операций: перевод, пополнение, обмен, оплата, Earn */}
         {OPERATION_SHEETS.map((name) => (
           <Stack.Screen key={name} name={name} options={OPERATION_SHEET_OPTIONS} />
