@@ -6,6 +6,7 @@ import { ApiError, isApiError } from '../client';
 import { API_BASE_URL, USE_MOCK_API } from '../config';
 import type { ChatLink, ChatLinkHandlers } from '../chat/link';
 import type {
+  ChatAttachment,
   ChatClientFrame,
   ChatDirectBody,
   ChatEmoji,
@@ -13,6 +14,7 @@ import type {
   ChatMessage,
   ChatRoom,
   ChatServerFrame,
+  ChatUploadFile,
   User,
 } from '../types';
 import { delay, respond } from './delay';
@@ -128,6 +130,8 @@ type MockDirect = { id: string; members: [ChatMember, ChatMember]; createdBy: st
 type MockChatDb = {
   /** сообщения комнаты в порядке отправки */
   messages: Record<string, ChatMessage[]>;
+  /** загруженные, но ещё не отправленные вложения: id → (владелец, файл) */
+  uploads: Record<string, { ownerId: string; attachment: ChatAttachment }>;
   directs: Record<string, MockDirect>;
   /** userId → roomId → последнее прочитанное */
   lastRead: Record<string, Record<string, string>>;
@@ -138,6 +142,7 @@ type MockChatDb = {
 
 const db: MockChatDb = {
   messages: { [LOBBY_ID]: seedLobby() },
+  uploads: {},
   directs: {},
   // три последних сообщения Lobby — «непрочитанные»
   lastRead: {},
@@ -466,8 +471,16 @@ class MockConnection implements ChatLink {
       return;
     }
 
+    const ids = frame.attachmentIds ?? [];
+    if (ids.length > 0 && frame.roomId === LOBBY_ID) {
+      return this.error('ATTACHMENTS_NOT_ALLOWED', frame.clientId);
+    }
+    const files = ids.map((id) => db.uploads[id]);
+    if (files.some((upload) => !upload || upload.ownerId !== me.id)) {
+      return this.error('ATTACHMENT_NOT_FOUND', frame.clientId);
+    }
     const text = frame.text.trim();
-    if (!text) return this.error('MESSAGE_EMPTY', frame.clientId);
+    if (!text && ids.length === 0) return this.error('MESSAGE_EMPTY', frame.clientId);
     if (text.length > MAX_TEXT) return this.error('MESSAGE_TOO_LONG', frame.clientId);
 
     const now = Date.now();
@@ -482,9 +495,11 @@ class MockConnection implements ChatLink {
       : undefined;
     if (frame.replyToId && !reply) return this.error('MESSAGE_NOT_FOUND', frame.clientId);
 
+    for (const id of ids) delete db.uploads[id];
     const message = post(me, text, {
       roomId: frame.roomId,
       clientId: frame.clientId,
+      attachments: files.map((upload) => upload.attachment),
       replyTo: reply
         ? { id: reply.id, authorName: reply.author?.name ?? '', text: reply.text.slice(0, 140) }
         : null,
@@ -542,6 +557,28 @@ export const mockChatApi = {
     const end = params?.before ? all.findIndex((message) => message.id === params.before) : all.length;
     const slice = all.slice(Math.max(0, (end < 0 ? 0 : end) - limit), end < 0 ? 0 : end);
     return respond([...slice].reverse());
+  },
+
+  /** файл остаётся на устройстве: в mock ссылка — его локальный uri */
+  uploadChatAttachment: async (file: ChatUploadFile): Promise<ChatAttachment> => {
+    const me = await authorize();
+    const image = /^image\/(jpeg|png|webp)$/.test(file.mimeType);
+    if (!image && file.mimeType !== 'application/pdf') fail(415, 'FILE_TYPE_NOT_ALLOWED');
+    if ((file.sizeBytes ?? 0) > 10 * 1024 * 1024) fail(413, 'FILE_TOO_LARGE');
+    const attachment: ChatAttachment = {
+      id: randomUUID(),
+      kind: image ? 'image' : 'file',
+      name: file.name,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes ?? 0,
+      width: null,
+      height: null,
+      url: file.uri,
+      thumbnailUrl: image ? file.uri : null,
+    };
+    db.uploads[attachment.id] = { ownerId: me.id, attachment };
+    await delay(600);
+    return respond(attachment);
   },
 
   /** собеседник — другой демо-аккаунт по номеру; в mock Lobby кроме вас только боты */

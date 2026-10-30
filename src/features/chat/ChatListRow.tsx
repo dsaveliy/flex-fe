@@ -6,6 +6,7 @@ import { useTheme } from '@/theme';
 import { Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
 
+import { attachmentSummary } from './attachments';
 import { ChatAvatar } from './ChatAvatar';
 import { dayLabel } from './feed';
 
@@ -31,7 +32,8 @@ export function ChatListRow({ room, me, showDivider = false, onPress }: ChatList
         ? last.author.name
         : null
     : null;
-  const preview = last ? (author ? `${author}: ${last.text}` : last.text) : t('chat.list.noMessages');
+  const lastText = last ? attachmentSummary(last, t) : '';
+  const preview = last ? (author ? `${author}: ${lastText}` : lastText) : t('chat.list.noMessages');
   const subtitle = room.kind === 'lobby' ? t('chat.online', { count: room.onlineCount }) : null;
 
   return (

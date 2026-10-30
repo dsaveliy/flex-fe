@@ -615,6 +615,16 @@ export type ChatServerFrame =
   | { type: 'error'; code: string; message?: string; clientId?: string; retryAfter?: number }
   | { type: 'pong' };
 
+/** выбранный файл до загрузки: `uri` — для превью и native, `file` — Blob из браузера */
+export type ChatUploadFile = {
+  uri: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number | null;
+  /** web: файл из `<input type="file">` (его отдают image/document picker) */
+  file?: Blob;
+};
+
 /** `POST /chat/rooms/direct`: номер — как у перевода, `userId` — автор сообщения в Lobby */
 export type ChatDirectBody = { phone: string } | { userId: string };
 

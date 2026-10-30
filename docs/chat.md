@@ -1,8 +1,8 @@
 # Чат Flex: контракт WebSocket и REST для бэкенда
 
 > Статус: спринт 5 готов на фронтенде и бэкенде (`flex-be/app/api/routers/chat.py`, тесты `tests/test_chat.py`).
-> Спринт 6: готовы личные чаты и доставка тем, кто был офлайн (`migrations/0006_chat_direct.sql`); вложения,
-> поддержка и деньги — в работе. Mock для разработки без сервера — `src/api/mock/chat.ts`.
+> Спринт 6: готовы личные чаты, доставка тем, кто был офлайн (`migrations/0006_chat_direct.sql`), фото и PDF
+> в личных чатах (`0007_chat_attachments.sql`, `app/services/chat_files.py`); поддержка и деньги — в работе. Mock для разработки без сервера — `src/api/mock/chat.ts`.
 > Чат разрабатывается два спринта:
 > - **Спринт 5** — групповой чат «Flex Lobby»: простые текстовые сообщения с рассылкой всем онлайн (BE-003, FLEX-184).
 > - **Спринт 6** — личные сообщения, доставка тем, кто был офлайн, вложения, деньги в переписке, поддержка.
@@ -69,7 +69,7 @@ type ChatMessage = {
   text: string;          // 1–2000 символов после trim; у денежных — комментарий (может быть '')
   replyTo: { id: string; authorName: string; text: string } | null;  // text — первые 140 символов
   reactions: ChatReaction[];
-  attachments: ChatAttachment[];  // [С6]; в спринте 5 всегда []
+  attachments: ChatAttachment[];  // фото и PDF — только в direct; в Lobby всегда []
   money: ChatMoney | null;        // [С6] только у transfer / request / gift
   createdAt: string;     // ISO 8601 UTC, ставит сервер
 };
@@ -87,7 +87,7 @@ chat_messages   (id uuid PK, room_id, client_id uuid NULL, author_id uuid NULL, 
                  reply_to_id uuid NULL, money jsonb NULL, created_at timestamptz,
                  UNIQUE(author_id, client_id))                             -- защита от дублей при переотправке
 chat_reactions  (message_id, user_id, emoji text, PK(message_id, user_id, emoji))
-chat_attachments(id uuid PK, owner_id, message_id NULL, kind, name, mime_type, size_bytes, width, height, storage_key, created_at)  -- [С6]
+chat_attachments(id uuid PK, owner_id, message_id NULL, position, kind, name, mime_type, size_bytes, width, height, has_thumbnail, created_at)
 ```
 
 В Lobby участник — каждый клиент: строка `chat_members` создаётся при первом подключении (или неявно —
@@ -245,21 +245,33 @@ Access живёт 15 минут. Сервер **может** закрыть со
 собеседнику — с первого сообщения (он получает кадр `room`). `title` — имя собеседника, у каждого своё.
 Боты в direct не пишут и не реагируют.
 
-### `POST /chat/attachments` → 201 · access · [С6]
+### `POST /chat/attachments` → 201 · access · спринт 6
 
-`multipart/form-data`, поле `file`. Изображения `image/jpeg|png|webp|heic` и `application/pdf`, до 10 МБ
-(`413 FILE_TOO_LARGE`, `415 FILE_TYPE_NOT_ALLOWED`). Ответ:
+`multipart/form-data`, поле `file`. Фото JPEG, PNG, WebP и PDF до 10 МБ. Тип определяется по первым байтам файла,
+а не по имени или `Content-Type`: переименованный SVG или HTML не пройдёт (`415 FILE_TYPE_NOT_ALLOWED`). Слишком
+большой файл — `413 FILE_TOO_LARGE`, пустой — `422 FILE_EMPTY`, больше 30 загрузок за 10 минут — `429 RATE_LIMITED`.
+Ответ:
 
 ```ts
 type ChatAttachment = {
   id: string; kind: 'image' | 'file'; name: string; mimeType: string; sizeBytes: number;
-  width: number | null; height: number | null;      // у изображений
-  url: string;           // подписанная ссылка на 1 час: <img> и Image не умеют слать Authorization
-  thumbnailUrl: string | null;
+  width: number | null; height: number | null;      // у изображений — после поворота по EXIF
+  url: string;           // путь от базового адреса API: /chat/files/<id>/original?exp=…&sig=…
+  thumbnailUrl: string | null;                        // миниатюра JPEG до 480 px, только у фото
 };
 ```
-Затем `send` с `attachmentIds: string[]` (до 10); `text` тогда может быть пустым. Чужой или уже прикреплённый
-`attachmentId` → `error ATTACHMENT_NOT_FOUND`.
+
+- Фото сервер пересжимает (длинная сторона до 2560 px) и **удаляет метаданные**: в EXIF с телефона бывает геопозиция.
+  HEIC не принимается — iPhone отдаёт JPEG при выборе через `expo-image-picker` (`Compatible`).
+- Затем `send` с `attachmentIds: string[]` (до 10) в **direct**-комнату; `text` тогда может быть пустым. В Lobby —
+  `error ATTACHMENTS_NOT_ALLOWED`: его читают все клиенты. Чужой, несуществующий или уже отправленный
+  `attachmentId` → `error ATTACHMENT_NOT_FOUND`, сообщение не создаётся.
+- Файл отдаёт `GET /chat/files/{id}/{original|thumb}?exp&sig` **без токена**: `<img>` и `Image` не умеют слать
+  `Authorization`. Подпись — HMAC-SHA256 (ключ выводится из `FLEX_JWT_LEVEL1_SECRET`), ссылка живёт до конца
+  следующего часа и в пределах часа одинакова — картинки кешируются. Неверная или просроченная подпись — `403 LINK_EXPIRED`;
+  свежие ссылки приходят с каждой загрузкой истории. Клиент дописывает адрес сервера: `chatFileUrl()` в `src/api/chat/files.ts`.
+- Загруженный, но не отправленный файл удаляется через сутки (фоновая очистка). Файлы лежат в volume `chat_files`
+  и в бэкап базы не входят.
 
 ### Деньги в переписке · [С6]
 

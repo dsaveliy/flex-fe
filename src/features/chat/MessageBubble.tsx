@@ -11,13 +11,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import type { ChatEmoji, ChatMember, LocalChatMessage } from '@/api';
+import type { ChatAttachment, ChatEmoji, ChatMember, LocalChatMessage } from '@/api';
 import { useTheme } from '@/theme';
 import { ActionMenu, Icon, Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
 
+import { attachmentSummary } from './attachments';
 import { avatarColor, BotLabel, ChatAvatar } from './ChatAvatar';
 import { DeliveryMark } from './DeliveryMark';
+import { MessageAttachments } from './MessageAttachments';
 
 /** насколько потянуть пузырь влево, чтобы ответить на него */
 const REPLY_THRESHOLD = 56;
@@ -44,6 +46,7 @@ export type MessageBubbleProps = {
   onRetry(message: LocalChatMessage): void;
   onDiscard(message: LocalChatMessage): void;
   onQuotePress(messageId: string): void;
+  onOpenImage(attachment: ChatAttachment): void;
 };
 
 /**
@@ -66,6 +69,7 @@ export const MessageBubble = memo(function MessageBubble({
   onRetry,
   onDiscard,
   onQuotePress,
+  onOpenImage,
 }: MessageBubbleProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -154,7 +158,7 @@ export const MessageBubble = memo(function MessageBubble({
                   ? `${authorName}, ${t('chat.bot')}`
                   : authorName,
               time,
-              text: message.text,
+              text: attachmentSummary(message, t),
             })}
             accessibilityHint={canInteract ? t('chat.a11y.messageActions') : undefined}
             hitSlop={0}
@@ -217,14 +221,20 @@ export const MessageBubble = memo(function MessageBubble({
                   {message.replyTo.authorName}
                 </Text>
                 <Text variant="caption" numberOfLines={2} style={{ color: ink, opacity: 0.8 }}>
-                  {message.replyTo.text}
+                  {message.replyTo.text || t('chat.attachment.generic')}
                 </Text>
               </Touchable>
             ) : null}
 
-            <Text variant="message" style={[{ color: ink }, styles.noSelect]}>
-              {message.text}
-            </Text>
+            {message.attachments.length > 0 ? (
+              <MessageAttachments attachments={message.attachments} own={own} onOpenImage={onOpenImage} />
+            ) : null}
+
+            {message.text ? (
+              <Text variant="message" style={[{ color: ink }, styles.noSelect]}>
+                {message.text}
+              </Text>
+            ) : null}
 
             <View style={[styles.meta, { gap: theme.spacing.xs }]}>
               <Text variant="micro" style={{ color: ink, opacity: 0.7 }}>

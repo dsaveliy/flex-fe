@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Platform, StyleSheet, View } from 'react-native';
 
 import {
+  type ChatAttachment,
   type ChatEmoji,
   type ChatMember,
   type ChatRoomFeed,
@@ -36,6 +37,7 @@ export type MessageListProps = {
   /** подпись пустой ленты: кто увидит первое сообщение */
   emptySubtitle?: string;
   onAuthorPress?(author: ChatMember): void;
+  onOpenImage(attachment: ChatAttachment): void;
   onLongPress(message: LocalChatMessage): void;
   onReply(message: LocalChatMessage): void;
 };
@@ -51,6 +53,7 @@ export function MessageList({
   showAuthors = true,
   emptySubtitle,
   onAuthorPress,
+  onOpenImage,
   onLongPress,
   onReply,
 }: MessageListProps) {
@@ -123,6 +126,7 @@ export function MessageList({
           onRetry={retry}
           onDiscard={discard}
           onQuotePress={scrollTo}
+          onOpenImage={onOpenImage}
         />
       );
     },
@@ -132,6 +136,7 @@ export function MessageList({
       meId,
       onAuthorPress,
       onLongPress,
+      onOpenImage,
       onReply,
       react,
       readUntil,

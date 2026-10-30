@@ -34,6 +34,14 @@
         {
           "faceIDPermission": "Flex использует Face ID для входа в раздел Crypto"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Flex открывает фото, чтобы вы могли отправить его в чате",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

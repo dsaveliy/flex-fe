@@ -88,6 +88,10 @@ async function toApiError(response: Response): Promise<ApiError> {
  * токен берётся из сессии по `auth`; повтор после refresh и выход при отзыве —
  * в `authInterceptor.ts`, общем для mock и HTTP
  */
+/** файл (вложение чата) уходит как multipart: границу в Content-Type ставит сам fetch */
+const isForm = (body: unknown): body is FormData =>
+  typeof FormData !== 'undefined' && body instanceof FormData;
+
 export function createHttpTransport(baseUrl: string): ApiTransport {
   async function request<T>(path: string, init: RequestInit, auth: AuthScope): Promise<T> {
     const response = await fetch(`${baseUrl}${path}`, {
@@ -95,7 +99,7 @@ export function createHttpTransport(baseUrl: string): ApiTransport {
       // web: refresh в httpOnly-cookie
       credentials: auth === 'refresh' ? 'include' : init.credentials,
       headers: {
-        'Content-Type': 'application/json',
+        ...(isForm(init.body) ? {} : { 'Content-Type': 'application/json' }),
         ...bearer(auth),
         ...(init.headers ?? {}),
       },
@@ -113,7 +117,7 @@ export function createHttpTransport(baseUrl: string): ApiTransport {
     post: (path, body, options) =>
       request(
         path,
-        { ...options?.init, method: 'POST', body: JSON.stringify(body ?? {}) },
+        { ...options?.init, method: 'POST', body: isForm(body) ? body : JSON.stringify(body ?? {}) },
         options?.auth ?? 'access',
       ),
     put: (path, body, options) =>

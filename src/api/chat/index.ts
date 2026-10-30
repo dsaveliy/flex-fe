@@ -11,6 +11,7 @@ export {
   startChatClient,
   toggleChatReaction,
 } from './client';
+export { chatFileUrl } from './files';
 export {
   useChatConnection,
   useChatMe,

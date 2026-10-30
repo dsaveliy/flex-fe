@@ -51,7 +51,9 @@ export type IconName =
   | 'faceId'
   | 'chat'
   | 'reply'
-  | 'close';
+  | 'close'
+  | 'paperclip'
+  | 'image';
 
 export type IconProps = {
   name: IconName;
@@ -351,6 +353,19 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.8 }: IconProps) {
         </>
       )}
       {name === 'close' && <Path d="M6.5 6.5l11 11M17.5 6.5l-11 11" {...common} />}
+      {name === 'paperclip' && (
+        <Path
+          d="m19 11.5-7.2 7.2a4.6 4.6 0 0 1-6.5-6.5l7.6-7.6a3 3 0 0 1 4.3 4.3l-7.6 7.6a1.5 1.5 0 0 1-2.1-2.1l7-7"
+          {...common}
+        />
+      )}
+      {name === 'image' && (
+        <>
+          <Rect x={3.5} y={4.5} width={17} height={15} rx={2.5} {...common} />
+          <Circle cx={9} cy={9.5} r={1.6} {...common} />
+          <Path d="m20.5 15.5-4.8-4.8L6 19.5" {...common} />
+        </>
+      )}
     </Svg>
   );
 }

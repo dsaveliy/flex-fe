@@ -594,7 +594,11 @@
       "MESSAGE_TOO_LONG": "Message is longer than 2000 characters",
       "MESSAGE_EMPTY": "Empty message",
       "TIMEOUT": "The server didn't respond",
-      "default": "Couldn't send"
+      "default": "Couldn't send",
+      "ATTACHMENT_NOT_FOUND": "Attachment not found — attach it again",
+      "ATTACHMENTS_NOT_ALLOWED": "Lobby is text only — send files in private chats",
+      "FILE_TOO_LARGE": "The file is larger than 10 MB",
+      "FILE_TYPE_NOT_ALLOWED": "Photos (JPEG, PNG, WebP) and PDF only"
     },
     "actions": {
       "reply": "Reply",
@@ -627,6 +631,25 @@
       "offline": "offline"
     },
     "writeDirect": "Message {{name}} privately",
-    "directError": "Couldn't open the private chat"
+    "directError": "Couldn't open the private chat",
+    "attachment": {
+      "pick": "Attach a photo or PDF",
+      "photo": "Photo",
+      "file": "PDF file",
+      "photoPreview": "📷 Photo",
+      "photosPreview": "📷 Photos: {{count}}",
+      "filePreview": "📎 {{name}}",
+      "generic": "Attachment",
+      "remove": "Remove {{name}}",
+      "uploading": "{{name}}: uploading",
+      "failed": "{{name}}: upload failed — tap to retry",
+      "open": "Open {{name}}",
+      "openImage": "Open the photo full screen",
+      "close": "Close",
+      "kb": "{{value}} KB",
+      "mb": "{{value}} MB",
+      "unavailable": "Update the app to send files",
+      "pdfSize": "PDF · {{size}}"
+    }
   }
 }

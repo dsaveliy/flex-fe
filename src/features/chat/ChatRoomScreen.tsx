@@ -6,6 +6,7 @@ import { FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, View } 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  type ChatAttachment,
   type ChatMember,
   type LocalChatMessage,
   openDirectChat,
@@ -27,10 +28,12 @@ import {
 } from '@/ui';
 import { formatTime } from '@/utils/format';
 
+import { useAttachmentDraft } from './attachments';
 import { ChatAvatar } from './ChatAvatar';
 import { Composer } from './Composer';
 import { ConnectionBanner } from './ConnectionBanner';
 import { dayLabel } from './feed';
+import { ImageViewer } from './ImageViewer';
 import { MessageActions } from './MessageActions';
 import { MessageList } from './MessageList';
 import { TypingIndicator } from './TypingIndicator';
@@ -59,6 +62,8 @@ export function ChatRoomScreen() {
   const webKeyboard = useKeyboardInset();
 
   const [actionError, setActionError] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<ChatAttachment | null>(null);
+  const attachments = useAttachmentDraft();
 
   const direct = room?.kind === 'direct';
   const peerOnline = direct && room.onlineCount > 0;
@@ -89,7 +94,9 @@ export function ChatRoomScreen() {
   );
 
   const send = (text: string) => {
-    sendChatMessage(roomId, text, replyTo);
+    // файлы — только в личных чатах: Lobby читают все клиенты
+    sendChatMessage(roomId, text, replyTo, direct ? attachments.ready : []);
+    attachments.clear();
     setReplyTo(null);
   };
   const clearFocus = useCallback(() => setFocusMessageId(null), []);
@@ -149,6 +156,7 @@ export function ChatRoomScreen() {
               direct ? t('chat.empty.directSubtitle', { name: room.title }) : undefined
             }
             onAuthorPress={room?.kind === 'lobby' ? writeDirect : undefined}
+            onOpenImage={setViewing}
             onLongPress={setActionsFor}
             onReply={setReplyTo}
           />
@@ -171,6 +179,7 @@ export function ChatRoomScreen() {
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
               onSend={send}
+              attachments={direct ? attachments : undefined}
             />
           </>
         )}
@@ -184,6 +193,8 @@ export function ChatRoomScreen() {
           }}
         />
       </KeyboardAvoidingView>
+
+      <ImageViewer image={viewing} onClose={() => setViewing(null)} />
 
       <MessageActions
         message={actionsFor}

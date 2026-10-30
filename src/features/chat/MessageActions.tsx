@@ -5,6 +5,8 @@ import type { ChatEmoji, LocalChatMessage } from '@/api';
 import { useTheme } from '@/theme';
 import { Glass, GlassCard, Icon, ListRow, Text, Touchable } from '@/ui';
 
+import { attachmentSummary } from './attachments';
+
 export const CHAT_EMOJI: ChatEmoji[] = ['👍', '❤️', '😂', '🔥', '🚀', '🙏'];
 
 export type MessageActionsProps = {
@@ -90,7 +92,7 @@ export function MessageActions({ message, meId, onClose, onReact, onReply }: Mes
               </Text>
             ) : null}
             <Text variant="message" numberOfLines={6}>
-              {message.text}
+              {attachmentSummary(message, t)}
             </Text>
           </View>
 

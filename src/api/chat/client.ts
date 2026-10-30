@@ -6,6 +6,7 @@ import { ensureFreshAccess, refreshSession, signOutLocal } from '@/auth/sessionA
 
 import { api } from '../api';
 import type {
+  ChatAttachment,
   ChatDirectBody,
   ChatEmoji,
   ChatMember,
@@ -293,6 +294,8 @@ function sendFrame(message: LocalChatMessage): void {
     roomId: message.roomId,
     text: message.text,
     replyToId: message.replyTo?.id,
+    attachmentIds:
+      message.attachments.length > 0 ? message.attachments.map((item) => item.id) : undefined,
   });
   armSendTimer(message.clientId ?? '');
 }
@@ -337,14 +340,16 @@ function clearSendTimers(): void {
   sendTimers.clear();
 }
 
+/** вложения уже загружены (`uploadChatAttachment`): в сообщении — их id, превью — до ответа сервера */
 export function sendChatMessage(
   roomId: string,
   text: string,
   replyTo?: ChatMessage | null,
+  attachments: ChatAttachment[] = [],
 ): void {
   const { me } = chatStore.get();
   const body = text.trim();
-  if (!me || !body) return;
+  if (!me || (!body && attachments.length === 0)) return;
 
   const clientId = randomUUID();
   const message: LocalChatMessage = {
@@ -358,7 +363,7 @@ export function sendChatMessage(
       ? { id: replyTo.id, authorName: replyTo.author?.name ?? '', text: replyTo.text.slice(0, 140) }
       : null,
     reactions: [],
-    attachments: [],
+    attachments,
     money: null,
     createdAt: new Date().toISOString(),
     delivery: 'sending',

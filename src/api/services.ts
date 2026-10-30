@@ -7,9 +7,11 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  ChatAttachment,
   ChatDirectBody,
   ChatMessage,
   ChatRoom,
+  ChatUploadFile,
   CryptoAccessStatus,
   CryptoBiometricRequest,
   CryptoBiometricResponse,
@@ -106,6 +108,8 @@ export type FlexApi = {
   ): Promise<ChatMessage[]>;
   /** личный чат по номеру или с автором из Lobby; уже переписывались — та же комната */
   openDirectChat(body: ChatDirectBody): Promise<ChatRoom>;
+  /** фото или PDF до 10 МБ; затем id — в `send.attachmentIds` личного чата */
+  uploadChatAttachment(file: ChatUploadFile): Promise<ChatAttachment>;
 };
 
 /**
@@ -159,6 +163,7 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   getChatRooms: 'access',
   getChatMessages: 'access',
   openDirectChat: 'access',
+  uploadChatAttachment: 'access',
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -274,6 +279,16 @@ function createHttpApi(baseUrl: string): FlexApi {
     },
     openDirectChat: (body) =>
       transport.post<ChatRoom>('/chat/rooms/direct', body, as('openDirectChat')),
+    uploadChatAttachment: (file) => {
+      const form = new FormData();
+      if (file.file) {
+        form.append('file', file.file, file.name);
+      } else {
+        // React Native: fetch сам читает файл по uri
+        form.append('file', { uri: file.uri, name: file.name, type: file.mimeType } as unknown as Blob);
+      }
+      return transport.post<ChatAttachment>('/chat/attachments', form, as('uploadChatAttachment'));
+    },
   };
 }
 

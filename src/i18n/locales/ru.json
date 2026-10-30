@@ -594,7 +594,11 @@
       "MESSAGE_TOO_LONG": "Сообщение длиннее 2000 символов",
       "MESSAGE_EMPTY": "Пустое сообщение",
       "TIMEOUT": "Сервер не ответил",
-      "default": "Не удалось отправить"
+      "default": "Не удалось отправить",
+      "ATTACHMENT_NOT_FOUND": "Вложение не найдено — прикрепите его заново",
+      "ATTACHMENTS_NOT_ALLOWED": "В Lobby — только текст, файлы — в личных чатах",
+      "FILE_TOO_LARGE": "Файл больше 10 МБ",
+      "FILE_TYPE_NOT_ALLOWED": "Можно фото (JPEG, PNG, WebP) и PDF"
     },
     "actions": {
       "reply": "Ответить",
@@ -627,6 +631,25 @@
       "offline": "не в сети"
     },
     "writeDirect": "Написать лично: {{name}}",
-    "directError": "Не удалось открыть личный чат"
+    "directError": "Не удалось открыть личный чат",
+    "attachment": {
+      "pick": "Прикрепить фото или PDF",
+      "photo": "Фото",
+      "file": "PDF-файл",
+      "photoPreview": "📷 Фото",
+      "photosPreview": "📷 Фото: {{count}}",
+      "filePreview": "📎 {{name}}",
+      "generic": "Вложение",
+      "remove": "Убрать {{name}}",
+      "uploading": "{{name}}: загружается",
+      "failed": "{{name}}: не загрузилось — нажмите, чтобы повторить",
+      "open": "Открыть {{name}}",
+      "openImage": "Открыть фото на весь экран",
+      "close": "Закрыть",
+      "kb": "{{value}} КБ",
+      "mb": "{{value}} МБ",
+      "unavailable": "Обновите приложение, чтобы отправлять файлы",
+      "pdfSize": "PDF · {{size}}"
+    }
   }
 }
