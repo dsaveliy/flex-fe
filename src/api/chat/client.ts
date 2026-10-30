@@ -494,6 +494,18 @@ export async function openDirectChat(body: ChatDirectBody): Promise<ChatRoom> {
   return room;
 }
 
+/** сотрудник закрыл обращение: системное сообщение и оценка у клиента придут кадрами */
+export async function closeSupportChat(roomId: string): Promise<void> {
+  await api.closeSupportChat(roomId);
+}
+
+/** оценка обращения: карточка оценки пропадает сразу, не дожидаясь кадра room */
+export async function rateSupportChat(roomId: string, score: number, comment?: string): Promise<void> {
+  await api.rateSupportChat(roomId, { score, comment: comment?.trim() || undefined });
+  const room = chatStore.get().rooms.find((item) => item.id === roomId);
+  if (room) update((state) => upsertRoom(state, { ...room, canRate: false }));
+}
+
 /** список комнат по REST — для «потянуть, чтобы обновить» и пока сокет не подключился */
 export async function refreshChatRooms(): Promise<void> {
   const rooms = await api.getChatRooms();

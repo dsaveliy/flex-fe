@@ -12,6 +12,7 @@ import type {
   ChatMessage,
   ChatRoom,
   ChatUploadFile,
+  SupportRatingBody,
   CryptoAccessStatus,
   CryptoBiometricRequest,
   CryptoBiometricResponse,
@@ -110,6 +111,9 @@ export type FlexApi = {
   openDirectChat(body: ChatDirectBody): Promise<ChatRoom>;
   /** фото или PDF до 10 МБ; затем id — в `send.attachmentIds` личного чата */
   uploadChatAttachment(file: ChatUploadFile): Promise<ChatAttachment>;
+  /** сотрудник (is_admin) закрывает обращение клиента */
+  closeSupportChat(roomId: string): Promise<void>;
+  rateSupportChat(roomId: string, body: SupportRatingBody): Promise<void>;
 };
 
 /**
@@ -164,6 +168,8 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   getChatMessages: 'access',
   openDirectChat: 'access',
   uploadChatAttachment: 'access',
+  closeSupportChat: 'access',
+  rateSupportChat: 'access',
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -289,6 +295,14 @@ function createHttpApi(baseUrl: string): FlexApi {
       }
       return transport.post<ChatAttachment>('/chat/attachments', form, as('uploadChatAttachment'));
     },
+    closeSupportChat: (roomId) =>
+      transport.post<void>(`/chat/rooms/${encodeURIComponent(roomId)}/close`, {}, as('closeSupportChat')),
+    rateSupportChat: (roomId, body) =>
+      transport.post<void>(
+        `/chat/rooms/${encodeURIComponent(roomId)}/rating`,
+        body,
+        as('rateSupportChat'),
+      ),
   };
 }
 

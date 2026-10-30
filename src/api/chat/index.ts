@@ -1,8 +1,10 @@
 export {
+  closeSupportChat,
   discardChatMessage,
   loadOlderChatMessages,
   notifyChatTyping,
   openDirectChat,
+  rateSupportChat,
   reconnectChat,
   refreshChatRooms,
   reloadChatRoom,

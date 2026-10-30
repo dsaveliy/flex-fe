@@ -650,6 +650,32 @@
       "mb": "{{value}} MB",
       "unavailable": "Update the app to send files",
       "pdfSize": "PDF · {{size}}"
+    },
+    "support": {
+      "title": "Flex Support",
+      "staffOnline": "an agent is online",
+      "replyTime": "we reply within 15 minutes",
+      "badge": "Flex ✓",
+      "badgeA11y": "verified Flex agent",
+      "tag": "ticket",
+      "close": "Close the ticket",
+      "closeError": "Couldn't close the ticket",
+      "emptySubtitle": "Describe your question — a Flex agent will reply here. Only you and support see these messages",
+      "quickTitle": "Common questions",
+      "quick": {
+        "transfer": "My transfer didn't arrive",
+        "card": "My card is blocked",
+        "crypto": "A question about Crypto",
+        "login": "I can't sign in"
+      },
+      "rate": {
+        "title": "Rate how we helped",
+        "star": "{{count}} of 5",
+        "comment": "Comment — optional",
+        "submit": "Send rating",
+        "thanks": "Thanks for your rating!",
+        "error": "Couldn't send the rating"
+      }
     }
   }
 }

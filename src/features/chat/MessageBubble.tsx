@@ -17,7 +17,7 @@ import { ActionMenu, Icon, Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
 
 import { attachmentSummary } from './attachments';
-import { avatarColor, BotLabel, ChatAvatar } from './ChatAvatar';
+import { avatarColor, BotLabel, ChatAvatar, StaffBadge } from './ChatAvatar';
 import { DeliveryMark } from './DeliveryMark';
 import { MessageAttachments } from './MessageAttachments';
 
@@ -194,6 +194,7 @@ export const MessageBubble = memo(function MessageBubble({
                   {authorName}
                 </Text>
                 {message.author?.isBot ? <BotLabel /> : null}
+                {message.author?.isStaff ? <StaffBadge /> : null}
               </View>
             ) : null}
 

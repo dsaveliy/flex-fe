@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { HeaderHeightContext } from 'expo-router/build/react-navigation/elements';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type ChatAttachment,
   type ChatMember,
+  closeSupportChat,
   type LocalChatMessage,
   openDirectChat,
   sendChatMessage,
@@ -36,6 +37,7 @@ import { dayLabel } from './feed';
 import { ImageViewer } from './ImageViewer';
 import { MessageActions } from './MessageActions';
 import { MessageList } from './MessageList';
+import { QuickReplies, RatingCard } from './SupportExtras';
 import { TypingIndicator } from './TypingIndicator';
 
 /** сколько показывать «не удалось открыть личный чат» */
@@ -66,20 +68,48 @@ export function ChatRoomScreen() {
   const attachments = useAttachmentDraft();
 
   const direct = room?.kind === 'direct';
-  const peerOnline = direct && room.onlineCount > 0;
+  const support = room?.kind === 'support';
+  // у сотрудника в обращении собеседник — клиент; у клиента — «Поддержка Flex» без собеседника
+  const staffView = support && room.peer !== null;
+  const peerOnline = (direct || support) && room.onlineCount > 0;
+  // файлы — в личных чатах и в поддержке (скриншоты), Lobby читают все клиенты
+  const filesAllowed = direct || support;
   const title = room?.title ?? t('chat.title');
   const subtitle =
     room?.kind === 'lobby'
       ? t('chat.online', { count: room.onlineCount })
-      : direct
+      : direct || staffView
         ? t(peerOnline ? 'chat.peer.online' : 'chat.peer.offline')
-        : undefined;
+        : support
+          ? t(peerOnline ? 'chat.support.staffOnline' : 'chat.support.replyTime')
+          : undefined;
+  // быстрые ответы — клиенту, пока он ничего не написал в этом обращении
+  const quickReplies =
+    support &&
+    !staffView &&
+    !room.closedAt &&
+    feed.history.status === 'ready' &&
+    !feed.messages.some((message) => message.author?.id === me?.id);
 
   useEffect(() => {
     if (!actionError) return;
     const timer = setTimeout(() => setActionError(null), ACTION_ERROR_MS);
     return () => clearTimeout(timer);
   }, [actionError]);
+
+  // оценку приняли: карточка пропадает, на её месте ненадолго — «Спасибо»
+  const [thanked, setThanked] = useState(false);
+  const couldRate = useRef(false);
+  const canRate = Boolean(support && room.canRate);
+  useEffect(() => {
+    if (couldRate.current && !canRate && room?.closedAt) setThanked(true);
+    couldRate.current = canRate;
+  }, [canRate, room?.closedAt]);
+  useEffect(() => {
+    if (!thanked) return;
+    const timer = setTimeout(() => setThanked(false), ACTION_ERROR_MS);
+    return () => clearTimeout(timer);
+  }, [thanked]);
 
   // аватар человека в Lobby → личный чат с ним (комната та же, если уже переписывались)
   const writeDirect = useCallback(
@@ -94,10 +124,12 @@ export function ChatRoomScreen() {
   );
 
   const send = (text: string) => {
-    // файлы — только в личных чатах: Lobby читают все клиенты
-    sendChatMessage(roomId, text, replyTo, direct ? attachments.ready : []);
+    sendChatMessage(roomId, text, replyTo, filesAllowed ? attachments.ready : []);
     attachments.clear();
     setReplyTo(null);
+  };
+  const closeTicket = () => {
+    closeSupportChat(roomId).catch(() => setActionError(t('chat.support.closeError')));
   };
   const clearFocus = useCallback(() => setFocusMessageId(null), []);
 
@@ -114,17 +146,29 @@ export function ChatRoomScreen() {
             <RoomTitle
               title={title}
               subtitle={subtitle}
-              subtitleColor={direct && !peerOnline ? 'textMuted' : 'accent'}
+              subtitleColor={(direct || support) && !peerOnline ? 'textMuted' : 'accent'}
             />
           ),
           headerRight: () => (
-            <Touchable
-              onPress={() => setSearching((value) => !value)}
-              accessibilityLabel={t(searching ? 'chat.search.close' : 'chat.search.open')}
-              style={styles.headerButton}
-            >
-              <Icon name={searching ? 'close' : 'search'} color={theme.colors.accent} />
-            </Touchable>
+            <View style={styles.row}>
+              {staffView && !room.closedAt && me?.isStaff ? (
+                <Touchable
+                  onPress={closeTicket}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('chat.support.close')}
+                  style={styles.headerButton}
+                >
+                  <Icon name="check" color={theme.colors.accent} />
+                </Touchable>
+              ) : null}
+              <Touchable
+                onPress={() => setSearching((value) => !value)}
+                accessibilityLabel={t(searching ? 'chat.search.close' : 'chat.search.open')}
+                style={styles.headerButton}
+              >
+                <Icon name={searching ? 'close' : 'search'} color={theme.colors.accent} />
+              </Touchable>
+            </View>
           ),
         }}
       />
@@ -153,7 +197,11 @@ export function ChatRoomScreen() {
             onFocusHandled={clearFocus}
             showAuthors={!direct}
             emptySubtitle={
-              direct ? t('chat.empty.directSubtitle', { name: room.title }) : undefined
+              direct
+                ? t('chat.empty.directSubtitle', { name: room.title })
+                : support
+                  ? t('chat.support.emptySubtitle')
+                  : undefined
             }
             onAuthorPress={room?.kind === 'lobby' ? writeDirect : undefined}
             onOpenImage={setViewing}
@@ -164,6 +212,19 @@ export function ChatRoomScreen() {
         {searching ? null : (
           <>
             <TypingIndicator users={feed.typing} />
+            {canRate ? <RatingCard roomId={roomId} /> : null}
+            {thanked ? (
+              <Text
+                variant="bodyStrong"
+                color="accent"
+                align="center"
+                accessibilityLiveRegion="polite"
+                style={{ paddingBottom: theme.spacing.sm }}
+              >
+                {t('chat.support.rate.thanks')}
+              </Text>
+            ) : null}
+            {quickReplies ? <QuickReplies onPick={(text) => sendChatMessage(roomId, text)} /> : null}
             {actionError ? (
               <Text
                 variant="caption"
@@ -179,7 +240,7 @@ export function ChatRoomScreen() {
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
               onSend={send}
-              attachments={direct ? attachments : undefined}
+              attachments={filesAllowed ? attachments : undefined}
             />
           </>
         )}

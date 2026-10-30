@@ -2,7 +2,8 @@
 
 > Статус: спринт 5 готов на фронтенде и бэкенде (`flex-be/app/api/routers/chat.py`, тесты `tests/test_chat.py`).
 > Спринт 6: готовы личные чаты, доставка тем, кто был офлайн (`migrations/0006_chat_direct.sql`), фото и PDF
-> в личных чатах (`0007_chat_attachments.sql`, `app/services/chat_files.py`); поддержка и деньги — в работе. Mock для разработки без сервера — `src/api/mock/chat.ts`.
+> в личных чатах (`0007_chat_attachments.sql`, `app/services/chat_files.py`), поддержка с оценкой
+> (`0008_chat_support.sql`); деньги в переписке — в работе. Mock для разработки без сервера — `src/api/mock/chat.ts`.
 > Чат разрабатывается два спринта:
 > - **Спринт 5** — групповой чат «Flex Lobby»: простые текстовые сообщения с рассылкой всем онлайн (BE-003, FLEX-184).
 > - **Спринт 6** — личные сообщения, доставка тем, кто был офлайн, вложения, деньги в переписке, поддержка.
@@ -56,6 +57,8 @@ type ChatRoom = {
   lastMessage: ChatMessage | null;
   /** до какого сообщения прочитал собеседник — для ✓✓ (в direct; иначе null) */
   peerLastReadMessageId: string | null;
+  closedAt: string | null;   // support: сотрудник закрыл обращение; иначе null
+  canRate: boolean;          // support: клиент ещё не оценил это закрытие
 };
 
 type ChatMessageKind = 'text' | 'system' | 'transfer' | 'request' | 'gift';
@@ -294,15 +297,26 @@ type ChatMoney =
   вызовет `POST /chat/gifts/{giftId}/open` · access → зачисление на его счёт этой валюты (создать, если нет),
   `message_update` обоим. Ошибки: `INSUFFICIENT_FUNDS`, `GIFT_ALREADY_OPENED`, `GIFT_NOT_FOUND`.
 
-### Поддержка · [С6]
+### Поддержка · спринт 6
 
-- У каждого клиента одна комната `kind: "support"` — создаётся при первом `GET /chat/rooms`, всегда первая в списке.
-- Сотрудник = пользователь с `is_admin`; в своём списке он видит support-комнаты всех клиентов (`title` = имя клиента)
-  и отвечает в них обычным `send`. У его сообщений `author.isStaff = true` — клиент рисует значок «Проверенный Flex».
-  Значок **нельзя** получить в Lobby и direct: сервер не ставит `isStaff` вне support.
-- `POST /chat/rooms/{roomId}/close` · admin → системное сообщение «Обращение закрыто»; клиент показывает оценку.
-- `POST /chat/rooms/{roomId}/rating {score: 1..5, comment?}` · access → 204.
+- У каждого клиента одна комната `kind: "support"` (`title` «Поддержка Flex») — создаётся при первом
+  `GET /chat/rooms`/`ready` и всегда первая в списке. Её видят только этот клиент и сотрудники.
+- Сотрудник = пользователь с `users.is_admin`. В `ready` у него `me.isStaff = true` — клиент показывает кнопку
+  «Закрыть обращение». В списке он видит обращения клиентов, где уже есть сообщения (`title` и `peer` — клиент,
+  `onlineCount` — клиент в сети), и отвечает в них обычным `send`. Первое сообщение нового обращения приходит
+  сотрудникам кадром `room`. У клиента `onlineCount` = 1, если в сети хоть один сотрудник.
+- У ответов сотрудника `author.isStaff = true` — значок «Flex ✓». Значок **нельзя** получить в Lobby и direct: там
+  сервер всегда ставит `isStaff = false`.
+- На первое сообщение обращения сервер отвечает системным сообщением (`kind: "system"`, `author: null`)
+  «Мы получили обращение…». Если клиент пишет в закрытое обращение, оно открывается снова
+  («Обращение снова открыто» + автоответ), а клиенту приходит `room` с `closedAt: null`.
+- `POST /chat/rooms/{roomId}/close` · admin → 204: системное «Обращение закрыто…», кадр `room` с `closedAt` и у клиента
+  `canRate: true`. Повторно — `409 ALREADY_CLOSED`, не сотрудник — `403`.
+- `POST /chat/rooms/{roomId}/rating {score: 1..5, comment?}` · access, только клиент обращения → 204, затем `room` с
+  `canRate: false`. Одна оценка на каждое закрытие (`chat_ratings`): `409 ALREADY_RATED`, `409 NOT_CLOSED`,
+  `422 RATING_INVALID`.
 - Быстрые ответы («Не пришёл перевод», «Карта заблокирована», …) — только на клиенте, уходят обычным текстом.
+  Фото и PDF в поддержке разрешены (скриншоты), как в direct.
 
 ### Офлайн-доставка · спринт 6
 
@@ -338,6 +352,9 @@ type ChatMoney =
     `react` — `MESSAGE_NOT_FOUND`, `send` — `ROOM_NOT_FOUND`.
 11. B подключился / отключился → A получает `presence` комнаты с `onlineCount` 1 / 0; B прочитал → A получает `read`,
     а в `GET /chat/rooms` у A — `peerLastReadMessageId`.
+12. Клиент пишет в поддержку → сотрудник получает `room` (имя клиента) и `message`, клиент — автоответ. Ответ сотрудника
+    с `isStaff: true`, его же сообщение в Lobby — `false`. Закрытие → `canRate: true`; оценка → `false`, вторая —
+    `ALREADY_RATED`; новое сообщение клиента открывает обращение снова.
 
 ## 7. Подключение фронтенда
 

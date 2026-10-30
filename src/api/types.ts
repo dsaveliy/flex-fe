@@ -584,7 +584,14 @@ export type ChatRoom = {
   lastMessage: ChatMessage | null;
   /** до какого сообщения прочитал собеседник — для ✓✓ */
   peerLastReadMessageId: string | null;
+  /** поддержка: сотрудник закрыл обращение (`null` — открыто) */
+  closedAt?: string | null;
+  /** поддержка: клиент может оценить это закрытие */
+  canRate?: boolean;
 };
+
+/** `POST /chat/rooms/{id}/rating` — оценка закрытого обращения */
+export type SupportRatingBody = { score: number; comment?: string };
 
 /** кадры клиента → сервера */
 export type ChatClientFrame =

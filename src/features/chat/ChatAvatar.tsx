@@ -28,9 +28,11 @@ export type ChatAvatarProps = {
   size?: number;
   /** зелёная точка «онлайн» */
   online?: boolean;
+  /** значок вместо инициалов, когда `member` нет: Lobby — чат, поддержка — щит */
+  icon?: 'chat' | 'shield';
 };
 
-export function ChatAvatar({ member, size = 32, online = false }: ChatAvatarProps) {
+export function ChatAvatar({ member, size = 32, online = false, icon = 'chat' }: ChatAvatarProps) {
   const theme = useTheme();
   const dot = Math.max(8, Math.round(size * 0.26));
 
@@ -62,7 +64,7 @@ export function ChatAvatar({ member, size = 32, online = false }: ChatAvatarProp
           tint={theme.colors.accentMuted}
           style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Icon name="chat" size={size * 0.5} color={theme.colors.accent} />
+          <Icon name={icon} size={size * 0.5} color={theme.colors.accent} />
         </Glass>
       )}
       {online ? (
@@ -99,6 +101,28 @@ export function BotLabel() {
     >
       <Text variant="micro" color="accent">
         {t('chat.bot')}
+      </Text>
+    </View>
+  );
+}
+
+/** «Flex ✓» у ответов сотрудника поддержки: сервер ставит isStaff только в комнате поддержки */
+export function StaffBadge() {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={t('chat.support.badgeA11y')}
+      style={{
+        paddingHorizontal: theme.spacing.xs + 2,
+        borderRadius: theme.radii.pill,
+        backgroundColor: theme.colors.accent,
+      }}
+    >
+      <Text variant="micro" color="textInverse">
+        {t('chat.support.badge')}
       </Text>
     </View>
   );

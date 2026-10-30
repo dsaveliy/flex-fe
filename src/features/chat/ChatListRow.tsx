@@ -7,7 +7,7 @@ import { Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
 
 import { attachmentSummary } from './attachments';
-import { ChatAvatar } from './ChatAvatar';
+import { ChatAvatar, StaffBadge } from './ChatAvatar';
 import { dayLabel } from './feed';
 
 const AVATAR = 48;
@@ -28,13 +28,22 @@ export function ChatListRow({ room, me, showDivider = false, onPress }: ChatList
   const author = last?.author
     ? last.author.id === me?.id
       ? t('chat.you')
-      : room.kind === 'lobby'
+      : room.kind !== 'direct'
         ? last.author.name
         : null
     : null;
   const lastText = last ? attachmentSummary(last, t) : '';
   const preview = last ? (author ? `${author}: ${lastText}` : lastText) : t('chat.list.noMessages');
-  const subtitle = room.kind === 'lobby' ? t('chat.online', { count: room.onlineCount }) : null;
+  // сотрудник видит обращения клиентов: у них имя клиента и пометка «обращение»
+  const staffView = room.kind === 'support' && room.peer !== null;
+  const subtitle =
+    room.kind === 'lobby'
+      ? t('chat.online', { count: room.onlineCount })
+      : staffView
+        ? t('chat.support.tag')
+        : room.kind === 'support' && room.onlineCount > 0
+          ? t('chat.support.staffOnline')
+          : null;
 
   return (
     <Touchable
@@ -53,13 +62,17 @@ export function ChatListRow({ room, me, showDivider = false, onPress }: ChatList
       <ChatAvatar
         member={room.kind === 'lobby' ? null : room.peer}
         size={AVATAR}
-        online={room.kind === 'direct' && room.onlineCount > 0}
+        icon={room.kind === 'support' ? 'shield' : 'chat'}
+        online={room.kind !== 'lobby' && room.onlineCount > 0}
       />
       <View style={[styles.fill, { gap: 2 }]}>
         <View style={[styles.row, { gap: theme.spacing.sm }]}>
-          <Text variant="headline" numberOfLines={1} style={styles.fill}>
-            {room.title}
-          </Text>
+          <View style={[styles.row, styles.fill, { gap: theme.spacing.xs }]}>
+            <Text variant="headline" numberOfLines={1} style={styles.shrink}>
+              {room.title}
+            </Text>
+            {room.kind === 'support' && !staffView ? <StaffBadge /> : null}
+          </View>
           {last ? (
             <Text variant="caption" color={room.unreadCount ? 'accent' : 'textMuted'}>
               {today ? formatTime(last.createdAt) : dayLabel(last.createdAt, t)}
@@ -113,5 +126,8 @@ const styles = StyleSheet.create({
   },
   fill: {
     flex: 1,
+  },
+  shrink: {
+    flexShrink: 1,
   },
 });

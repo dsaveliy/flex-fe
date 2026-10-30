@@ -15,6 +15,7 @@ import type {
   ChatRoom,
   ChatServerFrame,
   ChatUploadFile,
+  SupportRatingBody,
   User,
 } from '../types';
 import { delay, respond } from './delay';
@@ -76,6 +77,26 @@ const REPLIES: { match: RegExp; text: string[] }[] = [
 ];
 
 const FALLBACK = ['👍', 'Согласен', 'Ха, точно 😂', 'Интересно', '+1'];
+/** сотрудник поддержки в mock: его сообщения со значком «Проверенный Flex» */
+const SUPPORT_AGENT: ChatMember = {
+  id: 'support-agent',
+  name: 'Ольга, поддержка',
+  initials: 'ОП',
+  isStaff: true,
+  isBot: false,
+};
+const SUPPORT_TITLE = 'Поддержка Flex';
+const SUPPORT_RECEIVED = 'Мы получили обращение. Сотрудник ответит здесь же — обычно в течение 15 минут';
+const SUPPORT_REOPENED = 'Обращение снова открыто';
+const SUPPORT_CLOSED = 'Обращение закрыто. Оцените, пожалуйста, как мы помогли';
+const SUPPORT_ANSWERS: { match: RegExp; text: string }[] = [
+  { match: /перевод/i, text: 'Проверила: перевод зачислен, обновите экран «Главная». Если не видно — пришлите время перевода' },
+  { match: /карт/i, text: 'Карту можно разморозить в «Карты → Заморозить». Если блокировка от банка — разблокирую отсюда' },
+  { match: /crypto|крипт/i, text: 'Раздел Crypto открывается после KYC и PIN. Что именно не получается?' },
+  { match: /войти|вход|пароль/i, text: 'Попробуйте «Забыли пароль?» на экране входа. Код придёт на почту' },
+];
+const SUPPORT_THANKS = /спасибо|благодар|thanks/i;
+
 /** ответы собеседника в личном чате */
 const DIRECT_REPLIES = ['Привет! 👋', 'Ага, понял', 'Сейчас посмотрю', 'Спасибо!', 'Давай 👍', 'Ок, договорились'];
 
@@ -127,7 +148,11 @@ function seedLobby(): ChatMessage[] {
 /** личная комната двух клиентов; пустая видна только тому, кто её открыл */
 type MockDirect = { id: string; members: [ChatMember, ChatMember]; createdBy: string };
 
+/** обращение клиента в поддержку: одна комната на клиента */
+type MockSupport = { id: string; ownerId: string; closedAt: string | null; rated: boolean };
+
 type MockChatDb = {
+  supports: Record<string, MockSupport>;
   /** сообщения комнаты в порядке отправки */
   messages: Record<string, ChatMessage[]>;
   /** загруженные, но ещё не отправленные вложения: id → (владелец, файл) */
@@ -144,6 +169,7 @@ const db: MockChatDb = {
   messages: { [LOBBY_ID]: seedLobby() },
   uploads: {},
   directs: {},
+  supports: {},
   // три последних сообщения Lobby — «непрочитанные»
   lastRead: {},
   byClientId: {},
@@ -230,10 +256,85 @@ function broadcast(frame: ChatServerFrame): void {
 
 function isMember(roomId: string, userId: string): boolean {
   if (roomId === LOBBY_ID) return true;
+  const support = Object.values(db.supports).find((item) => item.id === roomId);
+  if (support) return support.ownerId === userId;
   return Boolean(db.directs[roomId]?.members.some((item) => item.id === userId));
 }
 
-/** кадр комнаты: Lobby — всем, личной — только участникам */
+const supportById = (roomId: string) => Object.values(db.supports).find((item) => item.id === roomId);
+
+function supportOf(userId: string): MockSupport {
+  db.supports[userId] ??= { id: randomUUID(), ownerId: userId, closedAt: null, rated: false };
+  db.messages[db.supports[userId].id] ??= [];
+  return db.supports[userId];
+}
+
+function supportFor(userId: string): ChatRoom {
+  const support = supportOf(userId);
+  const messages = db.messages[support.id];
+  const lastRead = db.lastRead[userId]?.[support.id];
+  const readIndex = messages.findIndex((message) => message.id === lastRead);
+  return {
+    id: support.id,
+    kind: 'support',
+    title: SUPPORT_TITLE,
+    peer: null,
+    onlineCount: 1,
+    unreadCount: messages.slice(readIndex + 1).filter((message) => message.author?.id !== userId).length,
+    lastMessage: messages.at(-1) ?? null,
+    peerLastReadMessageId: null,
+    closedAt: support.closedAt,
+    canRate: support.closedAt !== null && !support.rated,
+  };
+}
+
+function postSystem(roomId: string, text: string): void {
+  const message: ChatMessage = {
+    id: randomUUID(),
+    roomId,
+    clientId: null,
+    kind: 'system',
+    author: null,
+    text,
+    replyTo: null,
+    reactions: [],
+    attachments: [],
+    money: null,
+    createdAt: new Date().toISOString(),
+  };
+  db.messages[roomId] = [...(db.messages[roomId] ?? []), message];
+  deliver(roomId, { type: 'message', message });
+}
+
+/** клиент написал в поддержку: автоответ, затем ответ «сотрудника»; на «спасибо» обращение закрывается */
+function supportReplies(support: MockSupport, message: ChatMessage): void {
+  const own = db.messages[support.id].filter((item) => item.author?.id === support.ownerId);
+  if (support.closedAt) {
+    support.closedAt = null;
+    support.rated = false;
+    postSystem(support.id, SUPPORT_REOPENED);
+    deliver(support.id, { type: 'room', room: supportFor(support.ownerId) });
+    postSystem(support.id, SUPPORT_RECEIVED);
+  } else if (own.length === 1) {
+    postSystem(support.id, SUPPORT_RECEIVED);
+  }
+  const thanks = SUPPORT_THANKS.test(message.text);
+  const answer = thanks
+    ? 'Рады помочь! Закрываю обращение'
+    : (SUPPORT_ANSWERS.find((item) => item.match.test(message.text))?.text ??
+      'Здравствуйте! Уточните, пожалуйста, детали — разберёмся');
+  setTimeout(() => deliver(support.id, { type: 'typing', roomId: support.id, user: SUPPORT_AGENT }), 1_000);
+  setTimeout(() => {
+    if (connections.size === 0) return;
+    post(SUPPORT_AGENT, answer, { roomId: support.id });
+    if (!thanks) return;
+    support.closedAt = new Date().toISOString();
+    postSystem(support.id, SUPPORT_CLOSED);
+    deliver(support.id, { type: 'room', room: supportFor(support.ownerId) });
+  }, 3_000);
+}
+
+/** кадр комнаты: Lobby — всем, личной и поддержке — только участникам */
 function deliver(roomId: string, frame: ChatServerFrame): void {
   if (roomId === LOBBY_ID) return broadcast(frame);
   for (const connection of connections) {
@@ -268,7 +369,7 @@ function roomsFor(userId: string): ChatRoom[] {
     )
     .map((direct) => directFor(userId, direct))
     .sort((a, b) => Date.parse(b.lastMessage?.createdAt ?? '0') - Date.parse(a.lastMessage?.createdAt ?? '0'));
-  return [lobbyFor(userId), ...personal];
+  return [supportFor(userId), lobbyFor(userId), ...personal];
 }
 
 /** собеседник читает (✓✓), печатает и отвечает */
@@ -458,9 +559,8 @@ class MockConnection implements ChatLink {
   }
 
   private handleSend(me: ChatMember, frame: Extract<ChatClientFrame, { type: 'send' }>): void {
-    if (!isMember(frame.roomId, me.id) || (frame.roomId !== LOBBY_ID && !db.directs[frame.roomId])) {
-      return this.error('ROOM_NOT_FOUND', frame.clientId);
-    }
+    const known = frame.roomId === LOBBY_ID || db.directs[frame.roomId] || supportById(frame.roomId);
+    if (!known || !isMember(frame.roomId, me.id)) return this.error('ROOM_NOT_FOUND', frame.clientId);
     const roomMessages = db.messages[frame.roomId] ?? [];
 
     // повтор с тем же clientId — то же сообщение, без дубля
@@ -507,7 +607,9 @@ class MockConnection implements ChatLink {
     db.byClientId[`${me.id}:${frame.clientId}`] = message.id;
     db.lastRead[me.id] = { ...db.lastRead[me.id], [frame.roomId]: message.id };
     const direct = db.directs[frame.roomId];
+    const support = supportById(frame.roomId);
     if (direct) peerReplies(direct, message);
+    else if (support) supportReplies(support, message);
     else reactToUser(message);
   }
 
@@ -549,9 +651,8 @@ export const mockChatApi = {
     params?: { before?: string; limit?: number },
   ): Promise<ChatMessage[]> => {
     const me = await authorize();
-    if (!isMember(roomId, me.id) || (roomId !== LOBBY_ID && !db.directs[roomId])) {
-      fail(404, 'ROOM_NOT_FOUND');
-    }
+    const known = roomId === LOBBY_ID || db.directs[roomId] || supportById(roomId);
+    if (!known || !isMember(roomId, me.id)) fail(404, 'ROOM_NOT_FOUND');
     const all = db.messages[roomId] ?? [];
     const limit = Math.min(Math.max(params?.limit ?? 50, 1), 100);
     const end = params?.before ? all.findIndex((message) => message.id === params.before) : all.length;
@@ -598,5 +699,23 @@ export const mockChatApi = {
     const direct = existing ?? { id: randomUUID(), members: [me, peer], createdBy: me.id };
     db.directs[direct.id] = direct;
     return respond(directFor(me.id, direct));
+  },
+
+  /** в mock сотрудников нет: обращение закрывает «Ольга» после «спасибо» */
+  closeSupportChat: async (_roomId: string): Promise<void> => {
+    await authorize();
+    fail(403, 'FORBIDDEN');
+  },
+
+  rateSupportChat: async (roomId: string, body: SupportRatingBody): Promise<void> => {
+    const me = await authorize();
+    const support = supportById(roomId);
+    if (!support || support.ownerId !== me.id) fail(404, 'ROOM_NOT_FOUND');
+    if (!support.closedAt) fail(409, 'NOT_CLOSED');
+    if (body.score < 1 || body.score > 5) fail(422, 'RATING_INVALID');
+    if (support.rated) fail(409, 'ALREADY_RATED');
+    support.rated = true;
+    deliver(roomId, { type: 'room', room: supportFor(me.id) });
+    return respond(undefined);
   },
 };
