@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, Platform, StyleSheet, View } from 'react-n
 
 import {
   type ChatEmoji,
+  type ChatMember,
   type ChatRoomFeed,
   discardChatMessage,
   type LocalChatMessage,
@@ -30,6 +31,11 @@ export type MessageListProps = {
   /** прокрутить к сообщению и подсветить его (из поиска или цитаты) */
   focusMessageId: string | null;
   onFocusHandled(): void;
+  /** имена и аватары собеседников — в Lobby; в личном чате не нужны */
+  showAuthors?: boolean;
+  /** подпись пустой ленты: кто увидит первое сообщение */
+  emptySubtitle?: string;
+  onAuthorPress?(author: ChatMember): void;
   onLongPress(message: LocalChatMessage): void;
   onReply(message: LocalChatMessage): void;
 };
@@ -42,6 +48,9 @@ export function MessageList({
   peerLastReadMessageId,
   focusMessageId,
   onFocusHandled,
+  showAuthors = true,
+  emptySubtitle,
+  onAuthorPress,
   onLongPress,
   onReply,
 }: MessageListProps) {
@@ -106,6 +115,8 @@ export function MessageList({
           meId={meId}
           read={readUntil !== null && Date.parse(item.message.createdAt) <= readUntil}
           highlighted={highlighted === item.message.id}
+          showAuthor={showAuthors}
+          onAuthorPress={onAuthorPress}
           onLongPress={onLongPress}
           onReply={onReply}
           onToggleReaction={react}
@@ -115,7 +126,19 @@ export function MessageList({
         />
       );
     },
-    [discard, highlighted, meId, onLongPress, onReply, react, readUntil, retry, scrollTo],
+    [
+      discard,
+      highlighted,
+      meId,
+      onAuthorPress,
+      onLongPress,
+      onReply,
+      react,
+      readUntil,
+      retry,
+      scrollTo,
+      showAuthors,
+    ],
   );
 
   if (feed.messages.length === 0) {
@@ -133,7 +156,7 @@ export function MessageList({
           {t('chat.empty.title')}
         </Text>
         <Text variant="body" color="textMuted" align="center">
-          {t('chat.empty.subtitle')}
+          {emptySubtitle ?? t('chat.empty.subtitle')}
         </Text>
       </View>
     );

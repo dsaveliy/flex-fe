@@ -1,16 +1,16 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { refreshChatRooms, useChatConnection, useChatMe, useChatRooms } from '@/api';
 import { useTheme } from '@/theme';
-import { ErrorState, GlassCard, Screen, Skeleton, Text } from '@/ui';
+import { ErrorState, GlassCard, Icon, Screen, Skeleton, Text, Touchable } from '@/ui';
 
 import { ChatListRow } from './ChatListRow';
 import { ConnectionBanner } from './ConnectionBanner';
 
-/** «Сообщения»: открывается из профиля; в спринте 5 здесь Flex Lobby, дальше — поддержка и личные чаты */
+/** «Сообщения»: открывается из профиля — Flex Lobby и личные чаты; «＋» в шапке — новый чат по номеру */
 export function ChatListScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -37,7 +37,21 @@ export function ChatListScreen() {
 
   return (
     <Screen onRefresh={() => void refresh()} refreshing={refreshing}>
-      <Stack.Screen options={{ title: t('chat.title') }} />
+      <Stack.Screen
+        options={{
+          title: t('chat.title'),
+          headerRight: () => (
+            <Touchable
+              onPress={() => router.push('/messages/new')}
+              accessibilityRole="button"
+              accessibilityLabel={t('chat.newChat.open')}
+              style={styles.headerButton}
+            >
+              <Icon name="plus" color={theme.colors.accent} />
+            </Touchable>
+          ),
+        }}
+      />
       <ConnectionBanner />
 
       <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.lg }}>
@@ -73,10 +87,21 @@ export function ChatListScreen() {
 
         {rooms.length > 0 ? (
           <Text variant="caption" color="textMuted" align="center">
-            {t('account.messagesHint')}
+            {rooms.some((room) => room.kind === 'direct')
+              ? t('account.messagesHint')
+              : t('chat.list.directHint')}
           </Text>
         ) : null}
       </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  headerButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+  },
+});

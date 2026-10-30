@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { HeaderHeightContext } from 'expo-router/build/react-navigation/elements';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,14 +6,16 @@ import { FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, View } 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  type ChatMember,
   type LocalChatMessage,
+  openDirectChat,
   sendChatMessage,
   toggleChatReaction,
   useChatMe,
   useChatRoom,
   useChatRoomInfo,
 } from '@/api';
-import { useTheme } from '@/theme';
+import { type ThemeColors, useTheme } from '@/theme';
 import {
   Icon,
   Screen,
@@ -33,9 +35,13 @@ import { MessageActions } from './MessageActions';
 import { MessageList } from './MessageList';
 import { TypingIndicator } from './TypingIndicator';
 
+/** сколько показывать «не удалось открыть личный чат» */
+const ACTION_ERROR_MS = 3_000;
+
 /** экран комнаты: лента, «печатает», поле ввода; поиск по загруженной истории — из шапки */
 export function ChatRoomScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const router = useRouter();
   const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -52,9 +58,35 @@ export function ChatRoomScreen() {
   // в браузере клавиатуру считаем по видимой области: KeyboardAvoidingView там не работает
   const webKeyboard = useKeyboardInset();
 
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const direct = room?.kind === 'direct';
+  const peerOnline = direct && room.onlineCount > 0;
   const title = room?.title ?? t('chat.title');
   const subtitle =
-    room?.kind === 'lobby' ? t('chat.online', { count: room.onlineCount }) : undefined;
+    room?.kind === 'lobby'
+      ? t('chat.online', { count: room.onlineCount })
+      : direct
+        ? t(peerOnline ? 'chat.peer.online' : 'chat.peer.offline')
+        : undefined;
+
+  useEffect(() => {
+    if (!actionError) return;
+    const timer = setTimeout(() => setActionError(null), ACTION_ERROR_MS);
+    return () => clearTimeout(timer);
+  }, [actionError]);
+
+  // аватар человека в Lobby → личный чат с ним (комната та же, если уже переписывались)
+  const writeDirect = useCallback(
+    (author: ChatMember) => {
+      if (author.isBot || author.id === me?.id) return;
+      openDirectChat({ userId: author.id }).then(
+        (next) => router.push({ pathname: '/messages/[roomId]', params: { roomId: next.id } }),
+        () => setActionError(t('chat.directError')),
+      );
+    },
+    [me?.id, router, t],
+  );
 
   const send = (text: string) => {
     sendChatMessage(roomId, text, replyTo);
@@ -71,7 +103,13 @@ export function ChatRoomScreen() {
       <Stack.Screen
         options={{
           title,
-          headerTitle: () => <RoomTitle title={title} subtitle={subtitle} />,
+          headerTitle: () => (
+            <RoomTitle
+              title={title}
+              subtitle={subtitle}
+              subtitleColor={direct && !peerOnline ? 'textMuted' : 'accent'}
+            />
+          ),
           headerRight: () => (
             <Touchable
               onPress={() => setSearching((value) => !value)}
@@ -106,6 +144,11 @@ export function ChatRoomScreen() {
             peerLastReadMessageId={room?.peerLastReadMessageId ?? null}
             focusMessageId={focusMessageId}
             onFocusHandled={clearFocus}
+            showAuthors={!direct}
+            emptySubtitle={
+              direct ? t('chat.empty.directSubtitle', { name: room.title }) : undefined
+            }
+            onAuthorPress={room?.kind === 'lobby' ? writeDirect : undefined}
             onLongPress={setActionsFor}
             onReply={setReplyTo}
           />
@@ -113,6 +156,16 @@ export function ChatRoomScreen() {
         {searching ? null : (
           <>
             <TypingIndicator users={feed.typing} />
+            {actionError ? (
+              <Text
+                variant="caption"
+                color="negative"
+                align="center"
+                style={{ paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.xs }}
+              >
+                {actionError}
+              </Text>
+            ) : null}
             <Composer
               roomId={roomId}
               replyTo={replyTo}
@@ -143,14 +196,22 @@ export function ChatRoomScreen() {
   );
 }
 
-function RoomTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+function RoomTitle({
+  title,
+  subtitle,
+  subtitleColor = 'accent',
+}: {
+  title: string;
+  subtitle?: string;
+  subtitleColor?: keyof ThemeColors;
+}) {
   return (
     <View style={styles.title} accessible accessibilityRole="header">
       <Text variant="headline" numberOfLines={1}>
         {title}
       </Text>
       {subtitle ? (
-        <Text variant="caption" color="accent" numberOfLines={1}>
+        <Text variant="caption" color={subtitleColor} numberOfLines={1}>
           {subtitle}
         </Text>
       ) : null}

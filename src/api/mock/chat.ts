@@ -7,6 +7,7 @@ import { API_BASE_URL, USE_MOCK_API } from '../config';
 import type { ChatLink, ChatLinkHandlers } from '../chat/link';
 import type {
   ChatClientFrame,
+  ChatDirectBody,
   ChatEmoji,
   ChatMember,
   ChatMessage,
@@ -15,12 +16,14 @@ import type {
   User,
 } from '../types';
 import { delay, respond } from './delay';
+import { getDb } from './auth/db';
 import { requireAccess } from './auth/guards';
 import { fail } from './auth/tokens';
 
 /**
  * «сервер» чата в памяти: Flex Lobby с тестовыми клиентами, которые пишут,
- * печатают и ставят реакции. правила и коды ошибок — как в docs/chat.md,
+ * печатают и ставят реакции, и личные чаты с другим демо-аккаунтом, который
+ * читает и отвечает. правила и коды ошибок — как в docs/chat.md,
  * чтобы экран вёл себя одинаково с mock и с настоящим WebSocket
  */
 
@@ -71,6 +74,8 @@ const REPLIES: { match: RegExp; text: string[] }[] = [
 ];
 
 const FALLBACK = ['👍', 'Согласен', 'Ха, точно 😂', 'Интересно', '+1'];
+/** ответы собеседника в личном чате */
+const DIRECT_REPLIES = ['Привет! 👋', 'Ага, понял', 'Сейчас посмотрю', 'Спасибо!', 'Давай 👍', 'Ок, договорились'];
 
 const pick = <T>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
 const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
@@ -117,9 +122,13 @@ function seedLobby(): ChatMessage[] {
     );
 }
 
+/** личная комната двух клиентов; пустая видна только тому, кто её открыл */
+type MockDirect = { id: string; members: [ChatMember, ChatMember]; createdBy: string };
+
 type MockChatDb = {
   /** сообщения комнаты в порядке отправки */
   messages: Record<string, ChatMessage[]>;
+  directs: Record<string, MockDirect>;
   /** userId → roomId → последнее прочитанное */
   lastRead: Record<string, Record<string, string>>;
   /** (автор, clientId) → id: повтор отправки не создаёт дубль */
@@ -129,6 +138,7 @@ type MockChatDb = {
 
 const db: MockChatDb = {
   messages: { [LOBBY_ID]: seedLobby() },
+  directs: {},
   // три последних сообщения Lobby — «непрочитанные»
   lastRead: {},
   byClientId: {},
@@ -213,6 +223,64 @@ function broadcast(frame: ChatServerFrame): void {
   for (const connection of connections) connection.push(frame);
 }
 
+function isMember(roomId: string, userId: string): boolean {
+  if (roomId === LOBBY_ID) return true;
+  return Boolean(db.directs[roomId]?.members.some((item) => item.id === userId));
+}
+
+/** кадр комнаты: Lobby — всем, личной — только участникам */
+function deliver(roomId: string, frame: ChatServerFrame): void {
+  if (roomId === LOBBY_ID) return broadcast(frame);
+  for (const connection of connections) {
+    if (connection.me && isMember(roomId, connection.me.id)) connection.push(frame);
+  }
+}
+
+function directFor(userId: string, direct: MockDirect): ChatRoom {
+  const messages = db.messages[direct.id] ?? [];
+  const peer = direct.members.find((item) => item.id !== userId) ?? direct.members[0];
+  const lastRead = db.lastRead[userId]?.[direct.id];
+  const readIndex = messages.findIndex((message) => message.id === lastRead);
+  return {
+    id: direct.id,
+    kind: 'direct',
+    title: peer.name,
+    peer,
+    // собеседник из mock всегда «в сети»
+    onlineCount: 1,
+    unreadCount: messages.slice(readIndex + 1).filter((message) => message.author?.id !== userId).length,
+    lastMessage: messages.at(-1) ?? null,
+    peerLastReadMessageId: db.lastRead[peer.id]?.[direct.id] ?? null,
+  };
+}
+
+function roomsFor(userId: string): ChatRoom[] {
+  const personal = Object.values(db.directs)
+    .filter(
+      (direct) =>
+        direct.members.some((item) => item.id === userId) &&
+        (direct.createdBy === userId || (db.messages[direct.id]?.length ?? 0) > 0),
+    )
+    .map((direct) => directFor(userId, direct))
+    .sort((a, b) => Date.parse(b.lastMessage?.createdAt ?? '0') - Date.parse(a.lastMessage?.createdAt ?? '0'));
+  return [lobbyFor(userId), ...personal];
+}
+
+/** собеседник читает (✓✓), печатает и отвечает */
+function peerReplies(direct: MockDirect, message: ChatMessage): void {
+  const peer = direct.members.find((item) => item.id !== message.author?.id);
+  if (!peer) return;
+  setTimeout(() => {
+    db.lastRead[peer.id] = { ...db.lastRead[peer.id], [direct.id]: message.id };
+    deliver(direct.id, { type: 'read', roomId: direct.id, userId: peer.id, messageId: message.id });
+    deliver(direct.id, { type: 'typing', roomId: direct.id, user: peer });
+  }, 1_200);
+  setTimeout(() => {
+    if (connections.size === 0) return;
+    post(peer, pick(DIRECT_REPLIES), { roomId: direct.id });
+  }, 3_500 + Math.random() * 1_500);
+}
+
 function post(author: ChatMember, text: string, extra: Partial<ChatMessage> = {}): ChatMessage {
   const message: ChatMessage = {
     id: randomUUID(),
@@ -228,8 +296,8 @@ function post(author: ChatMember, text: string, extra: Partial<ChatMessage> = {}
     createdAt: new Date().toISOString(),
     ...extra,
   };
-  db.messages[message.roomId].push(message);
-  broadcast({ type: 'message', message });
+  db.messages[message.roomId] = [...(db.messages[message.roomId] ?? []), message];
+  deliver(message.roomId, { type: 'message', message });
   return message;
 }
 
@@ -243,7 +311,7 @@ function toggleReaction(message: ChatMessage, userId: string, emoji: ChatEmoji):
   } else {
     message.reactions.push({ emoji, userIds: [userId] });
   }
-  broadcast({
+  deliver(message.roomId, {
     type: 'reaction',
     roomId: message.roomId,
     messageId: message.id,
@@ -370,8 +438,10 @@ class MockConnection implements ChatLink {
         db.lastRead[me.id] = { ...db.lastRead[me.id], [frame.roomId]: frame.messageId };
         return;
       case 'react': {
-        const message = db.messages[LOBBY_ID].find((item) => item.id === frame.messageId);
-        if (!message) return this.error('MESSAGE_NOT_FOUND');
+        const message = Object.values(db.messages)
+          .flat()
+          .find((item) => item.id === frame.messageId);
+        if (!message || !isMember(message.roomId, me.id)) return this.error('MESSAGE_NOT_FOUND');
         if (!ALLOWED_EMOJI.includes(frame.emoji)) return this.error('EMOJI_NOT_ALLOWED');
         toggleReaction(message, me.id, frame.emoji);
         return;
@@ -383,8 +453,10 @@ class MockConnection implements ChatLink {
   }
 
   private handleSend(me: ChatMember, frame: Extract<ChatClientFrame, { type: 'send' }>): void {
-    const roomMessages = db.messages[frame.roomId];
-    if (!roomMessages) return this.error('ROOM_NOT_FOUND', frame.clientId);
+    if (!isMember(frame.roomId, me.id) || (frame.roomId !== LOBBY_ID && !db.directs[frame.roomId])) {
+      return this.error('ROOM_NOT_FOUND', frame.clientId);
+    }
+    const roomMessages = db.messages[frame.roomId] ?? [];
 
     // повтор с тем же clientId — то же сообщение, без дубля
     const existingId = db.byClientId[`${me.id}:${frame.clientId}`];
@@ -419,7 +491,9 @@ class MockConnection implements ChatLink {
     });
     db.byClientId[`${me.id}:${frame.clientId}`] = message.id;
     db.lastRead[me.id] = { ...db.lastRead[me.id], [frame.roomId]: message.id };
-    reactToUser(message);
+    const direct = db.directs[frame.roomId];
+    if (direct) peerReplies(direct, message);
+    else reactToUser(message);
   }
 
   /** проверка access как у `require_access`; ошибки — кадр `error` и close code (docs/chat.md §3.1) */
@@ -431,7 +505,7 @@ class MockConnection implements ChatLink {
       this.me = me;
       connections.add(this);
       broadcast({ type: 'presence', roomId: LOBBY_ID, onlineCount: onlineCount() });
-      this.push({ type: 'ready', me: this.me, rooms: [lobbyFor(this.me.id)] });
+      this.push({ type: 'ready', me: this.me, rooms: roomsFor(this.me.id) });
       scheduleAmbient();
     } catch (error) {
       const code = isApiError(error) ? error.code : 'TOKEN_INVALID';
@@ -452,19 +526,40 @@ export function dropMockChatConnections(): void {
 export const mockChatApi = {
   getChatRooms: async (): Promise<ChatRoom[]> => {
     const me = await authorize();
-    return respond([lobbyFor(me.id)]);
+    return respond(roomsFor(me.id));
   },
 
   getChatMessages: async (
     roomId: string,
     params?: { before?: string; limit?: number },
   ): Promise<ChatMessage[]> => {
-    await authorize();
-    const all = db.messages[roomId];
-    if (!all) fail(404, 'ROOM_NOT_FOUND');
+    const me = await authorize();
+    if (!isMember(roomId, me.id) || (roomId !== LOBBY_ID && !db.directs[roomId])) {
+      fail(404, 'ROOM_NOT_FOUND');
+    }
+    const all = db.messages[roomId] ?? [];
     const limit = Math.min(Math.max(params?.limit ?? 50, 1), 100);
     const end = params?.before ? all.findIndex((message) => message.id === params.before) : all.length;
     const slice = all.slice(Math.max(0, (end < 0 ? 0 : end) - limit), end < 0 ? 0 : end);
     return respond([...slice].reverse());
+  },
+
+  /** собеседник — другой демо-аккаунт по номеру; в mock Lobby кроме вас только боты */
+  openDirectChat: async (body: ChatDirectBody): Promise<ChatRoom> => {
+    const me = await authorize();
+    if (!('phone' in body)) fail(404, 'RECIPIENT_NOT_FOUND');
+    const phone = body.phone.replace(/[^\d+]/g, '');
+    if (!/^\+375\d{9}$/.test(phone)) fail(422, 'PHONE_INVALID');
+    const user = Object.values((await getDb()).users).find((item) => item.phone === phone);
+    if (!user) fail(404, 'RECIPIENT_NOT_FOUND');
+    if (user.id === me.id) fail(422, 'SELF_CHAT');
+
+    const peer = toMember(user);
+    const existing = Object.values(db.directs).find((direct) =>
+      direct.members.every((item) => item.id === me.id || item.id === peer.id),
+    );
+    const direct = existing ?? { id: randomUUID(), members: [me, peer], createdBy: me.id };
+    db.directs[direct.id] = direct;
+    return respond(directFor(me.id, direct));
   },
 };

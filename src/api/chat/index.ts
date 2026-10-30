@@ -2,6 +2,7 @@ export {
   discardChatMessage,
   loadOlderChatMessages,
   notifyChatTyping,
+  openDirectChat,
   reconnectChat,
   refreshChatRooms,
   reloadChatRoom,

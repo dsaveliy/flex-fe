@@ -7,6 +7,7 @@ import type {
   BalanceSummary,
   BankCard,
   BankCardDetails,
+  ChatDirectBody,
   ChatMessage,
   ChatRoom,
   CryptoAccessStatus,
@@ -103,6 +104,8 @@ export type FlexApi = {
     roomId: string,
     params?: { before?: string; limit?: number },
   ): Promise<ChatMessage[]>;
+  /** личный чат по номеру или с автором из Lobby; уже переписывались — та же комната */
+  openDirectChat(body: ChatDirectBody): Promise<ChatRoom>;
 };
 
 /**
@@ -155,6 +158,7 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   subscribeEarn: 'crypto',
   getChatRooms: 'access',
   getChatMessages: 'access',
+  openDirectChat: 'access',
 };
 
 function createHttpApi(baseUrl: string): FlexApi {
@@ -268,6 +272,8 @@ function createHttpApi(baseUrl: string): FlexApi {
         as('getChatMessages'),
       );
     },
+    openDirectChat: (body) =>
+      transport.post<ChatRoom>('/chat/rooms/direct', body, as('openDirectChat')),
   };
 }
 

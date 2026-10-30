@@ -615,6 +615,9 @@ export type ChatServerFrame =
   | { type: 'error'; code: string; message?: string; clientId?: string; retryAfter?: number }
   | { type: 'pong' };
 
+/** `POST /chat/rooms/direct`: номер — как у перевода, `userId` — автор сообщения в Lobby */
+export type ChatDirectBody = { phone: string } | { userId: string };
+
 export type ChatMoneyRequestBody = { amountMinor: number; currency: string; comment?: string };
 
 export type ChatGiftBody = { fromAccountId: string; amountMinor: number; comment?: string };

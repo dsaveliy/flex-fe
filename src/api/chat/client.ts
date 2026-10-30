@@ -5,7 +5,14 @@ import { getAccessToken, sessionStore } from '@/auth/session';
 import { ensureFreshAccess, refreshSession, signOutLocal } from '@/auth/sessionActions';
 
 import { api } from '../api';
-import type { ChatEmoji, ChatMember, ChatMessage, ChatServerFrame } from '../types';
+import type {
+  ChatDirectBody,
+  ChatEmoji,
+  ChatMember,
+  ChatMessage,
+  ChatRoom,
+  ChatServerFrame,
+} from '../types';
 import { type ChatLink, openChatLink } from './link';
 import {
   addHistoryPage,
@@ -222,6 +229,10 @@ function handleFrame(frame: ChatServerFrame): void {
       clearSendTimer(frame.message.clientId);
       update((state) => applyMessage(state, frame.message, activeRoomId));
       if (frame.message.roomId === activeRoomId) markRead(frame.message.roomId);
+      // кадр room мог потеряться при переподключении — новая комната придёт со списком
+      if (!chatStore.get().rooms.some((room) => room.id === frame.message.roomId)) {
+        void api.getChatRooms().then((rooms) => update((state) => applyRooms(state, rooms)), () => {});
+      }
       return;
     case 'message_update':
       update((state) => replaceMessage(state, frame.message));
@@ -469,6 +480,13 @@ export async function loadOlderChatMessages(roomId: string): Promise<void> {
   } catch {
     update((state) => setHistory(state, roomId, { loadingMore: false }));
   }
+}
+
+/** личный чат: комната сразу в списке, чтобы экран открылся с названием и собеседником */
+export async function openDirectChat(body: ChatDirectBody): Promise<ChatRoom> {
+  const room = await api.openDirectChat(body);
+  update((state) => upsertRoom(state, room));
+  return room;
 }
 
 /** список комнат по REST — для «потянуть, чтобы обновить» и пока сокет не подключился */

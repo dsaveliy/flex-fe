@@ -410,7 +410,8 @@
       "RATE_UNAVAILABLE": "The rate is temporarily unavailable",
       "CURRENCY_NOT_SUPPORTED": "This currency isn't supported for the operation",
       "WALLET_NOT_FOUND": "You have no wallet for this coin",
-      "PHONE_INVALID": "Use the format +375 XX XXX-XX-XX"
+      "PHONE_INVALID": "Use the format +375 XX XXX-XX-XX",
+      "SELF_CHAT": "That's your own number"
     }
   },
   "auth": {
@@ -558,7 +559,8 @@
     "bot": "bot",
     "online": "{{count}} online",
     "list": {
-      "noMessages": "No messages yet"
+      "noMessages": "No messages yet",
+      "directHint": "Start a private chat by phone number or tap an avatar in the Lobby"
     },
     "placeholder": "Message…",
     "today": "Today",
@@ -568,7 +570,8 @@
     "typingMany": "Several people are typing…",
     "empty": {
       "title": "It's quiet here",
-      "subtitle": "Be the first to write — everyone online will see it"
+      "subtitle": "Be the first to write — everyone online will see it",
+      "directSubtitle": "Only you and {{name}} will see these messages"
     },
     "connection": {
       "connecting": "Connecting…",
@@ -611,6 +614,19 @@
       "reaction": "{{emoji}}: {{count}}",
       "send": "Send",
       "messageActions": "Hold to reply or react"
-    }
+    },
+    "newChat": {
+      "open": "New chat",
+      "title": "New chat",
+      "subtitle": "To a Flex client by phone number",
+      "phone": "Phone number",
+      "submit": "Message"
+    },
+    "peer": {
+      "online": "online",
+      "offline": "offline"
+    },
+    "writeDirect": "Message {{name}} privately",
+    "directError": "Couldn't open the private chat"
   }
 }

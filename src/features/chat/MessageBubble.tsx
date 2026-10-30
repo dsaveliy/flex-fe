@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import type { ChatEmoji, LocalChatMessage } from '@/api';
+import type { ChatEmoji, ChatMember, LocalChatMessage } from '@/api';
 import { useTheme } from '@/theme';
 import { ActionMenu, Icon, Text, Touchable } from '@/ui';
 import { formatTime } from '@/utils/format';
@@ -34,6 +34,10 @@ export type MessageBubbleProps = {
   read: boolean;
   /** подсветка после перехода из поиска или цитаты */
   highlighted?: boolean;
+  /** имя и аватар собеседника: в Lobby — да, в личном чате и так понятно, кто пишет */
+  showAuthor?: boolean;
+  /** аватар человека в Lobby → личный чат с ним */
+  onAuthorPress?(author: ChatMember): void;
   onLongPress(message: LocalChatMessage): void;
   onReply(message: LocalChatMessage): void;
   onToggleReaction(message: LocalChatMessage, emoji: ChatEmoji): void;
@@ -54,6 +58,8 @@ export const MessageBubble = memo(function MessageBubble({
   meId,
   read,
   highlighted = false,
+  showAuthor = true,
+  onAuthorPress,
   onLongPress,
   onReply,
   onToggleReaction,
@@ -125,9 +131,11 @@ export const MessageBubble = memo(function MessageBubble({
         },
       ]}
     >
-      {!own ? (
+      {!own && showAuthor ? (
         <View style={{ width: AVATAR_SIZE }}>
-          {endsGroup ? <ChatAvatar member={message.author} size={AVATAR_SIZE} /> : null}
+          {endsGroup ? (
+            <AuthorAvatar author={message.author} onPress={onAuthorPress} />
+          ) : null}
         </View>
       ) : null}
 
@@ -172,7 +180,7 @@ export const MessageBubble = memo(function MessageBubble({
               },
             ]}
           >
-            {!own && startsGroup && authorName ? (
+            {!own && showAuthor && startsGroup && authorName ? (
               <View style={[styles.author, { gap: theme.spacing.xs }]}>
                 <Text
                   variant="bodyStrong"
@@ -336,6 +344,29 @@ function SwipeArea({
     <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.swipeArea, style]}>{children}</Animated.View>
     </GestureDetector>
+  );
+}
+
+/** аватар у конца группы; у человека (не бота) по нажатию — личный чат с ним */
+function AuthorAvatar({
+  author,
+  onPress,
+}: {
+  author: ChatMember | null;
+  onPress?: (author: ChatMember) => void;
+}) {
+  const { t } = useTranslation();
+  const avatar = <ChatAvatar member={author} size={AVATAR_SIZE} />;
+  if (!author || author.isBot || !onPress) return avatar;
+  return (
+    <Touchable
+      onPress={() => onPress(author)}
+      accessibilityRole="button"
+      accessibilityLabel={t('chat.writeDirect', { name: author.name })}
+      hitSlop={6}
+    >
+      {avatar}
+    </Touchable>
   );
 }
 
