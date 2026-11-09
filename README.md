@@ -38,6 +38,5 @@ npx expo export --platform web --output-dir dist
 - [Развёртывание и сеть](https://github.com/dsaveliy/flex-be/blob/main/docs/deployment.md)
 - [OpenAPI](https://github.com/dsaveliy/flex-be/blob/main/api/openapi.yaml)
 - [Локальные спецификации экранов и протоколов](docs/README.md)
-- [Правила клиентского кода](CLAUDE.md)
 
-Команда: Савелий Давыдович (Team Lead / PO, frontend, интеграция), Максим Камыно (frontend, UI), Родион Храмцов (backend), Александр Кукулянский (backend, тесты).
+Команда: Савелий Давыдович (Team Lead / PO, frontend, интеграция), Максим Камыно (frontend, Technical Writer), Родион Храмцов (backend, DevOps), Александр Кукулянский (backend, QA).
