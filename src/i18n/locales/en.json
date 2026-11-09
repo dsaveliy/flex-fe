@@ -739,5 +739,13 @@
         "gift": "🎁 Crypto envelope"
       }
     }
+  },
+  "serviceStatus": {
+    "title": "Service status",
+    "loading": "Checking connection…",
+    "up": "Server and database are available",
+    "down": "Service unavailable. Please try again.",
+    "mock": "Demo mode: server is not connected",
+    "retry": "Check again"
   }
 }
