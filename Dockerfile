@@ -12,14 +12,5 @@ ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL \
     NODE_OPTIONS=--max-old-space-size=1536
 RUN npx expo export --platform web --output-dir dist
 
-FROM caddy:2-alpine AS runtime
+FROM caddy:2-alpine
 COPY --from=build /app/dist /srv/web
-
-# локальный Caddy слушает непривилегированный порт и не пишет TLS-данные VPS
-FROM runtime AS local
-RUN addgroup -S flexweb && adduser -S -G flexweb flexweb \
-    && chown -R flexweb:flexweb /config /data
-USER flexweb
-EXPOSE 8080
-
-FROM runtime AS production
