@@ -172,7 +172,6 @@ export const MessageBubble = memo(function MessageBubble({
             hitSlop={0}
             style={[
               styles.bubble,
-              styles.noSelect,
               {
                 paddingHorizontal: theme.spacing.md,
                 paddingTop: theme.spacing.sm,

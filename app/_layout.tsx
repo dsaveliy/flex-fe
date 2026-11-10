@@ -69,6 +69,7 @@ function RootStack() {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+      <Stack.Screen name="status" />
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="account" options={PUSH_SCREEN_OPTIONS} />
