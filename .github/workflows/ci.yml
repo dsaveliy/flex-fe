@@ -13,4 +13,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - run: docker build --build-arg EXPO_PUBLIC_API_URL=/api/v1 -t flex-web:ci .
+      - run: docker build --target local --build-arg EXPO_PUBLIC_API_URL=/api/v1 -t flex-web:ci .
