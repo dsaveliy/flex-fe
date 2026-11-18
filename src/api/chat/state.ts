@@ -101,12 +101,16 @@ export function applyMessage(
   const feed = state.messages[message.roomId];
   const own = message.author?.id === state.me?.id;
   const known = feed?.some((item) => item.id === message.id);
-  const rooms = updateRoom(state, message.roomId, (room) => ({
-    ...room,
-    lastMessage: message,
-    unreadCount:
-      own || known || activeRoomId === message.roomId ? room.unreadCount : room.unreadCount + 1,
-  }));
+  const rooms = updateRoom(state, message.roomId, (room) => {
+    // Кадры room и ready уже содержат последнее сообщение и его вклад в unreadCount.
+    const counted = known || room.lastMessage?.id === message.id;
+    return {
+      ...room,
+      lastMessage: !room.lastMessage || byNewest(message, room.lastMessage) <= 0 ? message : room.lastMessage,
+      unreadCount:
+        own || counted || activeRoomId === message.roomId ? room.unreadCount : room.unreadCount + 1,
+    };
+  });
   const typing = state.typing[message.roomId]?.filter((user) => user.id !== message.author?.id);
 
   return {

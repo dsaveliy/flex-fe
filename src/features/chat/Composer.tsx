@@ -16,7 +16,7 @@ import { type LocalChatMessage, notifyChatTyping } from '@/api';
 import { useTheme } from '@/theme';
 import { ActionMenu, Glass, Icon, Text, Touchable } from '@/ui';
 
-import { type AttachmentDraft, type AttachmentDraftState, attachmentSummary } from './attachments';
+import { type AttachmentDraft, type AttachmentDraftState, attachmentSummary, canRetryAttachment } from './attachments';
 
 /** поле растёт до пяти строк, дальше прокручивается внутри */
 const MAX_LINES = 5;
@@ -28,7 +28,8 @@ export type ComposerProps = {
   roomId: string;
   replyTo: LocalChatMessage | null;
   onCancelReply(): void;
-  onSend(text: string): void;
+  onSend(text: string): boolean;
+  canCompose: boolean;
   /** вложения следующего сообщения; нет — кнопки «скрепка» нет (Lobby — только текст) */
   attachments?: AttachmentDraftState;
   /** деньги в личном чате: в том же меню, кнопка тогда — «＋» */
@@ -36,15 +37,16 @@ export type ComposerProps = {
 };
 
 /** многострочный ввод с подсказкой, полоса «Ответ …», выбранные файлы и круглая кнопка отправки */
-export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments, money }: ComposerProps) {
+export function Composer({ roomId, replyTo, onCancelReply, onSend, canCompose, attachments, money }: ComposerProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const input = useRef<TextInput>(null);
   const [text, setText] = useState('');
   const files = attachments?.drafts ?? [];
-  // пока файл загружается, отправка ждёт: иначе он не попадёт в сообщение
+  const failedFile = files.find((file) => file.status === 'failed');
+  // Отправляем черновик целиком. Ошибочный файл нужно повторить или убрать.
   const canSend =
-    !attachments?.busy && (text.trim().length > 0 || (attachments?.ready.length ?? 0) > 0);
+    canCompose && files.every((file) => file.status === 'ready') && (text.trim().length > 0 || files.length > 0);
   const lineHeight = theme.typography.message.lineHeight ?? 20;
 
   useEffect(() => {
@@ -53,8 +55,7 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments, 
 
   const send = () => {
     if (!canSend) return;
-    onSend(text);
-    setText('');
+    if (onSend(text)) setText('');
   };
 
   const change = (value: string) => {
@@ -133,6 +134,14 @@ export function Composer({ roomId, replyTo, onCancelReply, onSend, attachments, 
             />
           ))}
         </ScrollView>
+      ) : null}
+
+      {failedFile ? (
+        <Text variant="caption" color="negative" accessibilityLiveRegion="polite">
+          {t(canRetryAttachment(failedFile) ? 'chat.attachment.retryOrRemove' : 'chat.attachment.removeInvalid', {
+            name: failedFile.file.name,
+          })}
+        </Text>
       ) : null}
 
       <Glass variant="regular" radius={theme.radii.cardLg}>
@@ -267,8 +276,9 @@ function DraftTile({
   const { t } = useTranslation();
   const image = draft.file.mimeType.startsWith('image/');
   const failed = draft.status === 'failed';
+  const retryable = canRetryAttachment(draft);
   const label = failed
-    ? `${t('chat.attachment.failed', { name: draft.file.name })}. ${t(`chat.errors.${draft.error ?? 'default'}`, { defaultValue: t('chat.errors.default') })}`
+    ? `${t(retryable ? 'chat.attachment.failed' : 'chat.attachment.removeInvalid', { name: draft.file.name })}. ${t(`chat.errors.${draft.error ?? 'default'}`, { defaultValue: t('chat.errors.default') })}`
     : draft.status === 'uploading'
       ? t('chat.attachment.uploading', { name: draft.file.name })
       : draft.file.name;
@@ -277,8 +287,8 @@ function DraftTile({
     <View style={{ width: DRAFT_SIZE, height: DRAFT_SIZE }}>
       <Touchable
         haptic={false}
-        onPress={failed ? onRetry : undefined}
-        disabled={!failed}
+        onPress={retryable ? onRetry : undefined}
+        disabled={!retryable}
         accessibilityLabel={label}
         style={[
           styles.center,
@@ -309,7 +319,7 @@ function DraftTile({
         ) : null}
         {failed ? (
           <View style={[StyleSheet.absoluteFill, styles.center, { backgroundColor: theme.colors.overlay }]}>
-            <Icon name="refresh" size={20} color={theme.colors.negative} />
+            <Icon name={retryable ? 'refresh' : 'close'} size={20} color={theme.colors.negative} />
           </View>
         ) : null}
       </Touchable>

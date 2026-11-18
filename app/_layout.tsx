@@ -53,10 +53,7 @@ const OPERATION_SHEET_OPTIONS = {
   sheetGrabberVisible: true,
 };
 
-/**
- * маршруты по состоянию сессии: без входа доступна только группа `(auth)`,
- * после входа — приложение. переходы между ними делает сам `Stack.Protected`
- */
+/** При изменении сессии Stack.Protected выбирает вкладки или вход. /status доступен напрямую. */
 function RootStack() {
   const { status } = useSession();
 
@@ -69,7 +66,6 @@ function RootStack() {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-      <Stack.Screen name="status" />
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="account" options={PUSH_SCREEN_OPTIONS} />
@@ -95,6 +91,7 @@ function RootStack() {
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
+      <Stack.Screen name="status" />
     </Stack>
   );
 }
