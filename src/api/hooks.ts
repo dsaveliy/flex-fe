@@ -2,7 +2,6 @@ import { randomUUID } from 'expo-crypto';
 import { useCallback, useState } from 'react';
 
 import {
-  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -39,6 +38,7 @@ import type {
   PromoOffer,
   TopUpRequest,
   Transaction,
+  TransactionFilters,
   TransferRequest,
   TransferResult,
   User,
@@ -75,15 +75,10 @@ export function useCardDetails(
   });
 }
 
-export function useTransactions(params?: {
-  cardId?: string;
-  limit?: number;
-}): UseQueryResult<Transaction[]> {
+export function useTransactions(params?: TransactionFilters): UseQueryResult<Transaction[]> {
   return useQuery({
     queryKey: queryKeys.transactions(params),
     queryFn: () => api.getTransactions(params),
-    // при смене карты список не мигает скелетоном, пока грузится новый
-    placeholderData: keepPreviousData,
   });
 }
 
@@ -190,6 +185,33 @@ export function useLinkCard() {
   return useMutation({
     mutationFn: (body: LinkCardRequest) => api.linkCard(body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.linkedCards }),
+  });
+}
+
+export function useUpdateLinkedCard() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ cardId, nickname }: { cardId: string; nickname: string | null }) =>
+      api.updateLinkedCard(cardId, nickname),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<LinkedCard[]>(queryKeys.linkedCards, (cards) =>
+        cards?.map((card) => (card.id === updated.id ? updated : card)),
+      );
+      return queryClient.invalidateQueries({ queryKey: queryKeys.linkedCards });
+    },
+  });
+}
+
+export function useUnlinkCard() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (cardId: string) => api.unlinkCard(cardId),
+    onSuccess: (_, cardId) => {
+      queryClient.setQueryData<LinkedCard[]>(queryKeys.linkedCards, (cards) =>
+        cards?.filter((card) => card.id !== cardId),
+      );
+      return queryClient.invalidateQueries({ queryKey: queryKeys.linkedCards });
+    },
   });
 }
 

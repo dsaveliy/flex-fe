@@ -200,7 +200,20 @@
   },
   "cards": {
     "title": "Cards",
-    "searchPlaceholder": "Search or pay",
+    "searchPlaceholder": "Search transaction descriptions",
+    "resetFilters": "Reset filters",
+    "noMatchingTransactions": "No transactions match these filters",
+    "transactionsAccessDenied": "Transaction history for this card is unavailable",
+    "linked": {
+      "title": "Linked cards",
+      "empty": "You have no linked cards yet",
+      "rename": "Edit name",
+      "nickname": "Card name",
+      "save": "Save name",
+      "unlink": "Unlink",
+      "confirmUnlink": "Unlink card ending in {{last4}}?",
+      "unavailable": "This linked card is unavailable"
+    },
     "addCard": "Add card",
     "kinds": {
       "debit": "Debit",

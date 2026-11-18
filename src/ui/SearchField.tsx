@@ -10,6 +10,7 @@ export type SearchFieldProps = {
   value?: string;
   onChangeText?: (text: string) => void;
   editable?: boolean;
+  maxLength?: number;
   /** `small` — компактное лёгкое поле (экран Cards) */
   size?: 'default' | 'small';
   style?: ViewStyle;
@@ -21,6 +22,7 @@ export function SearchField({
   value,
   onChangeText,
   editable = true,
+  maxLength,
   size = 'default',
   style,
 }: SearchFieldProps) {
@@ -51,6 +53,7 @@ export function SearchField({
           value={value}
           onChangeText={onChangeText}
           editable={editable}
+          maxLength={maxLength}
           returnKeyType="search"
           style={[
             styles.input,

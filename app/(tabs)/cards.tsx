@@ -5,7 +5,7 @@ import { View } from 'react-native';
 
 import { router } from 'expo-router';
 
-import { type CardStyle, useCards, useIssueCard, useSetCardFrozen } from '@/api';
+import { type CardStyle, useCards, useIssueCard, useLinkedCards, useSetCardFrozen } from '@/api';
 import { CardActions } from '@/features/cards/CardActions';
 import { MAX_CARDS_PER_USER } from '@/features/cards/cardLimits';
 import { CardPager } from '@/features/cards/CardPager';
@@ -19,7 +19,6 @@ import {
   GlassButton,
   Screen,
   ScreenHeader,
-  SearchField,
   Skeleton,
   useAppDimensions,
 } from '@/ui';
@@ -39,6 +38,7 @@ export default function CardsScreen() {
   const queryClient = useQueryClient();
 
   const cards = useCards();
+  const linkedCards = useLinkedCards();
   const setFrozen = useSetCardFrozen();
   const issueCard = useIssueCard();
   const [index, setIndex] = useState(0);
@@ -52,7 +52,7 @@ export default function CardsScreen() {
 
   const list = cards.data ?? [];
   const active = list[Math.min(index, list.length - 1)];
-  const atCardLimit = list.length >= MAX_CARDS_PER_USER;
+  const atCardLimit = list.length + (linkedCards.data?.length ?? 0) >= MAX_CARDS_PER_USER;
 
   // статус в кэше меняется сразу (оптимистично), сервер подтверждает в фоне
   const toggleFreeze = () => {
@@ -88,6 +88,7 @@ export default function CardsScreen() {
     <Screen
       onRefresh={() => {
         void cards.refetch();
+        void linkedCards.refetch();
         void queryClient.invalidateQueries({ queryKey: ['transactions'] });
       }}
       refreshing={cards.isRefetching}
@@ -143,6 +144,12 @@ export default function CardsScreen() {
                     disabled: atCardLimit,
                     onPress: () => router.push('/link-card'),
                   },
+                  {
+                    id: 'manage-linked',
+                    label: t('cards.linked.title'),
+                    systemImage: 'creditcard',
+                    onPress: () => router.push('/linked-cards'),
+                  },
                 ]}
               >
                 <GlassButton
@@ -154,11 +161,6 @@ export default function CardsScreen() {
                 />
               </ActionMenu>
             }
-          />
-          <SearchField
-            size="small"
-            placeholder={t('cards.searchPlaceholder')}
-            style={{ marginTop: theme.spacing.lg }}
           />
         </View>
 

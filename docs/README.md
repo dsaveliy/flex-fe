@@ -8,6 +8,7 @@
 | [chat.md](chat.md) | REST и WebSocket чата, доставка, файлы |
 | [home-screen.md](home-screen.md) | Главная и баланс |
 | [cards-screen.md](cards-screen.md) | Карты и их действия |
+| [report-6-2-design.md](report-6-2-design.md) | Привязанные карты и состояния фильтров истории |
 | [crypto-screen.md](crypto-screen.md) | Криптораздел и виджеты |
 | [crypto-handoff.md](crypto-handoff.md) | Передача макетов и контрактов криптораздела |
 | [network/](network/) | Скриншоты сетевого взаимодействия, отчёт 4-4 |

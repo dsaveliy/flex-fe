@@ -81,13 +81,13 @@ export default function WithdrawScreen() {
         <>
           <SelectField
             label={t('operations.withdraw.card')}
-            title={`${card.brand === 'visa' ? 'Visa' : 'Mastercard'} •• ${card.last4}`}
+            title={`${card.nickname || (card.brand === 'visa' ? 'Visa' : 'Mastercard')} •• ${card.last4}`}
             subtitle={card.holderName}
             left={<Icon name="cards" size={22} color={theme.colors.textMuted} />}
             options={[
               ...linked.data.map((item) => ({
                 id: item.id,
-                label: `${item.brand === 'visa' ? 'Visa' : 'Mastercard'} •• ${item.last4}`,
+                label: `${item.nickname || (item.brand === 'visa' ? 'Visa' : 'Mastercard')} •• ${item.last4}`,
                 checked: item.id === card.id,
                 onPress: () => setCardId(item.id),
               })),
