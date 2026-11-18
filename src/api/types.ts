@@ -425,12 +425,20 @@ export type ExchangeResult = {
 };
 
 /** карта другого банка, с которой пополняют счёт (хранятся только последние цифры) */
+export type TransactionFilters = {
+  cardId?: string;
+  from?: string;
+  query?: string;
+  limit?: number;
+};
+
 export type LinkedCard = {
   id: string;
   brand: CardBrand;
   last4: string;
   expiry: string;
   holderName: string;
+  nickname?: string | null;
   createdAt: string;
 };
 

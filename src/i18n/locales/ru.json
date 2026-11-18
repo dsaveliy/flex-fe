@@ -200,7 +200,20 @@
   },
   "cards": {
     "title": "Карты",
-    "searchPlaceholder": "Поиск или оплата",
+    "searchPlaceholder": "Поиск по описанию операции",
+    "resetFilters": "Сбросить фильтры",
+    "noMatchingTransactions": "Операции по этим фильтрам не найдены",
+    "transactionsAccessDenied": "История этой карты недоступна",
+    "linked": {
+      "title": "Привязанные карты",
+      "empty": "У вас пока нет привязанных карт",
+      "rename": "Изменить название",
+      "nickname": "Название карты",
+      "save": "Сохранить название",
+      "unlink": "Отвязать",
+      "confirmUnlink": "Отвязать карту •• {{last4}}?",
+      "unavailable": "Эта привязанная карта недоступна"
+    },
     "addCard": "Добавить карту",
     "kinds": {
       "debit": "Дебетовая",

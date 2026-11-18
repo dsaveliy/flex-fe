@@ -14,6 +14,7 @@ import type {
   Portfolio,
   PromoOffer,
   Transaction,
+  TransactionFilters,
   User,
 } from '../types';
 import { ApiError } from '../client';
@@ -86,14 +87,19 @@ export const mockApi = {
     return respond(details);
   },
 
-  getTransactions: async (params?: {
-    cardId?: string;
-    limit?: number;
-  }): Promise<Transaction[]> => {
+  getTransactions: async (params?: TransactionFilters): Promise<Transaction[]> => {
     await requireAccess();
-    const all = mockOperationsState.transactions();
-    const filtered = params?.cardId ? all.filter((item) => item.cardId === params.cardId) : all;
-    return respond(params?.limit ? filtered.slice(0, params.limit) : filtered);
+    if (params?.cardId && !mockOperationsState.cards().some((card) => card.id === params.cardId)) {
+      throw new ApiError({ status: 404, code: 'card_not_found', message: 'Card not found' });
+    }
+    const query = params?.query?.toLowerCase();
+    const since = params?.from ? Date.parse(params.from) : -Infinity;
+    const filtered = mockOperationsState.transactions().filter((item) =>
+      (!params?.cardId || item.cardId === params.cardId) &&
+      Date.parse(item.occurredAt) >= since &&
+      (!query || item.merchant.toLowerCase().includes(query)),
+    );
+    return respond(filtered.slice(0, params?.limit ?? 100));
   },
 
   getMarkets: (params?: { kind?: AssetKind }): Promise<MarketAsset[]> => {

@@ -1,4 +1,4 @@
-import type { AssetKind, MoverDirection } from './types';
+import type { AssetKind, MoverDirection, TransactionFilters } from './types';
 
 /** единый источник ключей кэша TanStack Query */
 export const queryKeys = {
@@ -7,8 +7,7 @@ export const queryKeys = {
   promo: ['promo'] as const,
   cards: ['cards'] as const,
   cardDetails: (cardId: string) => ['cards', cardId, 'details'] as const,
-  transactions: (params?: { cardId?: string; limit?: number }) =>
-    ['transactions', params?.cardId ?? 'all', params?.limit ?? 'all'] as const,
+  transactions: (params?: TransactionFilters) => ['transactions', params ?? {}] as const,
   markets: (kind?: AssetKind) => ['markets', kind ?? 'all'] as const,
   movers: (direction: MoverDirection) => ['movers', direction] as const,
   portfolio: ['portfolio'] as const,

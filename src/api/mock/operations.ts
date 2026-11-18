@@ -296,6 +296,23 @@ export const mockOperationsApi = {
     return respond(linked);
   },
 
+  updateLinkedCard: async (cardId: string, nickname: string | null): Promise<LinkedCard> => {
+    await requireAccess();
+    const card = state.linked.find((item) => item.id === cardId);
+    if (!card) fail(404, 'linked_card_not_found');
+    if (nickname && Array.from(nickname).length > 40) fail(422, 'VALIDATION_ERROR');
+    card.nickname = nickname?.trim() || null;
+    return respond({ ...card });
+  },
+
+  unlinkCard: async (cardId: string): Promise<void> => {
+    await requireAccess();
+    const index = state.linked.findIndex((item) => item.id === cardId);
+    if (index === -1) fail(404, 'linked_card_not_found');
+    state.linked.splice(index, 1);
+    return respond(undefined);
+  },
+
   topUp: async (body: TopUpRequest, key: string): Promise<OperationResult> => {
     await requireAccess();
     const result = once(key, () => {

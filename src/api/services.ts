@@ -50,6 +50,7 @@ import type {
   TokenPair,
   TopUpRequest,
   Transaction,
+  TransactionFilters,
   TransferRequest,
   TransferResult,
   User,
@@ -81,7 +82,7 @@ export type FlexApi = {
   getPromo(): Promise<PromoOffer>;
   getCards(): Promise<BankCard[]>;
   getCardDetails(cardId: string): Promise<BankCardDetails>;
-  getTransactions(params?: { cardId?: string; limit?: number }): Promise<Transaction[]>;
+  getTransactions(params?: TransactionFilters): Promise<Transaction[]>;
   getMarkets(params?: { kind?: AssetKind }): Promise<MarketAsset[]>;
   getMovers(direction: MoverDirection): Promise<Mover[]>;
   getPortfolio(): Promise<Portfolio>;
@@ -97,6 +98,8 @@ export type FlexApi = {
   openAccount(currency: string): Promise<OpenedAccount>;
   getLinkedCards(): Promise<LinkedCard[]>;
   linkCard(body: LinkCardRequest): Promise<LinkedCard>;
+  updateLinkedCard(cardId: string, nickname: string | null): Promise<LinkedCard>;
+  unlinkCard(cardId: string): Promise<void>;
   topUp(body: TopUpRequest, idempotencyKey: string): Promise<OperationResult>;
   withdraw(body: WithdrawalRequest, idempotencyKey: string): Promise<OperationResult>;
   pay(body: PaymentRequest, idempotencyKey: string): Promise<PaymentResult>;
@@ -171,6 +174,8 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   openAccount: 'access',
   getLinkedCards: 'access',
   linkCard: 'access',
+  updateLinkedCard: 'access',
+  unlinkCard: 'access',
   topUp: 'access',
   withdraw: 'access',
   pay: 'access',
@@ -234,6 +239,8 @@ function createHttpApi(baseUrl: string): FlexApi {
     getTransactions: (params) => {
       const query = new URLSearchParams();
       if (params?.cardId) query.set('card_id', params.cardId);
+      if (params?.from) query.set('from', params.from);
+      if (params?.query) query.set('q', params.query);
       if (params?.limit) query.set('limit', String(params.limit));
       const suffix = query.size > 0 ? `?${query.toString()}` : '';
       return transport.get<Transaction[]>(`/transactions${suffix}`, as('getTransactions'));
@@ -269,6 +276,9 @@ function createHttpApi(baseUrl: string): FlexApi {
       transport.post<OpenedAccount>('/accounts', { currency }, as('openAccount')),
     getLinkedCards: () => transport.get<LinkedCard[]>('/linked-cards', as('getLinkedCards')),
     linkCard: (body) => transport.post<LinkedCard>('/linked-cards', body, as('linkCard')),
+    updateLinkedCard: (cardId, nickname) =>
+      transport.patch<LinkedCard>(`/linked-cards/${encodeURIComponent(cardId)}`, { nickname }, as('updateLinkedCard')),
+    unlinkCard: (cardId) => transport.delete<void>(`/linked-cards/${encodeURIComponent(cardId)}`, as('unlinkCard')),
     topUp: (body, key) =>
       transport.post<OperationResult>('/topups', body, { ...as('topUp'), init: idempotent(key) }),
     withdraw: (body, key) =>

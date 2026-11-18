@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { useTransactions } from '@/api';
+import { ApiError, useTransactions } from '@/api';
 import { useTheme } from '@/theme';
 import {
   ActionMenu,
   ErrorState,
   GlassCard,
   Icon,
+  SearchField,
   Skeleton,
   Text,
   Touchable,
@@ -39,19 +40,33 @@ export function CardTransactions({ cardId }: { cardId: string }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { reduceMotion } = useAccessibilityFlags();
-  const transactions = useTransactions({ cardId });
   const [period, setPeriod] = useState<Period>('all');
+  const [from, setFrom] = useState<string>();
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const transactions = useTransactions({ cardId, from, query: query || undefined });
+  const hasFilters = period !== 'all' || search.length > 0;
+  const accessDenied = transactions.error instanceof ApiError && [401, 403, 404].includes(transactions.error.status);
 
-  // у другой карты список снова свёрнут, выбранный период сохраняется
-  useEffect(() => setShowAll(false), [cardId]);
+  useEffect(() => {
+    const timeout = setTimeout(() => setQuery(search.trim()), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+  useEffect(() => setShowAll(false), [cardId, query, from]);
 
-  const cutoff = period === 'all' ? 0 : Date.now() - PERIOD_DAYS[period] * 24 * 60 * 60 * 1000;
-  const filtered = (transactions.data ?? []).filter(
-    (tx) => new Date(tx.occurredAt).getTime() >= cutoff,
-  );
-  const visible = showAll ? filtered : filtered.slice(0, COLLAPSED_COUNT);
-  const canExpand = filtered.length > COLLAPSED_COUNT;
+  const selectPeriod = (value: Period) => {
+    setPeriod(value);
+    setFrom(value === 'all' ? undefined : new Date(Date.now() - PERIOD_DAYS[value] * 86_400_000).toISOString());
+  };
+  const resetFilters = () => {
+    selectPeriod('all');
+    setSearch('');
+    setQuery('');
+  };
+  const items = transactions.data ?? [];
+  const visible = showAll ? items : items.slice(0, COLLAPSED_COUNT);
+  const canExpand = search.trim() === query && items.length > COLLAPSED_COUNT;
 
   const header = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.lg }}>
@@ -73,7 +88,7 @@ export function CardTransactions({ cardId }: { cardId: string }) {
             id: value,
             label: t(`cards.periods.${value}`),
             checked: value === period,
-            onPress: () => setPeriod(value),
+            onPress: () => selectPeriod(value),
           }))}
         >
           <Icon
@@ -95,21 +110,37 @@ export function CardTransactions({ cardId }: { cardId: string }) {
 
   return (
     <GlassCard title={t('cards.transactions')} headerRight={header}>
-      {transactions.isPending ? (
+      <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.sm }}>
+        <SearchField
+          size="small"
+          placeholder={t('cards.searchPlaceholder')}
+          value={search}
+          onChangeText={setSearch}
+          maxLength={80}
+        />
+        {hasFilters ? (
+          <Touchable accessibilityRole="button" onPress={resetFilters} style={{ alignSelf: 'flex-start' }}>
+            <Text color="accent">{t('cards.resetFilters')}</Text>
+          </Touchable>
+        ) : null}
+      </View>
+      {transactions.isPending || search.trim() !== query ? (
         <Skeleton height={60} />
+      ) : accessDenied ? (
+        <Text align="center" color="textMuted">{t('cards.transactionsAccessDenied')}</Text>
       ) : transactions.isError ? (
         <ErrorState onRetry={() => transactions.refetch()} />
-      ) : filtered.length === 0 ? (
+      ) : items.length === 0 ? (
         <Text
           variant="body"
           color="textMuted"
           align="center"
           style={{ paddingVertical: theme.spacing.lg }}
         >
-          {period === 'all' ? t('cards.noTransactions') : t('cards.noTransactionsInPeriod')}
+          {query ? t('cards.noMatchingTransactions') : period === 'all' ? t('cards.noTransactions') : t('cards.noTransactionsInPeriod')}
         </Text>
       ) : (
-        <View style={{ opacity: transactions.isPlaceholderData ? 0.5 : 1 }}>
+        <View>
           {/* строки монтируются заново при смене карты или раскрытии и въезжают лесенкой */}
           {visible.map((tx, index) => (
             <Animated.View
