@@ -1,4 +1,5 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useSyncExternalStore } from 'react';
 
 import type { ChatMember, ChatRoom } from '../types';
 import { openChatRoom } from './client';
@@ -44,18 +45,16 @@ export type ChatRoomFeed = {
 };
 
 /**
- * лента открытой комнаты. пока экран смонтирован (`active`), комната считается
- * открытой: история догружается, новые сообщения сразу помечаются прочитанными
+ * Только видимый экран комнаты догружает историю и отмечает новые сообщения прочитанными.
  */
 export function useChatRoom(roomId: string, active = true): ChatRoomFeed {
   const messages = useChatSelector((state) => state.messages[roomId] ?? EMPTY_FEED);
   const history = useChatSelector((state) => state.history[roomId] ?? IDLE_HISTORY);
   const typing = useChatSelector((state) => state.typing[roomId] ?? EMPTY_TYPING);
 
-  useEffect(() => {
-    if (!active) return;
-    return openChatRoom(roomId);
-  }, [roomId, active]);
+  useFocusEffect(useCallback(() => {
+    if (active) return openChatRoom(roomId);
+  }, [roomId, active]));
 
   return { messages, history, typing };
 }

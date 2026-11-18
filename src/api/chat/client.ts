@@ -64,6 +64,10 @@ const lastTypingSent = new Map<string, number>();
 
 const update = (fn: Parameters<typeof chatStore.set>[0]) => chatStore.set(fn);
 const isOnline = () => chatStore.get().status === 'online';
+const visibleRoom = () =>
+  Platform.OS === 'web' && typeof document !== 'undefined' && document.visibilityState !== 'visible'
+    ? null
+    : activeRoomId;
 
 /* ───────────── соединение ───────────── */
 
@@ -228,8 +232,8 @@ function handleFrame(frame: ChatServerFrame): void {
       return;
     case 'message':
       clearSendTimer(frame.message.clientId);
-      update((state) => applyMessage(state, frame.message, activeRoomId));
-      if (frame.message.roomId === activeRoomId) markRead(frame.message.roomId);
+      update((state) => applyMessage(state, frame.message, visibleRoom()));
+      markRead(frame.message.roomId);
       // кадр room мог потеряться при переподключении — новая комната придёт со списком
       if (!chatStore.get().rooms.some((room) => room.id === frame.message.roomId)) {
         void api.getChatRooms().then((rooms) => update((state) => applyRooms(state, rooms)), () => {});
@@ -346,10 +350,10 @@ export function sendChatMessage(
   text: string,
   replyTo?: ChatMessage | null,
   attachments: ChatAttachment[] = [],
-): void {
+): boolean {
   const { me } = chatStore.get();
   const body = text.trim();
-  if (!me || (!body && attachments.length === 0)) return;
+  if (!me || (!body && attachments.length === 0)) return false;
 
   const clientId = randomUUID();
   const message: LocalChatMessage = {
@@ -370,6 +374,7 @@ export function sendChatMessage(
   };
   update((state) => addLocalMessage(state, message));
   if (isOnline()) sendFrame(message);
+  return true;
 }
 
 export function retryChatMessage(clientId: string): void {
@@ -424,12 +429,14 @@ export function notifyChatTyping(roomId: string): void {
 /* ───────────── комнаты и история ───────────── */
 
 function markRead(roomId: string): void {
+  if (visibleRoom() !== roomId) return;
   const newest = chatStore.get().messages[roomId]?.find((message) => message.delivery === 'sent');
+  if (!newest) return;
   const room = chatStore.get().rooms.find((item) => item.id === roomId);
   if (room?.unreadCount) {
-    update((state) => applyRead(state, roomId, state.me?.id ?? '', newest?.id ?? ''));
+    update((state) => applyRead(state, roomId, state.me?.id ?? '', newest.id));
   }
-  if (newest && isOnline()) link?.send({ type: 'read', roomId, messageId: newest.id });
+  if (isOnline()) link?.send({ type: 'read', roomId, messageId: newest.id });
 }
 
 async function loadLatest(roomId: string): Promise<void> {

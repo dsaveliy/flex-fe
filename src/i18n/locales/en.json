@@ -588,7 +588,7 @@
     },
     "delivery": {
       "sending": "Sending",
-      "sent": "Delivered",
+      "sent": "Sent",
       "read": "Read",
       "failed": "Not sent"
     },
@@ -605,6 +605,7 @@
       "default": "Couldn't send",
       "ATTACHMENT_NOT_FOUND": "Attachment not found — attach it again",
       "ATTACHMENTS_NOT_ALLOWED": "Lobby is text only — send files in private chats",
+      "FILE_EMPTY": "The file is empty",
       "FILE_TOO_LARGE": "The file is larger than 10 MB",
       "FILE_TYPE_NOT_ALLOWED": "Photos (JPEG, PNG, WebP) and PDF only"
     },
@@ -651,6 +652,8 @@
       "remove": "Remove {{name}}",
       "uploading": "{{name}}: uploading",
       "failed": "{{name}}: upload failed — tap to retry",
+      "retryOrRemove": "Retry uploading {{name}} or remove the file",
+      "removeInvalid": "Remove {{name}} to send the message",
       "open": "Open {{name}}",
       "openImage": "Open the photo full screen",
       "close": "Close",

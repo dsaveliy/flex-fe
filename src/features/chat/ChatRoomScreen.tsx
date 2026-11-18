@@ -127,9 +127,10 @@ export function ChatRoomScreen() {
   );
 
   const send = (text: string) => {
-    sendChatMessage(roomId, text, replyTo, filesAllowed ? attachments.ready : []);
+    if (!sendChatMessage(roomId, text, replyTo, filesAllowed ? attachments.ready : [])) return false;
     attachments.clear();
     setReplyTo(null);
+    return true;
   };
   const closeTicket = () => {
     closeSupportChat(roomId).catch(() => setActionError(t('chat.support.closeError')));
@@ -287,6 +288,7 @@ export function ChatRoomScreen() {
               replyTo={replyTo}
               onCancelReply={() => setReplyTo(null)}
               onSend={send}
+              canCompose={Boolean(room && me)}
               attachments={filesAllowed ? attachments : undefined}
               money={
                 direct

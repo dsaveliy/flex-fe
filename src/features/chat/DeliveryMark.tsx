@@ -5,7 +5,7 @@ import type { ChatDeliveryStatus } from '@/api';
 
 export type DeliveryState = ChatDeliveryStatus | 'read';
 
-/** часики → ✓ доставлено → ✓✓ прочитано; «!» — не отправлено */
+/** Часики → ✓ сохранено сервером → ✓✓ прочитано. «!» — ошибка отправки. */
 export function DeliveryMark({ state, color }: { state: DeliveryState; color: string }) {
   const { t } = useTranslation();
   const common = {

@@ -40,6 +40,11 @@ export type AttachmentDraft = {
   attachment?: ChatAttachment;
 };
 
+export function canRetryAttachment(draft: AttachmentDraft): boolean {
+  return draft.status === 'failed' &&
+    !['FILE_EMPTY', 'FILE_TOO_LARGE', 'FILE_TYPE_NOT_ALLOWED'].includes(draft.error ?? '');
+}
+
 let draftSeq = 0;
 
 /**
@@ -140,7 +145,7 @@ export function useAttachmentDraft() {
   const retry = useCallback(
     (key: string) => {
       const draft = drafts.find((item) => item.key === key);
-      if (!draft || draft.error === 'FILE_TOO_LARGE' || draft.error === 'FILE_TYPE_NOT_ALLOWED') return;
+      if (!draft || !canRetryAttachment(draft)) return;
       patch(key, { status: 'uploading', error: undefined });
       upload(draft);
     },
@@ -152,7 +157,6 @@ export function useAttachmentDraft() {
   return {
     drafts,
     ready: drafts.flatMap((draft) => (draft.status === 'ready' && draft.attachment ? [draft.attachment] : [])),
-    busy: drafts.some((draft) => draft.status === 'uploading'),
     unavailable,
     dismissUnavailable: () => setUnavailable(false),
     pickPhotos,
