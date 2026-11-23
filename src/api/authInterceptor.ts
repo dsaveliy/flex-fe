@@ -1,6 +1,7 @@
 import { lockCryptoLocal, touchCryptoSession } from '@/auth/cryptoSession';
 import { sessionStore } from '@/auth/session';
 import { ensureFreshAccess, refreshSession, signOutLocal } from '@/auth/sessionActions';
+import { logger } from '@/logging';
 
 import { ApiError, type AuthScope, isApiError } from './client';
 import { API_AUTH_SCOPE, type FlexApi } from './services';
@@ -29,12 +30,15 @@ async function run<T>(scope: AuthScope, call: () => Promise<T>, retried = false)
     return result;
   } catch (error) {
     if (!retried && isApiError(error, 'TOKEN_EXPIRED')) {
+      logger.child('auth').info('access expired, refreshing', { scope });
       await refreshSession();
       return run(scope, call, true);
     }
     if (isApiError(error, 'TOKEN_REVOKED') || isApiError(error, 'TOKEN_INVALID')) {
+      logger.child('auth').warn('session rejected by server, signing out', { code: error.code });
       await signOutLocal('revoked');
     } else if (isApiError(error, 'CRYPTO_AUTH_REQUIRED')) {
+      logger.child('auth').info('crypto section locked by server');
       lockCryptoLocal('server');
     }
     throw error;

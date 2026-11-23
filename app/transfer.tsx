@@ -2,12 +2,13 @@ import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useBalance, useIdempotencyKey, useTransfer } from '@/api';
+import { isApiError, useBalance, useIdempotencyKey, useTransfer } from '@/api';
 import { formatBalance, parseAmount, sanitizeAmount } from '@/features/operations/amount';
 import { OperationSheet, type OperationSuccess } from '@/features/operations/OperationSheet';
 import { operationErrorMessage } from '@/features/operations/operationErrors';
 import { SheetState } from '@/features/operations/SheetState';
 import { AccountSelect } from '@/features/operations/SelectField';
+import { logger } from '@/logging';
 import { TextField } from '@/ui';
 import { formatMoney } from '@/utils/money';
 
@@ -49,12 +50,21 @@ export default function TransferScreen() {
       {
         onSuccess: (result) => {
           renewKey();
+          logger.child('operations').info('transfer completed', {
+            currency: result.amount.currency,
+            hasComment: Boolean(comment.trim()),
+          });
           setSuccess({
             title: t('operations.transfer.success', { name: result.recipientName }),
             lines: [formatMoney(result.amount)],
           });
         },
-        onError: (failure) => setError(operationErrorMessage(failure, t)),
+        onError: (failure) => {
+          logger.child('operations').warn('transfer rejected', {
+            code: isApiError(failure) ? failure.code : 'network',
+          });
+          setError(operationErrorMessage(failure, t));
+        },
       },
     );
   };
