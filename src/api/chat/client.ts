@@ -3,6 +3,7 @@ import { AppState, Platform } from 'react-native';
 
 import { getAccessToken, sessionStore } from '@/auth/session';
 import { ensureFreshAccess, refreshSession, signOutLocal } from '@/auth/sessionActions';
+import { logger } from '@/logging';
 
 import { api } from '../api';
 import type {
@@ -47,6 +48,8 @@ const TYPING_THROTTLE_MS = 3_000;
 /** без ответа сервера за это время пузырь становится «Не отправлено» */
 const SEND_TIMEOUT_MS = 15_000;
 const PAGE_SIZE = 50;
+
+const log = logger.child('chat');
 
 let link: ChatLink | null = null;
 let attempt = 0;
@@ -128,6 +131,7 @@ async function handleClose(code: number, reason: string): Promise<void> {
     update((state) => ({ ...state, status: 'idle' }));
     return;
   }
+  log.warn('socket closed', { code, reason, attempt });
   update((state) => ({ ...state, status: 'offline' }));
 
   if (code === 4401 && reason === 'TOKEN_EXPIRED') {
@@ -152,6 +156,7 @@ function scheduleReconnect(): void {
   clearReconnect();
   const wait = BACKOFF_MS[Math.min(attempt, BACKOFF_MS.length - 1)];
   attempt += 1;
+  if (attempt >= BACKOFF_MS.length) log.error('chat keeps reconnecting', undefined, { attempt, wait });
   reconnectTimer = setTimeout(connect, wait);
 }
 

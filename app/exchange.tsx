@@ -16,6 +16,7 @@ import { operationErrorMessage } from '@/features/operations/operationErrors';
 import { AccountSelect, SelectField } from '@/features/operations/SelectField';
 import { SheetState } from '@/features/operations/SheetState';
 import { formatCoinAmount } from '@/features/crypto/convertRate';
+import { logger } from '@/logging';
 import { useTheme } from '@/theme';
 import { CoinBadge, Text, TextField } from '@/ui';
 import { formatMoney } from '@/utils/money';
@@ -122,6 +123,11 @@ export default function ExchangeScreen() {
       {
         onSuccess: (result) => {
           renewKey();
+          logger.child('operations').info('exchange completed', {
+            from: result.fromAmount.currency,
+            to: result.toAmount.currency,
+            crypto,
+          });
           const digits = currencyDigits(result.toAmount.currency);
           setSuccess({
             title: t('operations.exchange.success', {

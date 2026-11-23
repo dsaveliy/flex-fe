@@ -11,5 +11,7 @@
 | [crypto-screen.md](crypto-screen.md) | Криптораздел и виджеты |
 | [crypto-handoff.md](crypto-handoff.md) | Передача макетов и контрактов криптораздела |
 | [network/](network/) | Скриншоты сетевого взаимодействия, отчёт 4-4 |
+| [logging-and-testing.md](logging-and-testing.md) | Логирование с отправкой на сервер и тесты клиента, отчёт 6/1 |
+| [logging/](logging/) | Скриншоты отчёта 6/1 |
 
 Изменение контракта проходит ревью серверной и клиентской пар в том же PR; инструкция сети перенесена в [deployment.md](https://github.com/dsaveliy/flex-be/blob/main/docs/deployment.md).

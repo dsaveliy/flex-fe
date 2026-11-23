@@ -1,5 +1,6 @@
 import { getCryptoToken } from '@/auth/cryptoSession';
 import { getAccessToken } from '@/auth/session';
+import { logger, safePath } from '@/logging';
 
 import type { ApiErrorShape } from './types';
 
@@ -92,20 +93,54 @@ async function toApiError(response: Response): Promise<ApiError> {
 const isForm = (body: unknown): body is FormData =>
   typeof FormData !== 'undefined' && body instanceof FormData;
 
+const log = logger.child('api');
+
+/**
+ * каждый запрос — запись в лог: успех — debug с длительностью, 4xx — warn с кодом ошибки,
+ * 5xx и сбой сети — error. тело и заголовки не пишем: там деньги, пароли и токены
+ */
+function logResponse(method: string, path: string, startedAt: number, result: Response | ApiError) {
+  const fields = { method, path: safePath(path), ms: Date.now() - startedAt };
+  if (result instanceof ApiError) {
+    const context = { ...fields, status: result.status, code: result.code };
+    if (result.status >= 500) log.error(`${method} ${fields.path} ${result.status}`, undefined, context);
+    else log.warn(`${method} ${fields.path} ${result.status} ${result.code}`, context);
+  } else {
+    log.debug(`${method} ${fields.path} ${result.status}`, { ...fields, status: result.status });
+  }
+}
+
 export function createHttpTransport(baseUrl: string): ApiTransport {
   async function request<T>(path: string, init: RequestInit, auth: AuthScope): Promise<T> {
-    const response = await fetch(`${baseUrl}${path}`, {
-      ...init,
-      // web: refresh в httpOnly-cookie
-      credentials: auth === 'refresh' ? 'include' : init.credentials,
-      headers: {
-        ...(isForm(init.body) ? {} : { 'Content-Type': 'application/json' }),
-        ...bearer(auth),
-        ...(init.headers ?? {}),
-      },
-    });
+    const method = init.method ?? 'GET';
+    const startedAt = Date.now();
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        // web: refresh в httpOnly-cookie
+        credentials: auth === 'refresh' ? 'include' : init.credentials,
+        headers: {
+          ...(isForm(init.body) ? {} : { 'Content-Type': 'application/json' }),
+          ...bearer(auth),
+          ...(init.headers ?? {}),
+        },
+      });
+    } catch (error) {
+      log.error(`${method} ${safePath(path)} network error`, error, {
+        method,
+        path: safePath(path),
+        ms: Date.now() - startedAt,
+      });
+      throw error;
+    }
 
-    if (!response.ok) throw await toApiError(response);
+    if (!response.ok) {
+      const error = await toApiError(response);
+      logResponse(method, path, startedAt, error);
+      throw error;
+    }
+    logResponse(method, path, startedAt, response);
     if (response.status === 204) return undefined as T;
 
     return (await response.json()) as T;

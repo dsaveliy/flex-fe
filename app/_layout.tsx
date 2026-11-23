@@ -1,8 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { useSession } from '@/auth';
+import { installGlobalHandlers, logger } from '@/logging';
+import { LoggingErrorBoundary } from '@/logging/ErrorBoundary';
+import { useScreenLogging } from '@/logging/useScreenLogging';
 import { AppProviders } from '@/providers/AppProviders';
 import { darkTheme, palette } from '@/theme';
 import { useAppFonts } from '@/theme/useAppFonts';
@@ -15,6 +19,15 @@ import '@/styles/global.scss';
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useAppFonts();
 
+  // отчёт 6/1: необработанные ошибки, уход в фон и периодическая отправка логов на сервер
+  useEffect(() => {
+    logger.info('app started');
+    return installGlobalHandlers(logger);
+  }, []);
+  useEffect(() => {
+    if (fontError) logger.child('ui').error('fonts failed to load', fontError);
+  }, [fontError]);
+
   if (!fontsLoaded && !fontError) {
     return <View style={{ flex: 1, backgroundColor: darkTheme.colors.backgroundTop }} />;
   }
@@ -23,7 +36,9 @@ export default function RootLayout() {
     <AppProviders>
       {/* «auto» следует за темой, выставленной через Appearance в ThemeProvider */}
       <StatusBar style="auto" />
-      <RootStack />
+      <LoggingErrorBoundary logger={logger.child('ui')}>
+        <RootStack />
+      </LoggingErrorBoundary>
     </AppProviders>
   );
 }
@@ -59,6 +74,7 @@ const OPERATION_SHEET_OPTIONS = {
  */
 function RootStack() {
   const { status } = useSession();
+  useScreenLogging(logger);
 
   // пока refresh из Keychain обменивается на новую пару — пустой фон, как при загрузке шрифтов
   if (status === 'loading') {
