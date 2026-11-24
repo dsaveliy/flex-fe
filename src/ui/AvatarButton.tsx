@@ -1,14 +1,14 @@
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useChatUnreadCount, useUser } from '@/api';
 import { useTheme } from '@/theme';
 
-import { Glass, isNativeGlassAvailable } from './Glass';
+import { isNativeGlassAvailable } from './Glass';
 import { useAccessibilityFlags } from './hooks/useAccessibilityFlags';
 import { Touchable } from './Pressable';
-import { Text } from './Text';
+import { ProfileAvatar } from './ProfileAvatar';
 
 export type AvatarButtonProps = {
   size?: number;
@@ -27,9 +27,6 @@ export function AvatarButton({ size }: AvatarButtonProps) {
   const unread = useChatUnreadCount();
 
   const diameter = size ?? theme.sizes.iconButton;
-  const initials = user.data
-    ? `${user.data.firstName.charAt(0)}${user.data.lastName.charAt(0)}`
-    : '';
 
   return (
     <Touchable
@@ -39,32 +36,7 @@ export function AvatarButton({ size }: AvatarButtonProps) {
       pressedScale={isNativeGlassAvailable && !reduceTransparency ? 1 : 0.94}
       onPress={() => router.push('/account')}
     >
-      <Glass
-        variant="regular"
-        interactive
-        radius={diameter / 2}
-        style={{
-          width: diameter,
-          height: diameter,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {user.data?.avatarUrl ? (
-          <Image
-            source={{ uri: user.data.avatarUrl }}
-            style={{ width: diameter, height: diameter, borderRadius: diameter / 2 }}
-          />
-        ) : (
-          <Text
-            variant="bodyStrong"
-            color="accent"
-            style={{ fontSize: diameter * 0.36, lineHeight: diameter * 0.44 }}
-          >
-            {initials}
-          </Text>
-        )}
-      </Glass>
+      <ProfileAvatar user={user.data} size={diameter} interactive />
       {/* точка: есть непрочитанные сообщения (вход в чаты — из профиля) */}
       {unread > 0 ? (
         <View

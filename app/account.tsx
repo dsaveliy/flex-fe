@@ -13,11 +13,11 @@ import { useTheme, useThemeContext } from '@/theme';
 import {
   Chip,
   CurrencyMenu,
-  Glass,
   GlassCard,
   GlassGroup,
   Icon,
   ListRow,
+  ProfileAvatar,
   Screen,
   Skeleton,
   Text,
@@ -52,20 +52,7 @@ export default function AccountScreen() {
 
       <View style={{ paddingHorizontal: theme.spacing.xl, gap: theme.spacing.xl }}>
         <View style={{ alignItems: 'center', gap: theme.spacing.md }}>
-          <Glass
-            variant="regular"
-            radius={avatarSize / 2}
-            style={{
-              width: avatarSize,
-              height: avatarSize,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text variant="title" color="accent">
-              {user.data ? `${user.data.firstName.charAt(0)}${user.data.lastName.charAt(0)}` : ''}
-            </Text>
-          </Glass>
+          <ProfileAvatar user={user.data} size={avatarSize} />
           {user.isPending ? (
             <Skeleton height={24} width={160} />
           ) : (
@@ -98,7 +85,7 @@ export default function AccountScreen() {
             title={t('account.rows.profile')}
             left={<Icon name="user" color={theme.colors.accent} />}
             right={<Icon name="chevronRight" size={16} color={theme.colors.textMuted} />}
-            onPress={() => {}}
+            onPress={() => router.push('/profile')}
             showDivider
           />
           <ListRow

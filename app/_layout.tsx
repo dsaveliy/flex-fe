@@ -69,10 +69,10 @@ function RootStack() {
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-      <Stack.Screen name="status" />
       <Stack.Protected guard={signedIn}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="account" options={PUSH_SCREEN_OPTIONS} />
+        <Stack.Screen name="profile" options={PUSH_SCREEN_OPTIONS} />
         {/* сообщения: список из профиля и экран чата (docs/chat.md) */}
         <Stack.Screen name="messages/index" options={PUSH_SCREEN_OPTIONS} />
         <Stack.Screen name="messages/[roomId]" options={PUSH_SCREEN_OPTIONS} />
@@ -95,6 +95,8 @@ function RootStack() {
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
+      {/* Публичная диагностика идёт после экранов, которые открываются при смене сессии. */}
+      <Stack.Screen name="status" />
     </Stack>
   );
 }

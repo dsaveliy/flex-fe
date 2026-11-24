@@ -63,10 +63,10 @@ export function RegisterForm() {
     register.mutate(
       { phone: values.phone, email: values.email, password: values.password },
       {
-        onSuccess: ({ verificationId, channels }) =>
+        onSuccess: ({ verificationId, channels, emailLink }) =>
           router.push({
             pathname: '/verify',
-            params: { verificationId, channels: channels.join(',') },
+            params: { verificationId, channels: channels.join(','), emailLink: emailLink ? '1' : '0' },
           }),
         onError: (failure) => {
           const field = isApiError(failure) ? FIELD_BY_CODE[failure.code] : undefined;
