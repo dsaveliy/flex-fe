@@ -64,9 +64,10 @@ JSON в camelCase, как у остальных эндпоинтов (`docs/home
 
 | Метод и путь | Токен | Тело запроса → ответ |
 |---|---|---|
-| `POST /auth/register` | — | `{phone, email, password}` → `{verificationId, channels: ['phone','email']}`. Токены **не** выдаются |
-| `POST /auth/verify` | — | `{verificationId, channel, code}` → `{remaining: Channel[]}` |
-| `POST /auth/verify/resend` | — | `{verificationId, channel}` → `204` |
+| `POST /auth/register` | — | `{phone, email, password}` → `{verificationId, channels, emailLink}`. Сеанс входа выдаётся после подтверждения контактов |
+| `POST /auth/verify` | — | Подтверждение телефона: `{verificationId, channel: 'phone', code}` → `{remaining: Channel[]}` |
+| `GET /auth/verify/status?verificationId=…` | — | Проверка результата после перехода по ссылке из письма → `{remaining: Channel[]}` |
+| `POST /auth/verify/resend` | — | `{verificationId, channel}` → `204`. Для `email` повторно отправляет ссылку |
 | `POST /auth/login` | — | `{identifier, password, deviceId}` → `{accessToken, refreshToken}` |
 | `POST /auth/refresh` | refresh в теле (web — httpOnly-cookie) | `{refreshToken, deviceId}` → `{accessToken, refreshToken}` |
 | `POST /auth/logout` | access | → `204`; отзывает весь `sid` |

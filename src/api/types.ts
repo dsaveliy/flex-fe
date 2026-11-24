@@ -291,6 +291,7 @@ export type RegisterRequest = {
 export type RegisterResponse = {
   verificationId: string;
   channels: VerificationChannel[];
+  emailLink?: boolean;
 };
 
 export type VerifyContactRequest = {
@@ -623,7 +624,7 @@ export type ChatServerFrame =
   | { type: 'pong' };
 
 /** выбранный файл до загрузки: `uri` — для превью и native, `file` — Blob из браузера */
-export type ChatUploadFile = {
+export type UploadFile = {
   uri: string;
   name: string;
   mimeType: string;
@@ -631,6 +632,8 @@ export type ChatUploadFile = {
   /** web: файл из `<input type="file">` (его отдают image/document picker) */
   file?: Blob;
 };
+
+export type ChatUploadFile = UploadFile;
 
 /** `POST /chat/rooms/direct`: номер — как у перевода, `userId` — автор сообщения в Lobby */
 export type ChatDirectBody = { phone: string } | { userId: string };

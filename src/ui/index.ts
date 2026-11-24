@@ -4,6 +4,7 @@ export type { ActionMenuItem } from './ActionMenu';
 export { AnimatedNumber } from './AnimatedNumber';
 export { AreaChart } from './AreaChart';
 export { AvatarButton } from './AvatarButton';
+export { ProfileAvatar } from './ProfileAvatar';
 export { Chip } from './Chip';
 export { CoinBadge } from './CoinBadge';
 export { CurrencyMenu } from './CurrencyMenu';

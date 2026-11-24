@@ -14,6 +14,7 @@ import type {
   Portfolio,
   PromoOffer,
   Transaction,
+  UploadFile,
   User,
 } from '../types';
 import { ApiError } from '../client';
@@ -28,6 +29,7 @@ import {
 import { mockMarkets } from './markets.fixtures';
 import { requireAccess, requireCrypto } from './auth/guards';
 import { mockAuthApi } from './auth';
+import { getDb } from './auth/db';
 import { mockOperationsApi, mockOperationsState } from './operations';
 import { mockChatApi } from './chat';
 
@@ -36,6 +38,7 @@ import { mockChatApi } from './chat';
  * перезапуска приложения
  */
 let cryptoLayout: CryptoLayout = defaultCryptoLayout();
+const mockAvatars = new Map<string, string>();
 
 /**
  * mock-реализация будущих эндпоинтов FastAPI.
@@ -54,12 +57,31 @@ export const mockApi = {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
-      avatarUrl: null,
+      avatarUrl: mockAvatars.get(user.id) ?? null,
       phone: user.phone,
       email: user.email,
       role: user.role,
       kycStatus: user.kycStatus,
     });
+  },
+
+  getVerificationStatus: async (verificationId: string) => {
+    const verification = (await getDb()).verifications[verificationId];
+    if (!verification) {
+      throw new ApiError({ status: 404, code: 'VERIFICATION_NOT_FOUND', message: 'Verification not found' });
+    }
+    return respond({ remaining: verification.remaining });
+  },
+
+  requestEmailChange: async () => {
+    await requireAccess();
+    throw new ApiError({ status: 503, code: 'EMAIL_DELIVERY_FAILED', message: 'SMTP is unavailable in mock mode' });
+  },
+
+  uploadAvatar: async (file: UploadFile): Promise<User> => {
+    const user = await mockApi.getUser();
+    mockAvatars.set(user.id, file.uri);
+    return { ...user, avatarUrl: file.uri };
   },
 
   getBalance: async (): Promise<BalanceSummary> => {
