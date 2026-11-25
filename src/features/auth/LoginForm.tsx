@@ -46,6 +46,7 @@ export function LoginForm() {
               params: {
                 verificationId: String(failure.details?.verificationId ?? ''),
                 channels: Array.isArray(channels) ? channels.join(',') : 'phone,email',
+                emailLink: failure.details?.emailLink === true ? '1' : '0',
               },
             });
             return;

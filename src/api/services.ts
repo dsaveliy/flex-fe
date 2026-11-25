@@ -52,6 +52,7 @@ import type {
   Transaction,
   TransferRequest,
   TransferResult,
+  UploadFile,
   User,
   WithdrawalRequest,
   VerificationChannel,
@@ -64,6 +65,7 @@ export type FlexApi = {
   // аутентификация, Уровень 1 (docs/auth.md)
   register(body: RegisterRequest): Promise<RegisterResponse>;
   verifyContact(body: VerifyContactRequest): Promise<VerifyContactResponse>;
+  getVerificationStatus(verificationId: string): Promise<VerifyContactResponse>;
   resendCode(body: { verificationId: string; channel: VerificationChannel }): Promise<void>;
   login(body: LoginRequest): Promise<TokenPair>;
   refresh(body: RefreshRequest): Promise<TokenPair>;
@@ -77,6 +79,8 @@ export type FlexApi = {
   setCryptoBiometric(body: CryptoBiometricRequest): Promise<CryptoBiometricResponse>;
   // данные
   getUser(): Promise<User>;
+  requestEmailChange(email: string): Promise<void>;
+  uploadAvatar(file: UploadFile): Promise<User>;
   getBalance(): Promise<BalanceSummary>;
   getPromo(): Promise<PromoOffer>;
   getCards(): Promise<BankCard[]>;
@@ -139,6 +143,7 @@ export type FlexApi = {
 export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   register: 'none',
   verifyContact: 'none',
+  getVerificationStatus: 'none',
   resendCode: 'none',
   login: 'none',
   refresh: 'refresh',
@@ -150,6 +155,8 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   cryptoLogout: 'crypto',
   setCryptoBiometric: 'crypto',
   getUser: 'access',
+  requestEmailChange: 'access',
+  uploadAvatar: 'access',
   getBalance: 'access',
   getPromo: 'access',
   getCards: 'access',
@@ -193,6 +200,17 @@ export const API_AUTH_SCOPE: Record<keyof FlexApi, AuthScope> = {
   openGift: 'access',
 };
 
+function uploadForm(file: UploadFile): FormData {
+  const form = new FormData();
+  if (file.file) {
+    form.append('file', file.file, file.name);
+  } else {
+    // React Native передаёт URI в нативный multipart-загрузчик.
+    form.append('file', { uri: file.uri, name: file.name, type: file.mimeType } as unknown as Blob);
+  }
+  return form;
+}
+
 function createHttpApi(baseUrl: string): FlexApi {
   const transport = createHttpTransport(baseUrl);
   const as = (method: keyof FlexApi) => ({ auth: API_AUTH_SCOPE[method] });
@@ -201,6 +219,10 @@ function createHttpApi(baseUrl: string): FlexApi {
     register: (body) => transport.post<RegisterResponse>('/auth/register', body, as('register')),
     verifyContact: (body) =>
       transport.post<VerifyContactResponse>('/auth/verify', body, as('verifyContact')),
+    getVerificationStatus: (verificationId) => transport.get<VerifyContactResponse>(
+      `/auth/verify/status?verificationId=${encodeURIComponent(verificationId)}`,
+      as('getVerificationStatus'),
+    ),
     resendCode: (body) => transport.post<void>('/auth/verify/resend', body, as('resendCode')),
     login: (body) => transport.post<TokenPair>('/auth/login', body, as('login')),
     refresh: (body) => transport.post<TokenPair>('/auth/refresh', body, as('refresh')),
@@ -223,6 +245,8 @@ function createHttpApi(baseUrl: string): FlexApi {
       ),
 
     getUser: () => transport.get<User>('/me', as('getUser')),
+    requestEmailChange: (email) => transport.post<void>('/me/email-change', { email }, as('requestEmailChange')),
+    uploadAvatar: (file) => transport.post<User>('/me/avatar', uploadForm(file), as('uploadAvatar')),
     getBalance: () => transport.get<BalanceSummary>('/balance', as('getBalance')),
     getPromo: () => transport.get<PromoOffer>('/promo', as('getPromo')),
     getCards: () => transport.get<BankCard[]>('/cards', as('getCards')),
@@ -306,16 +330,8 @@ function createHttpApi(baseUrl: string): FlexApi {
     },
     openDirectChat: (body) =>
       transport.post<ChatRoom>('/chat/rooms/direct', body, as('openDirectChat')),
-    uploadChatAttachment: (file) => {
-      const form = new FormData();
-      if (file.file) {
-        form.append('file', file.file, file.name);
-      } else {
-        // React Native: fetch сам читает файл по uri
-        form.append('file', { uri: file.uri, name: file.name, type: file.mimeType } as unknown as Blob);
-      }
-      return transport.post<ChatAttachment>('/chat/attachments', form, as('uploadChatAttachment'));
-    },
+    uploadChatAttachment: (file) =>
+      transport.post<ChatAttachment>('/chat/attachments', uploadForm(file), as('uploadChatAttachment')),
     closeSupportChat: (roomId) =>
       transport.post<void>(`/chat/rooms/${encodeURIComponent(roomId)}/close`, {}, as('closeSupportChat')),
     rateSupportChat: (roomId, body) =>
